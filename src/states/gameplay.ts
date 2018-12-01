@@ -1,13 +1,11 @@
 import { Game } from "phaser-ce";
 import { PhaserTextStyle } from "phaser-ce";
 import BaseEnemy from "../enemies/base_enemy";
+import Player from "../player/player";
 
 // constants
-const PLAYER_SPEED: number = 300;
-const PLAYER_SCALE: number = 2;
 const ENEMY_SPEED: number = 100;
 const ENEMY_SCALE: number = 1.5;
-const BULLET_SPEED: number = 700;
 const BULLET_SCALE: number = 1;
 const ENEMY_COUNT = 30;
 
@@ -17,10 +15,9 @@ const ENGINEERING_TILES_HEIGHT = 8;
 
 export default class Startup extends Phaser.State {
     // game objects
-    private player: Phaser.Sprite;
+    private player: Player;
     private enemy: Phaser.Sprite;
     private bullet: Phaser.Sprite;
-    private playerBody: Phaser.Physics.P2.Body; // adding playerBody to make variables more accesible
     private enemyBody: Phaser.Physics.P2.Body; // same deal for enemy and all others
     private bulletBody: Phaser.Physics.P2.Body;
     private playerCollisionGroup: Phaser.Physics.P2.CollisionGroup;
@@ -28,22 +25,12 @@ export default class Startup extends Phaser.State {
     private bulletCollisionGroup: Phaser.Physics.P2.CollisionGroup;
     private worldCollisionGroup: Phaser.Physics.P2.CollisionGroup;
 
-    // game variables
-    private shootCoolDwn: number = 200; // computer time, not frames
-    private fireTime: number = 0;
+    // Enemy vars
     private enemyCreateCoolDwn = 1000;
     private enemyCreateTime = 0;
 
     // groups
     private groupEnemies: Phaser.Group;
-    private groupBullets: Phaser.Group;
-
-    // input keys
-    private keyUp: Phaser.Key;
-    private keyDown: Phaser.Key;
-    private keyLeft: Phaser.Key;
-    private keyRight: Phaser.Key;
-    private keyShoot: Phaser.Key;
 
     private shmupBounds: Phaser.Rectangle;
     private engineeringBounds: Phaser.Rectangle;
@@ -75,13 +62,6 @@ export default class Startup extends Phaser.State {
     }
 
     public create(): void {
-        // input
-        this.keyUp = this.game.input.keyboard.addKey(Phaser.Keyboard.UP);
-        this.keyDown = this.game.input.keyboard.addKey(Phaser.Keyboard.DOWN);
-        this.keyLeft = this.game.input.keyboard.addKey(Phaser.Keyboard.LEFT);
-        this.keyRight = this.game.input.keyboard.addKey(Phaser.Keyboard.RIGHT);
-        this.keyShoot = this.game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
-
         // collision groups
         this.playerCollisionGroup = this.game.physics.p2.createCollisionGroup();
         this.enemyCollisionGroup = this.game.physics.p2.createCollisionGroup();
@@ -115,41 +95,23 @@ export default class Startup extends Phaser.State {
         borderSpriteBody.collides([this.playerCollisionGroup, this.enemyCollisionGroup, this.bulletCollisionGroup]);
 
         // sprites and physics
-        this.player = this.game.add.sprite(200, 200, "player");
-        this.player.scale.setTo(PLAYER_SCALE, PLAYER_SCALE);
-        this.player.scale.setTo(ENEMY_SCALE, ENEMY_SCALE);
-        this.game.physics.p2.enable(this.player);
-
-        // make body variable after physic enabled
-        this.playerBody = this.player.body;
-        this.playerBody.fixedRotation = true; // forbid rotation
+        this.player = new Player(this.game, 200, 200, "player");
+        this.game.add.existing(this.player);
 
         // groups
 
         // assign collision groups
-        this.playerBody.setCollisionGroup(this.playerCollisionGroup);
-        this.playerBody.collides(this.worldCollisionGroup);
-        this.playerBody.collides(this.enemyCollisionGroup);
+        this.player.body.setCollisionGroup(this.playerCollisionGroup);
+        this.player.body.collides(this.worldCollisionGroup);
+        this.player.body.collides(this.enemyCollisionGroup);
 
         // This part is vital if you want the objects
         // with their own collision groups to still collide with the world bounds
         // (which we do) - what this does is adjust the bounds to use its own collision group.
         this.game.physics.p2.updateBoundsCollisionGroup();
 
-        // bullets
-        this.groupBullets = this.game.add.group();
-        this.groupBullets.createMultiple(30, "bullet");
-        this.game.physics.p2.enable(this.groupBullets, true);
-        this.groupBullets.setAll("outOfBoundsKill", true);
-        this.groupBullets.setAll("checkWorldBounds", true);
-        this.groupBullets.setAll("body.collideWorldBounds", false);
-        this.groupBullets.setAll("scale.x", BULLET_SCALE);
-        this.groupBullets.setAll("scale.y", BULLET_SCALE);
-        this.groupBullets.forEach((bullet: Phaser.Sprite) => {
-            const bulletBody: Phaser.Physics.P2.Body = bullet.body;
-            bulletBody.setCollisionGroup(this.bulletCollisionGroup);
-            bulletBody.collides(this.enemyCollisionGroup, this.bulletHitEnemy, this);
-        });
+        this.player.setBulletsCollisionGroup(this.bulletCollisionGroup);
+        this.player.setBulletsCollides(this.enemyCollisionGroup, this.bulletHitEnemy, this);
 
         // enemies
         this.groupEnemies = this.game.add.group();
@@ -223,48 +185,6 @@ export default class Startup extends Phaser.State {
                 const minY: number = this.enemy.height;
                 const maxY: number = this.shmupBounds.halfHeight;
                 this.enemy.reset(this.game.rnd.integerInRange(minX, maxX), this.game.rnd.integerInRange(minY, maxY));
-            }
-        }
-        this.updatePlayer();
-        this.updateEnemy();
-    }
-
-    private updatePlayer(): void {
-        // reset player velocity and orientation
-        this.playerBody.velocity.x = 0;
-        this.playerBody.velocity.y = 0;
-        this.playerBody.rotation = 0;
-
-        // controls
-        if (this.keyUp.isDown) {
-            this.playerBody.velocity.y = -PLAYER_SPEED;
-        }
-        if (this.keyDown.isDown) {
-            this.playerBody.velocity.y = PLAYER_SPEED;
-        }
-        if (this.keyLeft.isDown) {
-            this.playerBody.velocity.x = -PLAYER_SPEED;
-        }
-        if (this.keyRight.isDown) {
-            this.playerBody.velocity.x = PLAYER_SPEED;
-        }
-        if (this.keyShoot.isDown) {
-            this.playerShoot();
-        }
-    }
-
-    private updateEnemy(): void {
-        // not implemented
-    }
-
-    private playerShoot(): void {
-        if (this.game.time.now >= this.fireTime) {
-            this.fireTime = this.game.time.now + this.shootCoolDwn;
-            this.bullet = this.groupBullets.getFirstExists(false);
-            if (this.bullet) {
-                this.bulletBody = this.bullet.body;
-                this.bullet.reset(this.player.x, this.player.y - 20);
-                this.bulletBody.velocity.y = -BULLET_SPEED;
             }
         }
     }
