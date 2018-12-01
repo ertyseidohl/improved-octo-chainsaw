@@ -35,6 +35,7 @@ function startApp(): void {
         renderer: Phaser.AUTO,
         parent: "",
         resolution: 1,
+        scaleMode: Phaser.ScaleManager.SHOW_ALL,
     };
 
     const app = new App(gameConfig);

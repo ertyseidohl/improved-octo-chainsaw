@@ -37,7 +37,7 @@ export default class Startup extends Phaser.State {
     private liveComponentShake: Phaser.Point = new Phaser.Point(0, 0);
 
     public preload(): void {
-        this.game.load.image("player", "../assets/star.png");
+        this.game.load.image("player", "../assets/ship.png");
         this.game.load.image("enemy", "../assets/diamond.png");
         this.game.load.image("border", "../assets/border.png");
 
@@ -89,7 +89,7 @@ export default class Startup extends Phaser.State {
         this.player.scale.setTo(PLAYER_SCALE, PLAYER_SCALE);
         this.enemy = this.game.add.sprite(100, 100, "enemy");
         this.player.scale.setTo(ENEMY_SCALE, ENEMY_SCALE);
-        this.game.physics.p2.enable(this.player, true);
+        this.game.physics.p2.enable(this.player);
         this.game.physics.p2.enable(this.enemy, true);
 
         // make body variable after physic enabled
