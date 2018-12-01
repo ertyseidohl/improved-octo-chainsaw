@@ -41,7 +41,7 @@ export default class Startup extends Phaser.State {
 
     public preload(): void {
         this.game.load.image("player", "../assets/ship.png");
-        this.game.load.image("enemy", "../assets/diamond.png");
+        this.game.load.image("enemy", "../assets/enemy_1.png");
         this.game.load.image("border", "../assets/border.png");
         this.game.load.image("bullet", "../assets/laser.png");
 
@@ -107,9 +107,7 @@ export default class Startup extends Phaser.State {
             this.groupEnemies.add(newEnemy);
             newEnemy.kill();
         }
-        this.game.physics.p2.enable(this.groupEnemies, true);
-        this.groupEnemies.setAll("scale.x", ENEMY_SCALE);
-        this.groupEnemies.setAll("scale.y", ENEMY_SCALE);
+        this.game.physics.p2.enable(this.groupEnemies);
         this.groupEnemies.forEach((enemy: Phaser.Sprite) => {
             const enemyBody: Phaser.Physics.P2.Body = enemy.body;
             enemyBody.setCollisionGroup(this.enemyCollisionGroup);
