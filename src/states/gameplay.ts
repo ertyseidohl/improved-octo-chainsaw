@@ -1,10 +1,15 @@
 import { Game } from "phaser-ce";
+import { PhaserTextStyle } from "phaser-ce";
 
 // player constants
 const PLAYER_SPEED: number = 300;
 const PLAYER_SCALE: number = 2;
 const ENEMY_SPEED: number = 100;
 const ENEMY_SCALE: number = 1.5;
+
+const NUM_TILE_SPRITES = 9;
+const ENGINEERING_TILES_WIDTH = 10;
+const ENGINEERING_TILES_HEIGHT = 10;
 
 export default class Startup extends Phaser.State {
     // game objects
@@ -23,15 +28,18 @@ export default class Startup extends Phaser.State {
     private shmupBounds: Phaser.Rectangle;
     private engineeringBounds: Phaser.Rectangle;
 
-    private borderSprite: Phaser.Sprite;
+    private engineeringTiles: Phaser.Group;
 
-    private shmupCollisionGroup: Phaser.Physics.P2.CollisionGroup;
-    private engineeringCollisionGroup: Phaser.Physics.P2.CollisionGroup;
+    private borderSprite: Phaser.Sprite;
 
     public preload(): void {
         this.game.load.image("player", "../assets/star.png");
         this.game.load.image("enemy", "../assets/diamond.png");
         this.game.load.image("border", "../assets/border.png");
+
+        for (let i: number = 1; i <= NUM_TILE_SPRITES; i++) {
+            this.game.load.image(`floor_tile_${i}`, `../assets/floor_tile_${i}.png`);
+        }
     }
 
     public create(): void {
@@ -41,13 +49,24 @@ export default class Startup extends Phaser.State {
         this.keyLeft = this.game.input.keyboard.addKey(Phaser.Keyboard.LEFT);
         this.keyRight = this.game.input.keyboard.addKey(Phaser.Keyboard.RIGHT);
         this.keyShoot = this.game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
+        this.engineeringTiles = this.game.add.group();
+
+        const engineeringFloorStartX = this.game.width / 2 + 50;
+        const engineeringFloorStartY = 100;
+
+        for (let i: number = 0; i < ENGINEERING_TILES_WIDTH; i++) {
+            for (let j: number = 0; j < ENGINEERING_TILES_HEIGHT; j++) {
+                this.engineeringTiles.create(
+                    engineeringFloorStartX + (32 * i),
+                    engineeringFloorStartY + (32 * j),
+                    this.getTileSprite(),
+                );
+            }
+        }
 
         // play area bounds
         this.shmupBounds = new Phaser.Rectangle(0, 0, this.game.width / 2, this.game.height);
         this.engineeringBounds = new Phaser.Rectangle(this.game.width / 2, 0, this.game.width / 2, this.game.height);
-
-        this.shmupCollisionGroup = this.game.physics.p2.createCollisionGroup();
-        this.engineeringCollisionGroup = this.game.physics.p2.createCollisionGroup();
 
         this.borderSprite = this.game.add.sprite(this.game.width / 2, this.game.height / 2, "border");
         this.game.physics.p2.enable(this.borderSprite, true);
@@ -107,5 +126,10 @@ export default class Startup extends Phaser.State {
 
     private updateEngineering(): void {
         // todo
+    }
+
+    private getTileSprite(): string {
+        const r: number = Math.floor(Math.random() * NUM_TILE_SPRITES) + 1;
+        return `floor_tile_${r}`;
     }
 }
