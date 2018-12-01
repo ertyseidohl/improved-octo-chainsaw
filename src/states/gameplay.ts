@@ -6,7 +6,7 @@ const PLAYER_SPEED: number = 300;
 const PLAYER_SCALE: number = 2;
 const ENEMY_SPEED: number = 100;
 const ENEMY_SCALE: number = 1.5;
-const BULLET_SPEED: number = 500;
+const BULLET_SPEED: number = 700;
 const BULLET_SCALE: number = 1;
 
 const NUM_TILE_SPRITES = 9;
@@ -21,6 +21,19 @@ export default class Startup extends Phaser.State {
     private playerBody: Phaser.Physics.P2.Body; // adding playerBody to make variables more accesible
     private enemyBody: Phaser.Physics.P2.Body; // same deal for enemy and all others
     private bulletBody: Phaser.Physics.P2.Body;
+    private playerCollisionGroup: Phaser.Physics.P2.CollisionGroup;
+    private enemyCollisionGroup: Phaser.Physics.P2.CollisionGroup;
+    private bulletCollisionGroup: Phaser.Physics.P2.CollisionGroup;
+    private worldCollisionGroup: Phaser.Physics.P2.CollisionGroup;
+
+    // game variables
+    private shootCoolDwn: number = 200; // computer time, not frames
+    private fireTime: number = 0;
+    private enemyCreateCoolDwn = 1000;
+    private enemyCreateTime = 0;
+
+    // groups
+    private groupEnemies: Phaser.Group;
     private groupBullets: Phaser.Group;
 
     // input keys
@@ -58,6 +71,12 @@ export default class Startup extends Phaser.State {
         this.keyRight = this.game.input.keyboard.addKey(Phaser.Keyboard.RIGHT);
         this.keyShoot = this.game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
 
+        // collision groups
+        this.playerCollisionGroup = this.game.physics.p2.createCollisionGroup();
+        this.enemyCollisionGroup = this.game.physics.p2.createCollisionGroup();
+        this.bulletCollisionGroup = this.game.physics.p2.createCollisionGroup();
+        this.worldCollisionGroup = this.game.physics.p2.createCollisionGroup();
+
         // engineering stuff
         this.engineeringTiles = this.game.add.group();
         const engineeringFloorStartX = this.game.width / 2 + 50;
@@ -81,21 +100,31 @@ export default class Startup extends Phaser.State {
         this.game.physics.p2.enable(this.borderSprite, true);
         const borderSpriteBody: Phaser.Physics.P2.Body = this.borderSprite.body;
         borderSpriteBody.static = true;
+        borderSpriteBody.setCollisionGroup(this.worldCollisionGroup);
+        borderSpriteBody.collides([this.playerCollisionGroup, this.enemyCollisionGroup, this.bulletCollisionGroup]);
 
         // sprites and physics
         this.player = this.game.add.sprite(200, 200, "player");
         this.player.scale.setTo(PLAYER_SCALE, PLAYER_SCALE);
-        this.enemy = this.game.add.sprite(100, 100, "enemy");
-        this.player.scale.setTo(ENEMY_SCALE, ENEMY_SCALE);
         this.game.physics.p2.enable(this.player, true);
-        this.game.physics.p2.enable(this.enemy, true);
 
         // make body variable after physic enabled
         this.playerBody = this.player.body;
-        this.enemyBody = this.player.body;
-        // this.bulletBody = this.bullet.body;
+        this.playerBody.fixedRotation = true; // forbid rotation
 
         // groups
+
+        // assign collision groups
+        this.playerBody.setCollisionGroup(this.playerCollisionGroup);
+        this.playerBody.collides(this.worldCollisionGroup);
+        this.playerBody.collides(this.enemyCollisionGroup);
+
+        // This part is vital if you want the objects
+        // with their own collision groups to still collide with the world bounds
+        // (which we do) - what this does is adjust the bounds to use its own collision group.
+        this.game.physics.p2.updateBoundsCollisionGroup();
+
+        // bullets
         this.groupBullets = this.game.add.group();
         this.groupBullets.createMultiple(30, "bullet");
         this.game.physics.p2.enable(this.groupBullets, true);
@@ -104,6 +133,25 @@ export default class Startup extends Phaser.State {
         this.groupBullets.setAll("body.collideWorldBounds", false);
         this.groupBullets.setAll("scale.x", BULLET_SCALE);
         this.groupBullets.setAll("scale.y", BULLET_SCALE);
+        this.groupBullets.forEach((bullet: Phaser.Sprite) => {
+            const bulletBody: Phaser.Physics.P2.Body = bullet.body;
+            bulletBody.setCollisionGroup(this.bulletCollisionGroup);
+            bulletBody.collides(this.enemyCollisionGroup, this.bulletHitEnemy, this);
+        });
+
+        // enemies
+        this.groupEnemies = this.game.add.group();
+        this.groupEnemies.createMultiple(30, "enemy");
+        this.game.physics.p2.enable(this.groupEnemies, true);
+        this.groupEnemies.setAll("scale.x", ENEMY_SCALE);
+        this.groupEnemies.setAll("scale.y", ENEMY_SCALE);
+        this.groupEnemies.forEach((enemy: Phaser.Sprite) => {
+            const enemyBody: Phaser.Physics.P2.Body = enemy.body;
+            enemyBody.setCollisionGroup(this.enemyCollisionGroup);
+            enemyBody.collides([this.playerCollisionGroup, this.enemyCollisionGroup,
+                this.worldCollisionGroup, this.bulletCollisionGroup]);
+            enemyBody.fixedRotation = true;
+        });
 
         const engine1Dead: Phaser.Sprite = this.game.add.sprite(
             engineeringFloorStartX,
@@ -118,12 +166,25 @@ export default class Startup extends Phaser.State {
     }
 
     private updateShmup(): void {
+        // generate enemies
+        if (this.game.time.now >= this.enemyCreateTime) {
+            this.enemyCreateTime = this.game.time.now + this.enemyCreateCoolDwn;
+            this.enemy = this.groupEnemies.getFirstExists(false);
+            if (this.enemy) {
+                this.enemyBody = this.enemy.body;
+                const minX: number = this.enemy.width;
+                const maxX: number = this.shmupBounds.width - this.borderSprite.width / 2 - this.enemy.width;
+                const minY: number = this.enemy.height;
+                const maxY: number = this.shmupBounds.halfHeight;
+                this.enemy.reset(this.game.rnd.integerInRange(minX, maxX), this.game.rnd.integerInRange(minY, maxY));
+            }
+        }
         this.updatePlayer();
         this.updateEnemy();
     }
 
     private updatePlayer(): void {
-        // reset player physics each update. Gives us a solid responsive player
+        // reset player velocity and orientation
         this.playerBody.velocity.x = 0;
         this.playerBody.velocity.y = 0;
         this.playerBody.rotation = 0;
@@ -141,7 +202,7 @@ export default class Startup extends Phaser.State {
         if (this.keyRight.isDown) {
             this.playerBody.velocity.x = PLAYER_SPEED;
         }
-        if (this.keyShoot.justDown) {
+        if (this.keyShoot.isDown) {
             this.playerShoot();
         }
     }
@@ -151,12 +212,20 @@ export default class Startup extends Phaser.State {
     }
 
     private playerShoot(): void {
-        this.bullet = this.groupBullets.getFirstExists(false);
-        if (this.bullet) {
-            this.bulletBody = this.bullet.body;
-            this.bullet.reset(this.player.x, this.player.y - 20);
-            this.bulletBody.velocity.y = -BULLET_SPEED;
+        if (this.game.time.now >= this.fireTime) {
+            this.fireTime = this.game.time.now + this.shootCoolDwn;
+            this.bullet = this.groupBullets.getFirstExists(false);
+            if (this.bullet) {
+                this.bulletBody = this.bullet.body;
+                this.bullet.reset(this.player.x, this.player.y - 20);
+                this.bulletBody.velocity.y = -BULLET_SPEED;
+            }
         }
+    }
+
+    private bulletHitEnemy(bullet: Phaser.Physics.P2.Body, enemy: Phaser.Physics.P2.Body): void {
+        bullet.sprite.kill();
+        enemy.sprite.kill();
     }
 
     private updateEngineering(): void {
