@@ -8,8 +8,8 @@ const ENEMY_SPEED: number = 100;
 const ENEMY_SCALE: number = 1.5;
 
 const NUM_TILE_SPRITES = 9;
-const ENGINEERING_TILES_WIDTH = 10;
-const ENGINEERING_TILES_HEIGHT = 10;
+const ENGINEERING_TILES_WIDTH = 8;
+const ENGINEERING_TILES_HEIGHT = 8;
 
 export default class Startup extends Phaser.State {
     // game objects
@@ -45,6 +45,8 @@ export default class Startup extends Phaser.State {
         this.game.load.image("engine_1_live", "../assets/engine_1_live.png");
 
         this.game.load.spritesheet("gun_1", "../assets/gun_1.png", 32, 32 * 3, 5);
+
+        this.game.load.image("energy_source", "../assets/energy_source.png");
 
         for (let i: number = 1; i <= NUM_TILE_SPRITES; i++) {
             this.game.load.image(`floor_tile_${i}`, `../assets/floor_tile_${i}.png`);
@@ -95,18 +97,24 @@ export default class Startup extends Phaser.State {
         this.enemyBody = this.player.body;
 
 
-        // Engine Testing
+        // Component Testing
         this.game.add.sprite(
             engineeringFloorStartX,
-            engineeringFloorStartY,
+            engineeringFloorStartY + (6 * 32),
             "engine_1_dead",
+        );
+
+        this.game.add.sprite(
+            engineeringFloorStartX + 128,
+            engineeringFloorStartY + 128,
+            "energy_source",
         );
 
         this.liveComponents = this.game.add.group();
 
         this.liveComponents.add(this.game.add.sprite(
             engineeringFloorStartX + 32,
-            engineeringFloorStartY,
+            engineeringFloorStartY + (6 * 32),
             "engine_1_live",
         ));
 
@@ -116,8 +124,8 @@ export default class Startup extends Phaser.State {
             "gun_1",
         );
 
-        const gunFireAnimation: Phaser.Animation = gunOne.animations.add("walk");
-        gunFireAnimation.play(10, true);
+        const gunFireAnimation: Phaser.Animation = gunOne.animations.add("fire");
+        gunFireAnimation.play(20, true);
     }
 
     public update(): void {
