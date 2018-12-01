@@ -36,13 +36,11 @@ export default class Player extends Phaser.Sprite {
         // bullets
         this.bulletsGroup = this.game.add.group();
         this.bulletsGroup.createMultiple(30, "bullet");
-        this.game.physics.p2.enable(this.bulletsGroup, true);
+        this.game.physics.p2.enable(this.bulletsGroup);
         this.bulletsGroup.setAll("outOfBoundsKill", true);
         this.bulletsGroup.setAll("checkWorldBounds", true);
         this.bulletsGroup.setAll("body.collideWorldBounds", false);
-        this.bulletsGroup.forEach((bullet: Phaser.Sprite) => {
-            const bulletBody: Phaser.Physics.P2.Body = bullet.body;
-        });
+        this.bulletsGroup.setAll("body.fixedRotation", true);
     }
 
     public setBulletsCollisionGroup(bulletCollisionGroup: Phaser.Physics.P2.CollisionGroup): void {

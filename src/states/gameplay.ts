@@ -43,7 +43,7 @@ export default class Startup extends Phaser.State {
         this.game.load.image("player", "../assets/ship.png");
         this.game.load.image("enemy", "../assets/diamond.png");
         this.game.load.image("border", "../assets/border.png");
-        this.game.load.image("bullet", "../assets/star.png");
+        this.game.load.image("bullet", "../assets/laser.png");
 
         this.engineering.preload();
     }
