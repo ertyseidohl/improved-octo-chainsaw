@@ -1,11 +1,13 @@
 import { Game } from "phaser-ce";
 import { PhaserTextStyle } from "phaser-ce";
 
-// player constants
+// constants
 const PLAYER_SPEED: number = 300;
 const PLAYER_SCALE: number = 2;
 const ENEMY_SPEED: number = 100;
 const ENEMY_SCALE: number = 1.5;
+const BULLET_SPEED: number = 500;
+const BULLET_SCALE: number = 1;
 
 const NUM_TILE_SPRITES = 9;
 const ENGINEERING_TILES_WIDTH = 10;
@@ -15,8 +17,11 @@ export default class Startup extends Phaser.State {
     // game objects
     private player: Phaser.Sprite;
     private enemy: Phaser.Sprite;
+    private bullet: Phaser.Sprite;
     private playerBody: Phaser.Physics.P2.Body; // adding playerBody to make variables more accesible
-    private enemyBody: Phaser.Physics.P2.Body; // same deal for enemy
+    private enemyBody: Phaser.Physics.P2.Body; // same deal for enemy and all others
+    private bulletBody: Phaser.Physics.P2.Body;
+    private groupBullets: Phaser.Group;
 
     // input keys
     private keyUp: Phaser.Key;
@@ -36,6 +41,7 @@ export default class Startup extends Phaser.State {
         this.game.load.image("player", "../assets/star.png");
         this.game.load.image("enemy", "../assets/diamond.png");
         this.game.load.image("border", "../assets/border.png");
+        this.game.load.image("bullet", "../assets/star.png");
 
         for (let i: number = 1; i <= NUM_TILE_SPRITES; i++) {
             this.game.load.image(`floor_tile_${i}`, `../assets/floor_tile_${i}.png`);
@@ -49,8 +55,9 @@ export default class Startup extends Phaser.State {
         this.keyLeft = this.game.input.keyboard.addKey(Phaser.Keyboard.LEFT);
         this.keyRight = this.game.input.keyboard.addKey(Phaser.Keyboard.RIGHT);
         this.keyShoot = this.game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
-        this.engineeringTiles = this.game.add.group();
 
+        // engineering stuff
+        this.engineeringTiles = this.game.add.group();
         const engineeringFloorStartX = this.game.width / 2 + 50;
         const engineeringFloorStartY = 100;
 
@@ -84,7 +91,17 @@ export default class Startup extends Phaser.State {
         // make body variable after physic enabled
         this.playerBody = this.player.body;
         this.enemyBody = this.player.body;
+        // this.bulletBody = this.bullet.body;
 
+        // groups
+        this.groupBullets = this.game.add.group();
+        this.groupBullets.createMultiple(30, "bullet");
+        this.game.physics.p2.enable(this.groupBullets, true);
+        this.groupBullets.setAll("outOfBoundsKill", true);
+        this.groupBullets.setAll("checkWorldBounds", true);
+        this.groupBullets.setAll("body.collideWorldBounds", false);
+        this.groupBullets.setAll("scale.x", BULLET_SCALE);
+        this.groupBullets.setAll("scale.y", BULLET_SCALE);
     }
 
     public update(): void {
@@ -94,6 +111,7 @@ export default class Startup extends Phaser.State {
 
     private updateShmup(): void {
         this.updatePlayer();
+        this.updateEnemy();
     }
 
     private updatePlayer(): void {
@@ -116,12 +134,21 @@ export default class Startup extends Phaser.State {
             this.playerBody.velocity.x = PLAYER_SPEED;
         }
         if (this.keyShoot.justDown) {
-            // shoot not implemented
+            this.playerShoot();
         }
     }
 
     private updateEnemy(): void {
         // not implemented
+    }
+
+    private playerShoot(): void {
+        this.bullet = this.groupBullets.getFirstExists(false);
+        if (this.bullet) {
+            this.bulletBody = this.bullet.body;
+            this.bullet.reset(this.player.x, this.player.y - 20);
+            this.bulletBody.velocity.y = -BULLET_SPEED;
+        }
     }
 
     private updateEngineering(): void {
