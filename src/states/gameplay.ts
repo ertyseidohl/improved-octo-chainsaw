@@ -1,6 +1,7 @@
 import { Game } from "phaser-ce";
 import { PhaserTextStyle } from "phaser-ce";
 import BaseEnemy from "../enemies/base_enemy";
+import Engineering from "../engineering/engineering";
 import Player from "../player/player";
 
 // constants
@@ -8,10 +9,6 @@ const ENEMY_SPEED: number = 100;
 const ENEMY_SCALE: number = 1.5;
 const BULLET_SCALE: number = 1;
 const ENEMY_COUNT = 30;
-
-const NUM_TILE_SPRITES = 9;
-const ENGINEERING_TILES_WIDTH = 8;
-const ENGINEERING_TILES_HEIGHT = 8;
 
 export default class Startup extends Phaser.State {
     // game objects
@@ -35,13 +32,12 @@ export default class Startup extends Phaser.State {
     private shmupBounds: Phaser.Rectangle;
     private engineeringBounds: Phaser.Rectangle;
 
-    private engineeringTiles: Phaser.Group;
     private liveComponents: Phaser.Group;
 
     private borderSprite: Phaser.Sprite;
 
-    // "shake" for live components
-    private liveComponentShake: Phaser.Point = new Phaser.Point(0, 0);
+    // engineering section
+    private engineering = new Engineering(this);
 
     public preload(): void {
         this.game.load.image("player", "../assets/ship.png");
@@ -49,50 +45,41 @@ export default class Startup extends Phaser.State {
         this.game.load.image("border", "../assets/border.png");
         this.game.load.image("bullet", "../assets/star.png");
 
-        this.game.load.image("engine_1_dead", "../assets/engine_1_dead.png");
-        this.game.load.image("engine_1_live", "../assets/engine_1_live.png");
-
-        this.game.load.spritesheet("gun_1", "../assets/gun_1.png", 32, 32 * 3, 5);
-
-        this.game.load.spritesheet("energy_cell", "../assets/energy_cell.png", 35, 35, 5);
-
-        for (let i: number = 1; i <= NUM_TILE_SPRITES; i++) {
-            this.game.load.image(`floor_tile_${i}`, `../assets/floor_tile_${i}.png`);
-        }
+        this.engineering.preload();
     }
 
     public create(): void {
+        const { width, height } = this.game;
+
         // collision groups
         this.playerCollisionGroup = this.game.physics.p2.createCollisionGroup();
         this.enemyCollisionGroup = this.game.physics.p2.createCollisionGroup();
         this.bulletCollisionGroup = this.game.physics.p2.createCollisionGroup();
         this.worldCollisionGroup = this.game.physics.p2.createCollisionGroup();
 
-        // engineering stuff
-        this.engineeringTiles = this.game.add.group();
-        const engineeringFloorStartX = this.game.width / 2 + 50;
-        const engineeringFloorStartY = 100;
-
-        for (let i: number = 0; i < ENGINEERING_TILES_WIDTH; i++) {
-            for (let j: number = 0; j < ENGINEERING_TILES_HEIGHT; j++) {
-                this.engineeringTiles.create(
-                    engineeringFloorStartX + (32 * i),
-                    engineeringFloorStartY + (32 * j),
-                    this.getTileSprite(),
-                );
-            }
-        }
-
         // play area bounds
-        this.shmupBounds = new Phaser.Rectangle(0, 0, this.game.width / 2, this.game.height);
-        this.engineeringBounds = new Phaser.Rectangle(this.game.width / 2, 0, this.game.width / 2, this.game.height);
-
-        this.borderSprite = this.game.add.sprite(this.game.width / 2, this.game.height / 2, "border");
+        this.borderSprite = this.game.add.sprite(width / 2, height / 2, "border");
         this.game.physics.p2.enable(this.borderSprite, true);
         const borderSpriteBody: Phaser.Physics.P2.Body = this.borderSprite.body;
         borderSpriteBody.static = true;
         borderSpriteBody.setCollisionGroup(this.worldCollisionGroup);
         borderSpriteBody.collides([this.playerCollisionGroup, this.enemyCollisionGroup, this.bulletCollisionGroup]);
+
+        this.shmupBounds = new Phaser.Rectangle(
+            0,
+            0,
+            width / 2 - this.borderSprite.width / 2,
+            height,
+        );
+        this.engineering.bounds = new Phaser.Rectangle(
+            this.shmupBounds.width + this.borderSprite.width,
+            0,
+            this.shmupBounds.width,
+            this.game.height,
+        );
+
+        // setup engineering
+        this.engineering.create();
 
         // sprites and physics
         this.player = new Player(this.game, 200, 200, "player");
@@ -131,46 +118,11 @@ export default class Startup extends Phaser.State {
             enemyBody.fixedRotation = true;
         });
 
-        // Component Testing
-        this.game.add.sprite(
-            engineeringFloorStartX,
-            engineeringFloorStartY + (6 * 32),
-            "engine_1_dead",
-        );
-
-        const energyCell: Phaser.Sprite = this.game.add.sprite(
-            engineeringFloorStartX + 128,
-            engineeringFloorStartY + 128,
-            "energy_cell",
-        );
-
-        energyCell.x -= 0;
-        energyCell.y -= 4;
-
-        const energyCellAnimation: Phaser.Animation = energyCell.animations.add("zap", [1, 2, 3, 4]);
-        energyCellAnimation.play(20, true);
-
-        this.liveComponents = this.game.add.group();
-
-        this.liveComponents.add(this.game.add.sprite(
-            engineeringFloorStartX + 32,
-            engineeringFloorStartY + (6 * 32),
-            "engine_1_live",
-        ));
-
-        const gunOne: Phaser.Sprite = this.game.add.sprite(
-            engineeringFloorStartX + 64,
-            engineeringFloorStartY,
-            "gun_1",
-        );
-
-        const gunFireAnimation: Phaser.Animation = gunOne.animations.add("fire");
-        gunFireAnimation.play(20, true);
     }
 
     public update(): void {
         this.updateShmup();
-        this.updateEngineering();
+        this.engineering.update();
     }
 
     private updateShmup(): void {
@@ -194,14 +146,4 @@ export default class Startup extends Phaser.State {
         enemy.sprite.kill();
     }
 
-    private updateEngineering(): void {
-        this.liveComponentShake.x = Math.floor(Math.random() * 3) - 1;
-        this.liveComponents.x = this.liveComponentShake.x;
-        this.liveComponents.y = this.liveComponentShake.y;
-    }
-
-    private getTileSprite(): string {
-        const r: number = Math.floor(Math.random() * NUM_TILE_SPRITES) + 1;
-        return `floor_tile_${r}`;
-    }
 }
