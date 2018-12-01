@@ -1,0 +1,19 @@
+{
+    "compilerOptions": {
+        "outDir": "./dist/",
+        "noImplicitAny": true,
+        "sourceMap": true,
+        "module": "es6",
+        "target": "es5",
+        "jsx": "react",
+        "allowJs": true
+    },
+    "typeRoots": [
+        "./node_modules/phaser-ce/typescript/"
+    ],
+    "files": [
+        "./src/globals.d.ts",
+        "./src/app.ts",
+        "./node_modules/phaser-ce/typescript/phaser.comments.d.ts"
+    ]
+}
