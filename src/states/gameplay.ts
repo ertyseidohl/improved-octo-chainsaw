@@ -46,7 +46,7 @@ export default class Startup extends Phaser.State {
 
         this.game.load.spritesheet("gun_1", "../assets/gun_1.png", 32, 32 * 3, 5);
 
-        this.game.load.image("energy_source", "../assets/energy_source.png");
+        this.game.load.spritesheet("energy_cell", "../assets/energy_cell.png", 35, 35, 5);
 
         for (let i: number = 1; i <= NUM_TILE_SPRITES; i++) {
             this.game.load.image(`floor_tile_${i}`, `../assets/floor_tile_${i}.png`);
@@ -96,7 +96,6 @@ export default class Startup extends Phaser.State {
         this.playerBody = this.player.body;
         this.enemyBody = this.player.body;
 
-
         // Component Testing
         this.game.add.sprite(
             engineeringFloorStartX,
@@ -104,11 +103,17 @@ export default class Startup extends Phaser.State {
             "engine_1_dead",
         );
 
-        this.game.add.sprite(
+        const energyCell: Phaser.Sprite = this.game.add.sprite(
             engineeringFloorStartX + 128,
             engineeringFloorStartY + 128,
-            "energy_source",
+            "energy_cell",
         );
+
+        energyCell.x -= 0;
+        energyCell.y -= 4;
+
+        const energyCellAnimation: Phaser.Animation = energyCell.animations.add("zap", [1, 2, 3, 4]);
+        energyCellAnimation.play(20, true);
 
         this.liveComponents = this.game.add.group();
 
