@@ -6,6 +6,7 @@ import "pixi";
 import "phaser";
 
 import Gameplay from "./states/gameplay";
+import Splash from "./states/splash";
 import Startup from "./states/startup";
 
 class App extends Phaser.Game {
@@ -16,6 +17,7 @@ class App extends Phaser.Game {
         console.log("game is starting...");
 
         this.state.add("startup", Startup);
+        this.state.add("splash", Splash);
         this.state.add("gameplay", Gameplay);
 
         this.state.start("startup");

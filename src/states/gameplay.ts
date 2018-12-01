@@ -43,6 +43,8 @@ export default class Startup extends Phaser.State {
         this.game.load.image("border", "../assets/border.png");
         this.game.load.image("bullet", "../assets/star.png");
 
+        this.game.load.image("engine_1_dead", "../assets/engine_1_dead.png");
+
         for (let i: number = 1; i <= NUM_TILE_SPRITES; i++) {
             this.game.load.image(`floor_tile_${i}`, `../assets/floor_tile_${i}.png`);
         }
@@ -102,6 +104,12 @@ export default class Startup extends Phaser.State {
         this.groupBullets.setAll("body.collideWorldBounds", false);
         this.groupBullets.setAll("scale.x", BULLET_SCALE);
         this.groupBullets.setAll("scale.y", BULLET_SCALE);
+
+        const engine1Dead: Phaser.Sprite = this.game.add.sprite(
+            engineeringFloorStartX,
+            engineeringFloorStartY,
+            "engine_1_dead",
+        );
     }
 
     public update(): void {
