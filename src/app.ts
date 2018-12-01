@@ -6,6 +6,7 @@ import "pixi";
 import "phaser";
 
 import Gameplay from "./states/gameplay";
+import Splash from "./states/splash";
 import Startup from "./states/startup";
 
 import { BasicGun } from "./inventory/basic_gun";
@@ -18,6 +19,7 @@ class App extends Phaser.Game {
         console.log("game is starting...");
 
         this.state.add("startup", Startup);
+        this.state.add("splash", Splash);
         this.state.add("gameplay", Gameplay);
 
         this.state.start("startup");
@@ -35,6 +37,7 @@ function startApp(): void {
         renderer: Phaser.AUTO,
         parent: "",
         resolution: 1,
+        scaleMode: Phaser.ScaleManager.SHOW_ALL,
     };
 
     const app = new App(gameConfig);
