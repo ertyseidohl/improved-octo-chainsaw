@@ -5,11 +5,41 @@ const ENGINEERING_TILES_HEIGHT = 8;
 const NUM_TILE_SPRITES = 9;
 
 // TYPES
-type Connections = Map<Phaser.Sprite, Set<Phaser.Sprite>>;
-
 interface PendingConnection {
     rope: Phaser.Rope;
     start: Phaser.Sprite;
+}
+
+interface ConnectionState {
+    rope: Phaser.Rope;
+}
+
+type TargetToRope = Map<Phaser.Sprite, ConnectionState>;
+type SourceToTarget = Map<Phaser.Sprite, TargetToRope>;
+
+class Connections {
+
+    // PRIVATE DATA
+    private entries: SourceToTarget = new Map();
+
+    // PUBLIC METHODS
+    public tryConnect(
+        source: Phaser.Sprite,
+        target: Phaser.Sprite,
+        rope: Phaser.Rope,
+    ): boolean {
+        let existing = this.entries.get(source);
+        if (undefined === existing) {
+            existing = new Map();
+            this.entries.set(source, existing);
+        }
+        if (existing.has(target)) {
+            return false;
+        }
+        existing.set(target, { rope });
+        return true;
+    }
+
 }
 
                              // =================
@@ -29,7 +59,7 @@ export default class Engineering {
     private floorStartY: number;
 
     private connectTexture: Phaser.BitmapData;
-    private connections: Connections = new Map();
+    private connections: Connections = new Connections();
     private mouseInBounds: boolean = false;
     private pendingConnect: PendingConnection | null = null;
 
@@ -231,15 +261,9 @@ export default class Engineering {
             // nothing to connect to, or connected to start
             this.comps.remove(rope, true);
         }
-        let existing = this.connections.get(start);
-        if (undefined === existing) {
-            existing = new Set();
-            this.connections.set(start, existing);
-        }
-        if (existing.has(sprite)) {  // already connected
+        if (!this.connections.tryConnect(start, sprite, rope)) {
+            // already connected
             this.comps.remove(rope, true);
-        } else {
-            existing.add(sprite);
         }
         this.pendingConnect = null;
     }
