@@ -7,9 +7,6 @@ export default class Startup extends Phaser.State {
 
     private borderSprite: Phaser.Sprite;
 
-    private shmupCollisionGroup: Phaser.Physics.P2.CollisionGroup;
-    private engineeringCollisionGroup: Phaser.Physics.P2.CollisionGroup;
-
     public preload(): void {
         this.game.load.image("mario", "../assets/mario.png");
         this.game.load.image("border", "../assets/border.png");
@@ -19,9 +16,6 @@ export default class Startup extends Phaser.State {
 
         this.shmupBounds = new Phaser.Rectangle(0, 0, this.game.width / 2, this.game.height);
         this.engineeringBounds = new Phaser.Rectangle(this.game.width / 2, 0, this.game.width / 2, this.game.height);
-
-        this.shmupCollisionGroup = this.game.physics.p2.createCollisionGroup();
-        this.engineeringCollisionGroup = this.game.physics.p2.createCollisionGroup();
 
         this.borderSprite = this.game.add.sprite(this.game.width / 2, this.game.height / 2, "border");
         this.game.physics.p2.enable(this.borderSprite, true);
