@@ -8,6 +8,8 @@ import "phaser";
 import Gameplay from "./states/gameplay";
 import Startup from "./states/startup";
 
+import { BasicGun } from "./inventory/basic_gun";
+
 class App extends Phaser.Game {
     constructor(config: Phaser.IGameConfig) {
         super(config);

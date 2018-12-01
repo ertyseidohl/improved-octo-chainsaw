@@ -1,4 +1,6 @@
 import { PhaserTextStyle } from "phaser-ce";
+import { BasicGun } from "../inventory/basic_gun";
+import { InventorySystem } from "../inventory/system";
 
 const NUM_TILE_SPRITES = 9;
 const ENGINEERING_TILES_WIDTH = 10;
@@ -52,6 +54,14 @@ export default class Startup extends Phaser.State {
         this.mario.scale = new Phaser.Point(0.2, 0.2);
         this.game.physics.p2.enable(this.mario, true);
         const marioBody: Phaser.Physics.P2.Body = this.mario.body;
+
+        const inventorySystem = new InventorySystem(this.game.width / 2, 0, 32, 32, 20, 20);
+
+        const basicGun1 = new BasicGun(this.game, inventorySystem, 600, 300);
+        const basicGun2 = new BasicGun(this.game, inventorySystem, 700, 300);
+
+        inventorySystem.place(basicGun1);
+        inventorySystem.place(basicGun2);
 
         this.cursors = this.game.input.keyboard.createCursorKeys();
     }
