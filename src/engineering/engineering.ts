@@ -26,7 +26,7 @@ class Connections {
     public tryConnect(
         source: Phaser.Sprite,
         target: Phaser.Sprite,
-        rope: Phaser.Rope
+        rope: Phaser.Rope,
     ): boolean {
         let existing = this.entries.get(source);
         if (undefined === existing) {
