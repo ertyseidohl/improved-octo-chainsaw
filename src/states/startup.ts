@@ -11,6 +11,6 @@ export default class Startup extends Phaser.State {
         this.game.scale.pageAlignHorizontally = true;
         this.game.scale.pageAlignVertically = true;
 
-        this.state.start("gameplay");
+        this.state.start("splash");
     }
 }
