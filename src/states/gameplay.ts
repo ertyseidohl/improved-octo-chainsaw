@@ -29,8 +29,12 @@ export default class Startup extends Phaser.State {
     private engineeringBounds: Phaser.Rectangle;
 
     private engineeringTiles: Phaser.Group;
+    private liveComponents: Phaser.Group;
 
     private borderSprite: Phaser.Sprite;
+
+    // "shake" for live components
+    private liveComponentShake: Phaser.Point = new Phaser.Point(0, 0);
 
     public preload(): void {
         this.game.load.image("player", "../assets/star.png");
@@ -38,6 +42,9 @@ export default class Startup extends Phaser.State {
         this.game.load.image("border", "../assets/border.png");
 
         this.game.load.image("engine_1_dead", "../assets/engine_1_dead.png");
+        this.game.load.image("engine_1_live", "../assets/engine_1_live.png");
+
+        this.game.load.spritesheet("gun_1", "../assets/gun_1.png", 32, 32 * 3, 5);
 
         for (let i: number = 1; i <= NUM_TILE_SPRITES; i++) {
             this.game.load.image(`floor_tile_${i}`, `../assets/floor_tile_${i}.png`);
@@ -87,11 +94,30 @@ export default class Startup extends Phaser.State {
         this.playerBody = this.player.body;
         this.enemyBody = this.player.body;
 
-        const engine1Dead: Phaser.Sprite = this.game.add.sprite(
+
+        // Engine Testing
+        this.game.add.sprite(
             engineeringFloorStartX,
             engineeringFloorStartY,
             "engine_1_dead",
         );
+
+        this.liveComponents = this.game.add.group();
+
+        this.liveComponents.add(this.game.add.sprite(
+            engineeringFloorStartX + 32,
+            engineeringFloorStartY,
+            "engine_1_live",
+        ));
+
+        const gunOne: Phaser.Sprite = this.game.add.sprite(
+            engineeringFloorStartX + 64,
+            engineeringFloorStartY,
+            "gun_1",
+        );
+
+        const gunFireAnimation: Phaser.Animation = gunOne.animations.add("walk");
+        gunFireAnimation.play(10, true);
     }
 
     public update(): void {
@@ -132,7 +158,9 @@ export default class Startup extends Phaser.State {
     }
 
     private updateEngineering(): void {
-        // todo
+        this.liveComponentShake.x = Math.floor(Math.random() * 3) - 1;
+        this.liveComponents.x = this.liveComponentShake.x;
+        this.liveComponents.y = this.liveComponentShake.y;
     }
 
     private getTileSprite(): string {
