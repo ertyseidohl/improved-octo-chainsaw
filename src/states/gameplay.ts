@@ -19,6 +19,8 @@ export default class Startup extends Phaser.State {
         this.game.load.image("mario", "../assets/mario.png");
         this.game.load.image("border", "../assets/border.png");
 
+        this.game.load.image("engine_1_dead", "../assets/engine_1_dead.png");
+
         for (let i: number = 1; i <= NUM_TILE_SPRITES; i++) {
             this.game.load.image(`floor_tile_${i}`, `../assets/floor_tile_${i}.png`);
         }
@@ -52,6 +54,12 @@ export default class Startup extends Phaser.State {
         this.mario.scale = new Phaser.Point(0.2, 0.2);
         this.game.physics.p2.enable(this.mario, true);
         const marioBody: Phaser.Physics.P2.Body = this.mario.body;
+
+        const engine1Dead: Phaser.Sprite = this.game.add.sprite(
+            engineeringFloorStartX,
+            engineeringFloorStartY,
+            "engine_1_dead",
+        );
 
         this.cursors = this.game.input.keyboard.createCursorKeys();
     }
