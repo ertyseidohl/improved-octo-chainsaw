@@ -14,12 +14,8 @@
         ],
         "object-literal-sort-keys": false,
         "no-console": false,
-<<<<<<< HEAD
-        "interface-name": [true, "never-prefix"]
-=======
         "interface-name": false,
         "max-classes-per-file": false
->>>>>>> master
     },
     "rulesDirectory": []
 }

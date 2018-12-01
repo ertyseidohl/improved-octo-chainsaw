@@ -1,13 +1,12 @@
+import BaseEnemy from "../enemies/base_enemy";
+
 import { Game } from "phaser-ce";
 import { PhaserTextStyle } from "phaser-ce";
-<<<<<<< HEAD
 import { BasicGun } from "../inventory/basic_gun";
 import { InventorySystem } from "../inventory/system";
-=======
-import BaseEnemy from "../enemies/base_enemy";
+
 import Engineering from "../engineering/engineering";
 import Player from "../player/player";
->>>>>>> master
 
 // constants
 const ENEMY_SPEED: number = 100;
@@ -123,12 +122,6 @@ export default class Startup extends Phaser.State {
             enemyBody.fixedRotation = true;
         });
 
-<<<<<<< HEAD
-        this.mario = this.game.add.sprite(200, 200, "mario");
-        this.mario.scale = new Phaser.Point(0.2, 0.2);
-        this.game.physics.p2.enable(this.mario, true);
-        const marioBody: Phaser.Physics.P2.Body = this.mario.body;
-
         const inventorySystem = new InventorySystem(this.game.width / 2, 0, 32, 32, 20, 20);
 
         const basicGun1 = new BasicGun(this.game, inventorySystem, 600, 300);
@@ -136,10 +129,6 @@ export default class Startup extends Phaser.State {
 
         inventorySystem.place(basicGun1);
         inventorySystem.place(basicGun2);
-
-        this.cursors = this.game.input.keyboard.createCursorKeys();
-=======
->>>>>>> master
     }
 
     public update(): void {

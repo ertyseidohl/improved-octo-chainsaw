@@ -34,7 +34,7 @@ export class BaseComponent extends Phaser.Sprite {
     constructor(game: Phaser.Game, inventorySystem: InventorySystem,
                 x: number, y: number, key: string,
                 tileWidth: number, tileHeight: number) {
-        super(game, x, y, "mario", 0);
+        super(game, x, y, key, 0);
 
         this.inventorySystem = inventorySystem;
         this.tileWidth = tileWidth;
@@ -43,7 +43,6 @@ export class BaseComponent extends Phaser.Sprite {
         this.inputEnabled = true;
         this.input.enableDrag();
         this.input.enableSnap(8, 8, false, true);
-        this.scale.setTo(0.2, 0.2);
 
         this.physicsEnabled = true;
 
