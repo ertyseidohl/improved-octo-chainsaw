@@ -10,8 +10,8 @@ const BULLET_SPEED: number = 700;
 const BULLET_SCALE: number = 1;
 
 const NUM_TILE_SPRITES = 9;
-const ENGINEERING_TILES_WIDTH = 10;
-const ENGINEERING_TILES_HEIGHT = 10;
+const ENGINEERING_TILES_WIDTH = 8;
+const ENGINEERING_TILES_HEIGHT = 8;
 
 export default class Startup extends Phaser.State {
     // game objects
@@ -47,16 +47,25 @@ export default class Startup extends Phaser.State {
     private engineeringBounds: Phaser.Rectangle;
 
     private engineeringTiles: Phaser.Group;
+    private liveComponents: Phaser.Group;
 
     private borderSprite: Phaser.Sprite;
 
+    // "shake" for live components
+    private liveComponentShake: Phaser.Point = new Phaser.Point(0, 0);
+
     public preload(): void {
-        this.game.load.image("player", "../assets/star.png");
+        this.game.load.image("player", "../assets/ship.png");
         this.game.load.image("enemy", "../assets/diamond.png");
         this.game.load.image("border", "../assets/border.png");
         this.game.load.image("bullet", "../assets/star.png");
 
         this.game.load.image("engine_1_dead", "../assets/engine_1_dead.png");
+        this.game.load.image("engine_1_live", "../assets/engine_1_live.png");
+
+        this.game.load.spritesheet("gun_1", "../assets/gun_1.png", 32, 32 * 3, 5);
+
+        this.game.load.spritesheet("energy_cell", "../assets/energy_cell.png", 35, 35, 5);
 
         for (let i: number = 1; i <= NUM_TILE_SPRITES; i++) {
             this.game.load.image(`floor_tile_${i}`, `../assets/floor_tile_${i}.png`);
@@ -106,7 +115,10 @@ export default class Startup extends Phaser.State {
         // sprites and physics
         this.player = this.game.add.sprite(200, 200, "player");
         this.player.scale.setTo(PLAYER_SCALE, PLAYER_SCALE);
-        this.game.physics.p2.enable(this.player, true);
+        this.enemy = this.game.add.sprite(100, 100, "enemy");
+        this.player.scale.setTo(ENEMY_SCALE, ENEMY_SCALE);
+        this.game.physics.p2.enable(this.player);
+        this.game.physics.p2.enable(this.enemy, true);
 
         // make body variable after physic enabled
         this.playerBody = this.player.body;
@@ -153,11 +165,41 @@ export default class Startup extends Phaser.State {
             enemyBody.fixedRotation = true;
         });
 
-        const engine1Dead: Phaser.Sprite = this.game.add.sprite(
+        // Component Testing
+        this.game.add.sprite(
             engineeringFloorStartX,
-            engineeringFloorStartY,
+            engineeringFloorStartY + (6 * 32),
             "engine_1_dead",
         );
+
+        const energyCell: Phaser.Sprite = this.game.add.sprite(
+            engineeringFloorStartX + 128,
+            engineeringFloorStartY + 128,
+            "energy_cell",
+        );
+
+        energyCell.x -= 0;
+        energyCell.y -= 4;
+
+        const energyCellAnimation: Phaser.Animation = energyCell.animations.add("zap", [1, 2, 3, 4]);
+        energyCellAnimation.play(20, true);
+
+        this.liveComponents = this.game.add.group();
+
+        this.liveComponents.add(this.game.add.sprite(
+            engineeringFloorStartX + 32,
+            engineeringFloorStartY + (6 * 32),
+            "engine_1_live",
+        ));
+
+        const gunOne: Phaser.Sprite = this.game.add.sprite(
+            engineeringFloorStartX + 64,
+            engineeringFloorStartY,
+            "gun_1",
+        );
+
+        const gunFireAnimation: Phaser.Animation = gunOne.animations.add("fire");
+        gunFireAnimation.play(20, true);
     }
 
     public update(): void {
@@ -229,7 +271,9 @@ export default class Startup extends Phaser.State {
     }
 
     private updateEngineering(): void {
-        // todo
+        this.liveComponentShake.x = Math.floor(Math.random() * 3) - 1;
+        this.liveComponents.x = this.liveComponentShake.x;
+        this.liveComponents.y = this.liveComponentShake.y;
     }
 
     private getTileSprite(): string {

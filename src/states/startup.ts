@@ -11,6 +11,8 @@ export default class Startup extends Phaser.State {
         this.game.scale.pageAlignHorizontally = true;
         this.game.scale.pageAlignVertically = true;
 
+        Phaser.Canvas.setImageRenderingCrisp(this.game.canvas);
+
         this.state.start("splash");
     }
 }
