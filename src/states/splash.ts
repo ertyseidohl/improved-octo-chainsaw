@@ -1,14 +1,9 @@
 export default class Splash extends Phaser.State {
 
     // DATA
-    private enter : Phaser.Key;
-    private start : Phaser.Button;
-    private text  : Phaser.Text;
-
-    // PRIVATE METHODS
-    private startGameplay(): void {
-        this.state.start("gameplay");
-    }
+    private enter: Phaser.Key;
+    private start: Phaser.Button;
+    private text: Phaser.Text;
 
     // METHODS
     public create(): void {
@@ -36,4 +31,10 @@ export default class Splash extends Phaser.State {
         this.enter.onDown.addOnce(this.startGameplay, this);
 
     }
+
+    // PRIVATE METHODS
+    private startGameplay(): void {
+        this.state.start("gameplay");
+    }
+
 }
