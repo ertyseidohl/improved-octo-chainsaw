@@ -1,5 +1,6 @@
 import { Game } from "phaser-ce";
 import { PhaserTextStyle } from "phaser-ce";
+import BaseEnemy from "../enemies/base_enemy";
 
 // constants
 const PLAYER_SPEED: number = 300;
@@ -8,6 +9,7 @@ const ENEMY_SPEED: number = 100;
 const ENEMY_SCALE: number = 1.5;
 const BULLET_SPEED: number = 700;
 const BULLET_SCALE: number = 1;
+const ENEMY_COUNT = 30;
 
 const NUM_TILE_SPRITES = 9;
 const ENGINEERING_TILES_WIDTH = 8;
@@ -153,7 +155,11 @@ export default class Startup extends Phaser.State {
 
         // enemies
         this.groupEnemies = this.game.add.group();
-        this.groupEnemies.createMultiple(30, "enemy");
+        for (let i: number = 0; i < ENEMY_COUNT; i++) {
+            const newEnemy: BaseEnemy = new BaseEnemy(this.game, Math.random(), 0, "enemy");
+            this.groupEnemies.add(newEnemy);
+            newEnemy.kill();
+        }
         this.game.physics.p2.enable(this.groupEnemies, true);
         this.groupEnemies.setAll("scale.x", ENEMY_SCALE);
         this.groupEnemies.setAll("scale.y", ENEMY_SCALE);
