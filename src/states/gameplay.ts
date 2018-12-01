@@ -117,10 +117,8 @@ export default class Startup extends Phaser.State {
         // sprites and physics
         this.player = this.game.add.sprite(200, 200, "player");
         this.player.scale.setTo(PLAYER_SCALE, PLAYER_SCALE);
-        this.enemy = this.game.add.sprite(100, 100, "enemy");
         this.player.scale.setTo(ENEMY_SCALE, ENEMY_SCALE);
         this.game.physics.p2.enable(this.player);
-        this.game.physics.p2.enable(this.enemy, true);
 
         // make body variable after physic enabled
         this.playerBody = this.player.body;
