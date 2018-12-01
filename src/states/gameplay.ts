@@ -9,6 +9,7 @@ const ENEMY_SPEED: number = 100;
 const ENEMY_SCALE: number = 1.5;
 const BULLET_SCALE: number = 1;
 const ENEMY_COUNT = 30;
+const ENEMY_Y_SPAWN = -50;
 
 export default class Startup extends Phaser.State {
     // game objects
@@ -53,9 +54,14 @@ export default class Startup extends Phaser.State {
 
         // collision groups
         this.playerCollisionGroup = this.game.physics.p2.createCollisionGroup();
-        this.enemyCollisionGroup = this.game.physics.p2.createCollisionGroup();
         this.bulletCollisionGroup = this.game.physics.p2.createCollisionGroup();
         this.worldCollisionGroup = this.game.physics.p2.createCollisionGroup();
+        this.enemyCollisionGroup = this.game.physics.p2.createCollisionGroup();
+
+        // This part is vital if you want the objects
+        // with their own collision groups to still collide with the world bounds
+        // (which we do) - what this does is adjust the bounds to use its own collision group.
+        this.game.physics.p2.updateBoundsCollisionGroup();
 
         // play area bounds
         this.borderSprite = this.game.add.sprite(width / 2, height / 2, "border");
@@ -92,11 +98,6 @@ export default class Startup extends Phaser.State {
         this.player.body.collides(this.worldCollisionGroup);
         this.player.body.collides(this.enemyCollisionGroup);
 
-        // This part is vital if you want the objects
-        // with their own collision groups to still collide with the world bounds
-        // (which we do) - what this does is adjust the bounds to use its own collision group.
-        this.game.physics.p2.updateBoundsCollisionGroup();
-
         this.player.setBulletsCollisionGroup(this.bulletCollisionGroup);
         this.player.setBulletsCollides(this.enemyCollisionGroup, this.bulletHitEnemy, this);
 
@@ -110,11 +111,12 @@ export default class Startup extends Phaser.State {
         this.game.physics.p2.enable(this.groupEnemies, true);
         this.groupEnemies.setAll("scale.x", ENEMY_SCALE);
         this.groupEnemies.setAll("scale.y", ENEMY_SCALE);
+        this.groupEnemies.setAll("body.collideWorldBounds", false);
         this.groupEnemies.forEach((enemy: Phaser.Sprite) => {
             const enemyBody: Phaser.Physics.P2.Body = enemy.body;
             enemyBody.setCollisionGroup(this.enemyCollisionGroup);
             enemyBody.collides([this.playerCollisionGroup, this.enemyCollisionGroup,
-                this.worldCollisionGroup, this.bulletCollisionGroup]);
+                this.bulletCollisionGroup]);
             enemyBody.fixedRotation = true;
         });
 
@@ -134,9 +136,7 @@ export default class Startup extends Phaser.State {
                 this.enemyBody = this.enemy.body;
                 const minX: number = this.enemy.width;
                 const maxX: number = this.shmupBounds.width - this.borderSprite.width / 2 - this.enemy.width;
-                const minY: number = this.enemy.height;
-                const maxY: number = this.shmupBounds.halfHeight;
-                this.enemy.reset(this.game.rnd.integerInRange(minX, maxX), this.game.rnd.integerInRange(minY, maxY));
+                this.enemy.reset(this.game.rnd.integerInRange(minX, maxX), ENEMY_Y_SPAWN);
             }
         }
     }
