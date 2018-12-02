@@ -14,21 +14,40 @@ import Player from "../player/player";
 const ENEMY_SPEED: number = 100;
 const ENEMY_SCALE: number = 1.5;
 const BULLET_SCALE: number = 1;
-const SPAWN_WAVE_TIME_MAX: number = 4000;
-const SPAWN_RANDOM_ENEMY_MAX: number = 6;
-const ENEMY_COUNT: number = 10;
+const ENEMY_POOL_COUNT: number = 30;
 const ENEMY_SPAWN_TIME: number = 2000;
-const ENEMY_Y_SPAWN: number = -50;
+const ENEMY_Y_SPAWN: number = -20;
 const EXPLOSION_X_OFFSET: number = -20;
 const EXPLOSTION_Y_OFFSET: number = 0;
+const ENEMY_WIDTH: number = 100; // spacing number for spawning enemies
 
-// more wave constants
-const WAVE_ROWS_SPAWN_TIME_MAX = 50;
+// wave constants
+const WAVE_TIME_MAX: number = 2000;
+const WAVE_RANDOM_ENEMY_MAX: number = 6;
+const WAVE_ROWS_MAX = 4; // number of rows spawned in row wave
+const WAVE_ROW_XOFFSET = 60;
+const WAVE_ROWS_ENEMY_COUNT_MAX = 5;
+const WAVE_ROWS_TIME_MAX = 1000; // time between row spawns
+const WAVE_ROWS_ENEMY_TIME_MAX = 300; // time between enemy spawns in rows (only for right and left)
+const WAVE_BIGV_SPACER = 50;
+const WAVE_BIGV_XSPREAD = 30;
+const WAVE_SWOOP_MAX = 3; // this is the number of swoops we've have during a swoop wave
+const WAVE_SWOOP_ENEMY_COUNT_MAX = 8;
+const WAVE_SWOOP_TIME_MAX = 500;
+const WAVE_SWOOP_ENEMY_TIME_MAX = 400;
+const WAVE_SWOOP_XVEL = 250;
 
 enum ROW_TYPE {
     LEFT,
     RIGHT,
     STRAIGHT,
+    LAST,
+}
+
+enum SWOOP_TYPE {
+    LEFT,
+    RIGHT,
+    LAST,
 }
 
 export default class Startup extends Phaser.State {
@@ -46,9 +65,17 @@ export default class Startup extends Phaser.State {
     private backgrounds: Phaser.TileSprite[] = [];
     private background: Phaser.Sprite;
     private playerDeathQueue: Phaser.Sprite[] = [];
+    private spawnEnmyNumber: number; // we'll use this variable for all wave types
     private spawnWaveTime: number;
     private spawnWaveType: number;
-    private spawnRndmNumber: number;
+    private spawnRowNum: number;
+    private spawnRowFinished: boolean;
+    private spawnRowTime: number;
+    private spawnRowType: number;
+    private spawnSwoopNum: number;
+    private spawnSwoopFinished: boolean;
+    private spawnSwoopTime: number;
+    private spawnSwoopType: number;
 
     // Enemy vars
     private enemyRndmCreateCoolDwn = ENEMY_SPAWN_TIME;
@@ -183,11 +210,11 @@ export default class Startup extends Phaser.State {
         this.player.setBulletsCollides(this.enemyCollisionGroup, this.bulletHitEnemy, this);
 
         // enemies
-        this.spawnWaveTime = this.game.time.now + SPAWN_WAVE_TIME_MAX;
+        this.spawnWaveTime = this.game.time.now + WAVE_TIME_MAX;
         this.spawnWaveType = ENEMY_WAVE.NONE;
 
         this.groupEnemies = this.game.add.group();
-        for (let i: number = 0; i < ENEMY_COUNT; i++) {
+        for (let i: number = 0; i < ENEMY_POOL_COUNT; i++) {
             const newEnemy: BaseEnemy = new BaseEnemy(this.game, Math.random(), 0, "enemy");
             newEnemy.setBulletsCollisionGroup(this.bulletCollisionGroup);
             newEnemy.setBulletsCollides(this.playerCollisionGroup, this.bulletHitPlayer, this);
@@ -227,17 +254,25 @@ export default class Startup extends Phaser.State {
     }
 
     private updateShmup(): void {
-        // if time to spawn wave, generate enemies
+        // if time to spawn wave, and wave is finished, generate enemies
+        // we don't need a "wave finished" variable, we just set spawnWaveType to NONE and check for that
         if (this.game.time.now >= this.spawnWaveTime && this.spawnWaveType === ENEMY_WAVE.NONE) {
-            console.log("Enemy Wave chosen");
             // use 1 because 0 is "NONE"
             this.spawnWaveType = this.game.rnd.integerInRange(1, ENEMY_WAVE.LAST - 1);
+            // this.spawnWaveType = ENEMY_WAVE.SWOOP;
+            this.enemyCreateTime = 0;
+            this.spawnEnmyNumber = 0;
+            this.spawnRowTime = 0;
+            this.spawnRowNum = 0;
+            this.spawnRowFinished = true;
+            this.spawnSwoopTime = 0;
+            this.spawnSwoopNum = 0;
+            this.spawnSwoopFinished = true;
 
-            // setup for wave
+            // console debug messages
             switch (this.spawnWaveType) {
                 case ENEMY_WAVE.RANDOM:
                 console.log("Wave: Random");
-                this.spawnRndmNumber = 0;
                 break;
                 case ENEMY_WAVE.SWOOP:
                 console.log("Wave: Swoop");
@@ -249,6 +284,7 @@ export default class Startup extends Phaser.State {
                 console.log("Wave: Rows");
                 break;
                 default:
+                console.log("Error: No wave chosen!");
                 this.resetWave();
                 break;
             }
@@ -261,33 +297,206 @@ export default class Startup extends Phaser.State {
             case ENEMY_WAVE.RANDOM:
             if (this.game.time.now >= this.enemyCreateTime) {
                 this.enemyCreateTime = this.game.time.now + this.enemyRndmCreateCoolDwn;
-                this.spawnRndmNumber++;
-                const currEnemy: BaseEnemy = this.groupEnemies.getFirstExists(false);
-                if (currEnemy) {
-                    currEnemy.randomizeTimes();
-                    currEnemy.setWaveType(this.spawnWaveType);
-                    const currEnemyBody = currEnemy.body;
-                    const minX: number = currEnemy.width;
-                    const maxX: number = this.shmupBounds.width - this.borderSprite.width / 2 - currEnemy.width;
-                    currEnemy.reset(this.game.rnd.integerInRange(minX, maxX), ENEMY_Y_SPAWN, currEnemy.maxHealth);
-                }
+                this.spawnEnmyNumber++;
+                const minX: number = ENEMY_WIDTH;
+                const maxX: number = this.shmupBounds.width - this.borderSprite.width / 2 - ENEMY_WIDTH;
+                this.createEnemy(this.spawnWaveType, this.game.rnd.integerInRange(minX, maxX))
             }
             // check for end of wave
-            if (this.spawnRndmNumber >= SPAWN_RANDOM_ENEMY_MAX) {
+            if (this.spawnEnmyNumber >= WAVE_RANDOM_ENEMY_MAX) {
                 this.resetWave();
             }
             break;
             case ENEMY_WAVE.SWOOP:
-            this.resetWave();
+            // choose new swoop if swoop is finished
+            if (this.spawnSwoopFinished) {
+                this.spawnSwoopFinished = false;
+                this.spawnEnmyNumber = 0;
+                this.enemyCreateTime = 0;
+                this.spawnSwoopType = this.game.rnd.integerInRange(0, SWOOP_TYPE.LAST - 1);
+                switch (this.spawnSwoopType) {
+                    case SWOOP_TYPE.LEFT:
+                    console.log("Swoop chosen: Left");
+                    break;
+                    case SWOOP_TYPE.RIGHT:
+                    console.log("Swoop chosen: Right");
+                    break;
+                }
+            } else {
+                // otherwise, execute swoop
+                // debugger;
+                switch (this.spawnSwoopType) {
+                    /* spawn enemies until the number of
+                    enemies spawned matches WAVE_SWOOP_ENEMY_COUNT_MAX, then set
+                    the swoop time to WAVE_SWOOP_TIME_MAX. Once the game time reaches that,
+                    we set spawnSwoopFinished to true;
+                    */
+                    case SWOOP_TYPE.LEFT:
+                    if (this.spawnEnmyNumber < WAVE_SWOOP_ENEMY_COUNT_MAX) {
+                        if (this.game.time.now >= this.enemyCreateTime) {
+                            this.enemyCreateTime = this.game.time.now + WAVE_SWOOP_ENEMY_TIME_MAX;
+                            const currEnemy: BaseEnemy = this.groupEnemies.getFirstExists(false);
+                            if (currEnemy) {
+                                currEnemy.reset(0, ENEMY_Y_SPAWN, currEnemy.maxHealth);
+                                currEnemy.randomizeTimes();
+                                currEnemy.setWaveType(this.spawnWaveType);
+                                currEnemy.setXVel(WAVE_SWOOP_XVEL);
+                            }
+                            this.spawnEnmyNumber++;
+                        }
+                        if (this.spawnEnmyNumber >= WAVE_SWOOP_ENEMY_COUNT_MAX) {
+                            this.spawnSwoopTime = this.game.time.now + WAVE_SWOOP_TIME_MAX;
+                            console.log("Swoop Finished, waiting to setup new swoop...");
+                            this.spawnSwoopNum++;
+                        }
+                    }
+                    break;
+                    case SWOOP_TYPE.RIGHT:
+                    if (this.spawnEnmyNumber < WAVE_SWOOP_ENEMY_COUNT_MAX) {
+                        if (this.game.time.now >= this.enemyCreateTime) {
+                            this.enemyCreateTime = this.game.time.now + WAVE_SWOOP_ENEMY_TIME_MAX;
+                            const currEnemy: BaseEnemy = this.groupEnemies.getFirstExists(false);
+                            if (currEnemy) {
+                                currEnemy.reset(this.game.width / 2, ENEMY_Y_SPAWN, currEnemy.maxHealth);
+                                currEnemy.randomizeTimes();
+                                currEnemy.setWaveType(this.spawnWaveType);
+                                currEnemy.setXVel(-WAVE_SWOOP_XVEL);
+                            }
+                            this.spawnEnmyNumber++;
+                        }
+                        if (this.spawnEnmyNumber >= WAVE_SWOOP_ENEMY_COUNT_MAX) {
+                            this.spawnSwoopTime = this.game.time.now + WAVE_SWOOP_TIME_MAX;
+                            console.log("Swoop Finished, waiting to setup new swoop...");
+                            this.spawnSwoopNum++;
+                        }
+                    }
+                    break;
+                }
+                // If we've spawned all the necessary enemies, and the spawn time has been reached, we're done
+                // spawning the swoop
+                if (this.game.time.now >= this.spawnSwoopTime && this.spawnEnmyNumber >= WAVE_SWOOP_ENEMY_COUNT_MAX) {
+                    this.spawnSwoopFinished = true;
+                }
+            }
+            // spawnSwoopNum is incremented when new wave is chosen
+            // greater than necessary to spawn actual number in WAVE_ROW_MAX
+            if (this.spawnSwoopNum >= WAVE_SWOOP_MAX) {
+                this.resetWave();
+            }
             break;
             case ENEMY_WAVE.BIGV:
+            // I think it makes sense to just hardcode these guys in
+            // 5 enemies with different starty Y positions and x velocities
+            const xSpawn: number = this.game.width / 4;
+            let bigVEnemy: BaseEnemy = this.groupEnemies.getFirstExists(false);
+            if (bigVEnemy) {
+                bigVEnemy.reset(xSpawn, ENEMY_Y_SPAWN, bigVEnemy.maxHealth);
+                bigVEnemy.setWaveType(this.spawnWaveType);
+                bigVEnemy.setXVel(0);
+            }
+            bigVEnemy = this.groupEnemies.getFirstExists(false);
+            if (bigVEnemy) {
+                bigVEnemy.reset(xSpawn, ENEMY_Y_SPAWN - WAVE_BIGV_SPACER, bigVEnemy.maxHealth);
+                bigVEnemy.setWaveType(this.spawnWaveType);
+                bigVEnemy.setXVel(-WAVE_BIGV_XSPREAD);
+            }
+            bigVEnemy = this.groupEnemies.getFirstExists(false);
+            if (bigVEnemy) {
+                bigVEnemy.reset(xSpawn, ENEMY_Y_SPAWN - WAVE_BIGV_SPACER, bigVEnemy.maxHealth);
+                bigVEnemy.setWaveType(this.spawnWaveType);
+                bigVEnemy.setXVel(WAVE_BIGV_XSPREAD);
+            }
+            bigVEnemy = this.groupEnemies.getFirstExists(false);
+            if (bigVEnemy) {
+                bigVEnemy.reset(xSpawn, ENEMY_Y_SPAWN - WAVE_BIGV_SPACER * 2, bigVEnemy.maxHealth);
+                bigVEnemy.setWaveType(this.spawnWaveType);
+                bigVEnemy.setXVel(-2 * WAVE_BIGV_XSPREAD);
+            }
+            bigVEnemy = this.groupEnemies.getFirstExists(false);
+            if (bigVEnemy) {
+                bigVEnemy.reset(xSpawn, ENEMY_Y_SPAWN - WAVE_BIGV_SPACER * 2, bigVEnemy.maxHealth);
+                bigVEnemy.setWaveType(this.spawnWaveType);
+                bigVEnemy.setXVel(2 * WAVE_BIGV_XSPREAD);
+            }
             this.resetWave();
             break;
             case ENEMY_WAVE.ROWS:
-            if (this.game.time.now >= this.enemyCreateTime) {
-                this.enemyCreateTime = this.game.time.now + WAVE_ROWS_SPAWN_TIME_MAX;
+            if (this.spawnRowFinished) {
+                this.spawnRowFinished = false;
+                this.spawnEnmyNumber = 0;
+                this.spawnRowType = this.game.rnd.integerInRange(0, ROW_TYPE.LAST - 1);
+                // debug row chosen
+                switch (this.spawnRowType) {
+                    case ROW_TYPE.LEFT:
+                    console.log("Row chosen: Left");
+                    break;
+                    case ROW_TYPE.RIGHT:
+                    console.log("Row chosen: Right");
+                    break;
+                    case ROW_TYPE.STRAIGHT:
+                    console.log("Row chosen: Straight");
+                    break;
+                }
+            } else {
+                // execute row type
+                switch (this.spawnRowType) {
+                    /* all rows work the same way, spawn enemies until the number of
+                    enemies spawned matches WAVE_ROWS_ENEMY_COUNT_MAX, then set
+                    the row time to WAVE_ROWS_TIME_MAX. Once the game time reaches that,
+                    we set spawnRowFinished to true;
+                    */
+                    case ROW_TYPE.LEFT:
+                    if (this.spawnEnmyNumber < WAVE_ROWS_ENEMY_COUNT_MAX) {
+                        if (this.game.time.now >= this.enemyCreateTime) {
+                            this.enemyCreateTime = this.game.time.now + WAVE_ROWS_ENEMY_TIME_MAX;
+                            this.createEnemy(this.spawnWaveType, WAVE_ROW_XOFFSET + ENEMY_WIDTH * this.spawnEnmyNumber);
+                            this.spawnEnmyNumber++;
+                        }
+                        if (this.spawnEnmyNumber >= WAVE_ROWS_ENEMY_COUNT_MAX) {
+                            this.spawnRowTime = this.game.time.now + WAVE_ROWS_TIME_MAX;
+                            console.log("Row Finished, waiting to setup new row...");
+                            this.spawnRowNum++;
+                        }
+                    }
+                    break;
+                    case ROW_TYPE.RIGHT:
+                    if (this.spawnEnmyNumber < WAVE_ROWS_ENEMY_COUNT_MAX) {
+                        if (this.game.time.now >= this.enemyCreateTime) {
+                            this.enemyCreateTime = this.game.time.now + WAVE_ROWS_ENEMY_TIME_MAX;
+                            this.createEnemy(this.spawnWaveType,
+                                this.game.width / 2 - (WAVE_ROW_XOFFSET + ENEMY_WIDTH * this.spawnEnmyNumber));
+                            this.spawnEnmyNumber++;
+                        }
+                        if (this.spawnEnmyNumber >= WAVE_ROWS_ENEMY_COUNT_MAX) {
+                            this.spawnRowTime = this.game.time.now + WAVE_ROWS_TIME_MAX;
+                            console.log("Row Finished, waiting to setup new row...");
+                            this.spawnRowNum++;
+                        }
+                    }
+                    break;
+                    case ROW_TYPE.STRAIGHT:
+                    if (this.spawnEnmyNumber < WAVE_ROWS_ENEMY_COUNT_MAX) {
+                        for (let i: number = 0; i < WAVE_ROWS_ENEMY_COUNT_MAX; i++) {
+                            this.createEnemy(this.spawnWaveType, WAVE_ROW_XOFFSET + ENEMY_WIDTH * i);
+                            this.spawnEnmyNumber++;
+                        }
+                        this.spawnRowTime = this.game.time.now + WAVE_ROWS_TIME_MAX;
+                        console.log("Row Finished, waiting to setup new row...");
+                        this.spawnRowNum++;
+                    }
+                    break;
+                }
+                // If we've spawned all the necessary enemies, and the spawn time has been reached, we're done
+                // spawning the row
+                if (this.game.time.now >= this.spawnRowTime && this.spawnEnmyNumber >= WAVE_ROWS_ENEMY_COUNT_MAX) {
+                    this.spawnRowFinished = true;
+                }
             }
-            this.resetWave();
+            // spawnRowNum is incremented when new wave is chosen
+            // greater than necessary to spawn actual number in WAVE_ROW_MAX
+            if (this.spawnRowNum >= WAVE_ROWS_MAX) {
+                this.resetWave();
+            }
             break;
         }
     }
@@ -355,9 +564,20 @@ export default class Startup extends Phaser.State {
         // not implemented
     }
 
+    private createEnemy(waveType: number, xSpawn: number) {
+        const currEnemy: BaseEnemy = this.groupEnemies.getFirstExists(false);
+        if (currEnemy) {
+            if (waveType === ENEMY_WAVE.RANDOM) {
+                currEnemy.randomizeTimes();
+            }
+            currEnemy.setWaveType(waveType);
+            currEnemy.reset(xSpawn, ENEMY_Y_SPAWN, currEnemy.maxHealth);
+        }
+    }
+
     private resetWave(): void {
         console.log("Wave Reset");
-        this.spawnWaveTime = this.game.time.now + SPAWN_WAVE_TIME_MAX;
+        this.spawnWaveTime = this.game.time.now + WAVE_TIME_MAX;
         this.spawnWaveType = ENEMY_WAVE.NONE;
     }
 }
