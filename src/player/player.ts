@@ -2,7 +2,7 @@ const PLAYER_SPEED: number = 400; // EVAN wanted this faster
 const PLAYER_SCALE: number = 2;
 
 const BULLET_SPEED: number = 700;
-const MAX_HEALTH: number = 1;
+const MAX_HEALTH: number = 100;
 
 export default class Player extends Phaser.Sprite {
     public playerBody: Phaser.Physics.P2.Body;
