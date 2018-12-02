@@ -8,6 +8,8 @@ import { InputX } from "./inventory/input_x";
 import { InputZ } from "./inventory/input_z";
 import { Prince } from "./inventory/prince";
 // import { MissileLauncher } from "./inventory/missile_launcher";
+
+import { PowerSubSystem } from "./inventory/power_subsystem";
 import { BasicShip, InventorySystem, NUM_TILE_SPRITES} from "./inventory/system";
 
 import Chain from "./chain";
@@ -106,6 +108,7 @@ export default class Engineering {
     private pendingConnect: PendingConnection | null = null;
 
     private inventorySystem: InventorySystem;
+    private powerSystem: PowerSubSystem;
 
     // CREATORS
     constructor(private state: Phaser.State) {
@@ -121,6 +124,8 @@ export default class Engineering {
             10, 12,
             BasicShip,
         );
+
+        this.powerSystem = new PowerSubSystem();
 
         this.comps = this.game.add.group();
         this.createComps();
@@ -177,10 +182,16 @@ export default class Engineering {
 
     private createComps(): void {
         const gunCoord = this.inventorySystem.gridIndexToPixels(2, 4);
-        this.inventorySystem.place(new BasicGun(this.game, this.inventorySystem, gunCoord.x, gunCoord.y));
+        const basicGun = new BasicGun(this.game, this.inventorySystem, gunCoord.x, gunCoord.y);
+        this.inventorySystem.place(basicGun);
 
-        // const cellCoord = this.inventorySystem.gridIndexToPixels(5, 3);
-        // this.inventorySystem.place(new EnergyCell(this.game, this.inventorySystem, cellCoord.x, cellCoord.y));
+        const cellCoord = this.inventorySystem.gridIndexToPixels(5, 3);
+        const cell = new EnergyCell(this.game, this.inventorySystem, cellCoord.x, cellCoord.y);
+        this.inventorySystem.place(cell);
+
+        this.powerSystem.attach(cell, basicGun);
+        this.powerSystem.attach(cell, basicGun);
+        this.powerSystem.updateAllComponents();
 
         // const cellHDCoord = this.inventorySystem.gridIndexToPixels(6, 3);
         // this.inventorySystem.place(new EnergyCellHD(this.game, this.inventorySystem, cellHDCoord.x, cellHDCoord.y));
@@ -208,8 +219,8 @@ export default class Engineering {
         //     missileLauncher.y,
         // ));
 
-        const prince = this.inventorySystem.gridIndexToPixels(3, 1);
-        this.inventorySystem.place(new Prince(this.game, this.inventorySystem, prince.x, prince.y));
+        // const prince = this.inventorySystem.gridIndexToPixels(3, 1);
+        // this.inventorySystem.place(new Prince(this.game, this.inventorySystem, prince.x, prince.y));
     }
 
     private findComponent(p: Phaser.Pointer): Phaser.Sprite | null {
