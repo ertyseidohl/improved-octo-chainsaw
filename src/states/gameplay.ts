@@ -15,8 +15,8 @@ const BULLET_SCALE: number = 1;
 const ENEMY_COUNT = 10;
 const ENEMY_SPAWN_TIME = 2000;
 const ENEMY_Y_SPAWN = -50;
-const EXPLOSION_X_OFFSET = -70;
-const EXPLOSTION_Y_OFFSET = -100;
+const EXPLOSION_X_OFFSET = -20;
+const EXPLOSTION_Y_OFFSET = 0;
 
 export default class Startup extends Phaser.State {
     // game objects
@@ -40,6 +40,7 @@ export default class Startup extends Phaser.State {
     // groups
     private groupEnemies: Phaser.Group;
     private groupExplosions: Phaser.Group;
+    private groupExplosionsSmall: Phaser.Group;
     private groupPowerups: Phaser.Group;
 
     private shmupBounds: Phaser.Rectangle;
@@ -58,11 +59,11 @@ export default class Startup extends Phaser.State {
         this.game.load.image("border", "../assets/border.png");
         this.game.load.image("bullet", "../assets/laser.png");
         this.game.load.image("enemyBullet", "../assets/enemy-bullet.png");
-        this.game.load.spritesheet("kaboom", "../assets/explode.png", 128, 128);
         this.game.load.image("powerup", "../assets/firstaid.png");
 
         this.game.load.spritesheet("prince", "../assets/prince.png", 128, 128, 4);
         this.game.load.spritesheet("explosion", "../assets/explosion.png", 64, 64, 6);
+        this.game.load.spritesheet("explosion_small", "../assets/explosion_small.png", 32, 32, 4);
         this.game.load.image("background", "../assets/background.png");
         this.game.load.image("stars_1", "../assets/stars_1.png");
         this.game.load.image("stars_2", "../assets/stars_2.png");
@@ -137,11 +138,6 @@ export default class Startup extends Phaser.State {
             "stars_3",
         ));
 
-        // explosion test
-        const explosion: Phaser.Sprite = this.game.add.sprite(300, 300, "explosion");
-        explosion.animations.add("explode");
-        explosion.animations.getAnimation("explode").play(30, false, true);
-
         // prince test
         const prince: Phaser.Sprite = this.game.add.sprite(100, 100, "prince");
         prince.animations.add("glow");
@@ -153,10 +149,6 @@ export default class Startup extends Phaser.State {
         // sprites and physics
         this.player = new Player(this.game, this.game.width / 4, this.game.height - 50, "player");
         this.game.add.existing(this.player);
-
-        this.groupExplosions = this.game.add.group();
-        this.groupExplosions.createMultiple(30, "kaboom");
-        this.groupExplosions.forEach(this.setupEnemy, this);
 
         this.groupPowerups = this.game.add.group();
         this.groupPowerups.createMultiple(30, "powerup");
@@ -195,6 +187,14 @@ export default class Startup extends Phaser.State {
 
         inventorySystem.place(basicGun1);
         inventorySystem.place(basicGun2);
+
+        this.groupExplosions = this.game.add.group();
+        this.groupExplosions.createMultiple(30, "explosion");
+        this.groupExplosions.forEach((explosion: Phaser.Sprite) => explosion.animations.add("explode"));
+
+        this.groupExplosionsSmall = this.game.add.group();
+        this.groupExplosionsSmall.createMultiple(10, "explosion_small");
+        this.groupExplosionsSmall.forEach((explosion: Phaser.Sprite) => explosion.animations.add("explode"));
     }
 
     public update(): void {
@@ -224,19 +224,24 @@ export default class Startup extends Phaser.State {
     }
 
     private bulletHitEnemy(bullet: Phaser.Physics.P2.Body, enemy: Phaser.Physics.P2.Body): void {
-        const explosion: Phaser.Sprite = this.groupExplosions.getFirstExists(false);
-        explosion.reset(enemy.x + EXPLOSION_X_OFFSET, enemy.y + EXPLOSTION_Y_OFFSET);
-        explosion.play("kaboom", 30, false, true);
+        const explosion: Phaser.Sprite = this.groupExplosionsSmall.getFirstExists(false);
+        if (explosion) {
+            explosion.reset(bullet.x, bullet.y);
+            explosion.play("explode", 30, false, true);
+        }
 
         if (bullet.sprite.alive) {
-            console.log("Enemy Health before: ", enemy.sprite.health);
             enemy.sprite.damage(1);
-            console.log("Enemy Health after: ", enemy.sprite.health);
             console.log(enemy.sprite.width);
         }
+
+        if (enemy.sprite.health <= 0) {
+            const deathExplosion: Phaser.Sprite = this.groupExplosions.getFirstExists(false);
+            deathExplosion.reset(enemy.x, enemy.y);
+            deathExplosion.play("explode", 30, false, true);
+        }
+
         bullet.sprite.kill();
-        // if (enemy.sprite.health)
-        // enemy.sprite.kill();
     }
 
     private bulletHitPlayer(bullet: Phaser.Physics.P2.Body, player: Phaser.Physics.P2.Body): void {
@@ -246,10 +251,6 @@ export default class Startup extends Phaser.State {
 
     private powerUpHitPlayer(): void {
         // not implemented
-    }
-
-    private setupEnemy(enemy: BaseEnemy): void {
-        enemy.animations.add("kaboom");
     }
 
 }
