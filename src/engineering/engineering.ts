@@ -1,11 +1,10 @@
-// DEPENDENCIES
+import { BaseComponent } from "./inventory/base_component";
+import { BasicGun } from "./inventory/basic_gun";
+import { EnergyCell } from "./inventory/energy_cell";
+import { Engine } from "./inventory/engine";
+import { BasicShip, InventorySystem, NUM_TILE_SPRITES} from "./inventory/system";
+
 import Chain from "./chain";
-
-// CONSTANTS
-const ENGINEERING_TILES_WIDTH = 8;
-const ENGINEERING_TILES_HEIGHT = 8;
-
-const NUM_TILE_SPRITES = 9;
 
 // TYPES
 class RopeWire extends Phaser.Rope {
@@ -93,16 +92,14 @@ export default class Engineering {
     // PUBLIC DATA
     public bounds: Phaser.Rectangle;
 
-    // PRIVATE DATA
-    private tiles: Phaser.Group;
     private comps: Phaser.Group;
 
-    private floorStartX: number;
-    private floorStartY: number;
-
+    private connectTexture: Phaser.BitmapData;
     private connections: Connections = new Connections();
     private mouseInBounds: boolean = false;
     private pendingConnect: PendingConnection | null = null;
+
+    private inventorySystem: InventorySystem;
 
     // CREATORS
     constructor(private state: Phaser.State) {
@@ -111,7 +108,13 @@ export default class Engineering {
     // PUBLIC METHODS
     public create(): void {
 
-        this.createTiles();
+        this.inventorySystem = new InventorySystem(
+            this.game,
+            600, 100,
+            32, 32,
+            10, 12,
+            BasicShip,
+        );
 
         this.comps = this.game.add.group();
         this.createComps();
@@ -135,7 +138,6 @@ export default class Engineering {
         this.game.load.spritesheet("engine_1", "../assets/engine_1.png", 32, 64, 5);
 
         this.game.load.spritesheet("gun_1", "../assets/gun_1.png", 32, 32 * 3, 5);
-
         this.game.load.spritesheet("energy_cell", "../assets/energy_cell.png", 35, 35, 5);
 
         for (let i: number = 1; i <= NUM_TILE_SPRITES; i++) {
@@ -167,58 +169,17 @@ export default class Engineering {
     }
 
     private createComps(): void {
-        const energyCell = this.addComponent(
-            this.game.add.sprite(
-                this.floorStartX + 128,
-                this.floorStartY + 128,
-                "energy_cell",
-            ),
-            "energyCell",
-        );
-        energyCell.x -= 0;
-        energyCell.y -= 4;
+        const gunCoord = this.inventorySystem.gridIndexToPixels(2, 4);
+        this.inventorySystem.place(new BasicGun(this.game, this.inventorySystem, gunCoord.x, gunCoord.y));
 
-        const energyCellAnimation = energyCell.animations.add("zap", [1, 2, 3, 4]);
-        energyCellAnimation.play(20, true);
+        const cellCoord = this.inventorySystem.gridIndexToPixels(5, 3);
+        this.inventorySystem.place(new EnergyCell(this.game, this.inventorySystem, cellCoord.x, cellCoord.y));
 
-        const engine1Live = this.addComponent(
-            this.game.add.sprite(
-                this.floorStartX + 32,
-                this.floorStartY + (6 * 32),
-                "engine_1",
-            ),
-            "engine1",
-        );
-        const engineAnimation: Phaser.Animation = engine1Live.animations.add("burn", [1, 2, 3, 4]);
-        engineAnimation.play(20, true);
+        const engCoord1 = this.inventorySystem.gridIndexToPixels(3, 6);
+        this.inventorySystem.place(new Engine(this.game, this.inventorySystem, engCoord1.x, engCoord1.y));
 
-        const gunOne = this.addComponent(
-            this.game.add.sprite(
-                this.floorStartX + 64,
-                this.floorStartY,
-                "gun_1",
-            ),
-            "gunOne",
-        );
-        const gunFireAnimation: Phaser.Animation = gunOne.animations.add("fire");
-        gunFireAnimation.play(20, true);
-    }
-
-    private createTiles(): void {
-        this.tiles = this.game.add.group();
-        this.floorStartX = this.bounds.left + 50;
-        this.floorStartY = 100;
-
-        for (let i: number = 0; i < ENGINEERING_TILES_WIDTH; i++) {
-            for (let j: number = 0; j < ENGINEERING_TILES_HEIGHT; j++) {
-                this.tiles.create(
-                    this.floorStartX + (32 * i),
-                    this.floorStartY + (32 * j),
-                    this.getTileSprite(),
-                );
-            }
-        }
-
+        const engCoord2 = this.inventorySystem.gridIndexToPixels(6, 6);
+        this.inventorySystem.place(new Engine(this.game, this.inventorySystem, engCoord2.x, engCoord2.y));
     }
 
     private findComponent(p: Phaser.Pointer): Phaser.Sprite | null {
@@ -234,11 +195,6 @@ export default class Engineering {
             }
         }
         return null;
-    }
-
-    private getTileSprite(): string {
-        const r: number = Math.floor(Math.random() * NUM_TILE_SPRITES) + 1;
-        return `floor_tile_${r}`;
     }
 
     private onMouseDown(): void {
