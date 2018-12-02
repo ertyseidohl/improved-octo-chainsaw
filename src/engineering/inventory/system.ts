@@ -3,6 +3,14 @@ import { BaseComponent } from "./base_component";
 
 export const NUM_TILE_SPRITES = 9;
 
+const DISPLAY_TEXT_BUFFER = 100;
+const DISPLAY_TEXT_STYLE: Phaser.PhaserTextStyle = {
+    font: "pixelsix",
+    fontSize: 24,
+    fill: "white",
+    wordWrap: true,
+};
+
 type BaseComponentOrEmpty = BaseComponent | number;
 
 export const BasicShip = [
@@ -41,6 +49,8 @@ export class InventorySystem {
 
     private grid: BaseComponentOrEmpty[][];
 
+    private displayText: Phaser.Text;
+
     constructor(game: Phaser.Game, x: number, y: number,
                 tileWidth: number, tileHeight: number,
                 startingWidth: number, startingHeight: number, shipMap: BaseComponentOrEmpty[][]) {
@@ -70,6 +80,18 @@ export class InventorySystem {
             }
         }
 
+        this.displayText = new Phaser.Text(
+            this.game,
+            this.x,
+            this.y + (this.height * this.tileHeight) + DISPLAY_TEXT_BUFFER,
+            "",
+            {
+                ...DISPLAY_TEXT_STYLE,
+                wordWrapWidth: this.width * this.tileWidth,
+            },
+        );
+        this.game.add.existing(this.displayText);
+
         this.createTiles();
     }
 
@@ -98,6 +120,14 @@ export class InventorySystem {
         const x = this.x + (xIndex * this.tileWidth);
         const y = this.y + (yIndex * this.tileHeight);
         return {x, y};
+    }
+
+    public setDisplayText(text: string[]): void {
+        this.displayText.setText(text);
+    }
+
+    public clearText(): void {
+        this.displayText.clear();
     }
 
     private pixelToGridIndex(x: number, y: number, tile: boolean): Index {

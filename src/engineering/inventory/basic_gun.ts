@@ -13,8 +13,11 @@ export class BasicGun extends BaseComponent {
     public getDescription(): string[] {
         return [
             "The GK-305 model is the hottest on the market! No seriously, you'll need, like, three heatsinks.",
-            "Power Draw: $$",
         ];
+    }
+
+    public getPower(): number {
+        return 2;
     }
 
 }
