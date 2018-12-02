@@ -1,5 +1,5 @@
 import { BaseComponent } from "./base_component";
-import { PowerFunction, StateConfig } from "./component_state";
+import { StateConfig } from "./component_state";
 import { InventorySystem } from "./system";
 
 export class EnergyCell extends BaseComponent {
@@ -16,7 +16,6 @@ export class EnergyCell extends BaseComponent {
             powerSource: {
                 power: 4,
             },
-            powerConsumer: null,
         };
     }
 

@@ -1,5 +1,5 @@
 import { BaseComponent } from "./base_component";
-import { PowerFunction, StateConfig } from "./component_state";
+import { StateConfig } from "./component_state";
 import { Constraints, InventorySystem } from "./system";
 
 export class Engine extends BaseComponent {
@@ -21,8 +21,6 @@ export class Engine extends BaseComponent {
             powerConsumer: {
                 powerLoad: 2,
                 minPowerDraw: 0,
-                powerFunction: PowerFunction.Fractional,
-                powerFunctionSteps: null,
             },
         };
     }

@@ -1,12 +1,6 @@
-export enum PowerFunction {
-    StepFunction,
-    Fractional,
-    Source,
-}
-
 export interface StateConfig {
-    powerConsumer: PowerConsumerStateConfig;
-    powerSource: PowerSourceStateConfig;
+    powerConsumer?: PowerConsumerStateConfig;
+    powerSource?: PowerSourceStateConfig;
 }
 
 export interface PowerSourceStateConfig {
@@ -16,8 +10,6 @@ export interface PowerSourceStateConfig {
 export interface PowerConsumerStateConfig {
     powerLoad: number;
     minPowerDraw: number;
-    powerFunction: PowerFunction;
-    powerFunctionSteps: number[];
 }
 
 export class ComponentState {
@@ -61,22 +53,12 @@ export class ComponentState {
         }
     }
 
-    public getPowerFactor(): number {
-        const numerator = this.power - this.powerConsumer.minPowerDraw;
-        const denomator = this.powerConsumer.powerLoad - this.powerConsumer.minPowerDraw;
-        const fraction = numerator / denomator;
-
-        if (!this.isAlive() || fraction <= 0) {
-            return 0;
+    public getPower(): number {
+        if (this.isAlive() && this.isOnline) {
+            return this.power;
         }
 
-        if (this.powerConsumer.powerFunction === PowerFunction.Fractional) {
-            return fraction;
-        } else if (this.powerConsumer.powerFunction === PowerFunction.StepFunction) {
-            const numSteps = this.powerConsumer.powerFunctionSteps.length;
-            const index = Math.floor(numSteps * fraction);
-            return this.powerConsumer.powerFunctionSteps[index];
-        }
+        return 0;
     }
 
 }
