@@ -16,6 +16,8 @@ export default class Startup extends Phaser.State {
         // preload font
         this.game.add.text(0, 0, " ", {font: "1px pixelsix", fill: "#FFFFFF"});
 
+        this.game.canvas.oncontextmenu = (e) => e.preventDefault();
+
         this.state.start("splash");
     }
 }
