@@ -11,10 +11,9 @@ import { ShieldGenerator } from "./inventory/shield_generator";
 import { SmallGun } from "./inventory/small_gun";
 // import { MissileLauncher } from "./inventory/missile_launcher";
 
+import { HandlerType, MultiDragHandler } from "./inventory/drag_handler/multi";
 import { PowerSubSystem } from "./inventory/power_subsystem";
 import { BasicShip, InventorySystem, NUM_TILE_SPRITES} from "./inventory/system";
-
-import { HandlerType, MultiDragHandler } from "./inventory/drag_handler/multi";
 
 // =================
 // class Engineering
@@ -66,6 +65,11 @@ export default class Engineering {
         );
         dragSwitch.inputEnabled = true;
         dragSwitch.events.onInputDown.add(this.dragSwitchPressed, this);
+
+        this.game.canvas.addEventListener(
+            "mousedown",
+            this.onMouseDown.bind(this),
+        );
     }
 
     public preload(): void {
@@ -162,15 +166,20 @@ export default class Engineering {
         // this.inventorySystem.place(new Prince(this.game, this.inventorySystem, prince.x, prince.y));
     }
 
-    private dragSwitchPressed(dragSwitch: Phaser.Sprite, p: Phaser.Pointer) {
+    private onMouseDown() {
+        const p = this.game.input.mousePointer;
+        if (this.bounds.contains(p.x, p.y) && p.rightButton.isDown) {
+            this.dragSwitchPressed(null, this.game.input.mousePointer);
+        }
+    }
+
+    private dragSwitchPressed(_: any, p: Phaser.Pointer) {
         switch (this.dragHandler.handler) {
-            case HandlerType.MOVE:  // transition to 'CONNECT'
-                this.comps.setAll("alpha", 0.5);
+            case HandlerType.MOVE: // transition to 'CONNECT'
                 this.dragBitmap.fill(0, 255, 0);
                 this.dragHandler.handler = HandlerType.CONNECT;
                 break;
-            case HandlerType.CONNECT:  // transition to 'MOVE'
-                this.comps.setAll("alpha", 1);
+            case HandlerType.CONNECT: // transition to 'MOVE'
                 this.dragBitmap.fill(255, 0, 0);
                 this.dragHandler.handler = HandlerType.MOVE;
                 break;

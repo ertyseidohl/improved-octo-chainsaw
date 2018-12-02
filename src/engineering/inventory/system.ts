@@ -186,7 +186,7 @@ export class InventorySystem {
     }
 
     public find(point: Coordinate): BaseComponent | undefined {
-        const i = this.pixelToGridIndex(point.x, point.y, true);
+        const i = this.pixelToGridIndex(point.x, point.y, false);
         const col = this.grid[i.y];
         if (col) {
             const elem = col[i.x];
