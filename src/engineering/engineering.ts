@@ -178,7 +178,7 @@ export default class Engineering {
         this.inventorySystem.place(new EnergyCell(this.game, this.inventorySystem, cellCoord.x, cellCoord.y));
 
         const cellHDCoord = this.inventorySystem.gridIndexToPixels(6, 3);
-        this.inventorySystem.place(new EnergyCellHD(this.game, this.inventorySystem, cellCoord.x, cellCoord.y));
+        this.inventorySystem.place(new EnergyCellHD(this.game, this.inventorySystem, cellHDCoord.x, cellHDCoord.y));
 
         const engCoord1 = this.inventorySystem.gridIndexToPixels(3, 6);
         this.inventorySystem.place(new Engine(this.game, this.inventorySystem, engCoord1.x, engCoord1.y));
