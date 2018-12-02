@@ -1,7 +1,20 @@
 import { Game } from "phaser-ce";
 import { BaseComponent } from "./base_component";
 
-const NUM_TILE_SPRITES = 9;
+export const NUM_TILE_SPRITES = 9;
+
+type BaseComponentOrEmpty = BaseComponent | number;
+
+export const BasicShip = [
+    [0, 0, 0, 0, null, null, 0, 0, 0, 0],
+    [0, 0, 0, null, null, null, null, 0, 0, 0],
+    [0, 0, 0, null, null, null, null, 0, 0, 0],
+    [0, 0, 0, null, null, null, null, 0, 0, 0],
+    [0, 0, null, null, null, null, null, null, 0, 0],
+    [0, null, null, null, null, null, null, null, null, 0],
+    [null, null, null, null, null, null, null, null, null, null],
+    [0, 0, null, null, 0, 0, null, null, 0, 0],
+];
 
 interface Index {
     x: number;
@@ -26,11 +39,13 @@ export class InventorySystem {
     private tileHeight: number;
     private tileWidth: number;
 
-    private grid: BaseComponent[][];
+    private grid: BaseComponentOrEmpty[][];
 
     constructor(game: Phaser.Game, x: number, y: number,
                 tileWidth: number, tileHeight: number,
-                startingWidth: number, startingHeight: number) {
+                startingWidth: number, startingHeight: number, shipMap: BaseComponentOrEmpty[][]) {
+
+        this.game = game;
 
         this.width = startingWidth;
         this.height = startingHeight;
@@ -41,43 +56,42 @@ export class InventorySystem {
         this.tileHeight = tileHeight;
         this.tileWidth = tileWidth;
 
-        this.grid = [];
-        for (let i = 0; i < this.height; i++) {
-            this.grid[i] = [];
-            for (let j = 0; j < this.width; j ++) {
-                this.grid[i][j] = null;
+        if (shipMap) {
+            this.grid = shipMap;
+            this.height = shipMap.length;
+            this.width = shipMap[0].length;
+        } else  {
+            this.grid = [];
+            for (let i = 0; i < this.height; i++) {
+                this.grid[i] = [];
+                for (let j = 0; j < this.width; j ++) {
+                    this.grid[i][j] = null;
+                }
             }
         }
 
-        // this.createTiles();
-    }
-
-    public preload(): void {
-        for (let i: number = 1; i <= NUM_TILE_SPRITES; i++) {
-            this.game.load.image(`floor_tile_${i}`, `../assets/floor_tile_${i}.png`);
-        }
+        this.createTiles();
     }
 
     public release(component: BaseComponent): void {
-        const index = this.pixelToGridIndex(component.x, component.y);
+        const index = this.pixelToGridIndex(component.x, component.y, true);
         const indexes = this.generate_indexes(index, component.tileWidth, component.tileHeight);
         indexes.map((i) => this.grid[i.y][i.x] = null);
     }
 
     public test(component: BaseComponent): boolean {
-        const index = this.pixelToGridIndex(component.x, component.y);
+        const index = this.pixelToGridIndex(component.x, component.y, true);
         const testIndexes = this.generate_indexes(index, component.tileWidth, component.tileHeight);
 
         return this.allNone(testIndexes);
     }
 
-    public place(component: BaseComponent): void {
-        const index = this.pixelToGridIndex(component.x, component.y);
+    public place(component: BaseComponent): Coordinate {
+        const index = this.pixelToGridIndex(component.x, component.y, true);
         const indexes = this.generate_indexes(index, component.tileWidth, component.tileHeight);
         indexes.map((i) => this.grid[i.y][i.x] = component);
 
-        console.log(indexes);
-        console.log(this.grid);
+        return this.gridIndexToPixels(index.x, index.y);
     }
 
     public gridIndexToPixels(xIndex: number, yIndex: number): Coordinate {
@@ -86,14 +100,18 @@ export class InventorySystem {
         return {x, y};
     }
 
-    private pixelToGridIndex(x: number, y: number): Index {
+    private pixelToGridIndex(x: number, y: number, tile: boolean): Index {
+        let offset = 0;
+        if (tile) {
+            offset = 16;
+        }
 
-        const dx = x - this.x;
-        const dy = y - this.y;
+        const dx = x - this.x + offset;
+        const dy = y - this.y + offset;
 
         const ix = Math.floor(dx / this.tileWidth);
         const iy = Math.floor(dy / this.tileHeight);
-
+    
         return {
             x: ix,
             y: iy,
@@ -112,6 +130,9 @@ export class InventorySystem {
 
     private allNone(indexes: Index[]): boolean {
         for (const index of indexes) {
+            if (index.x < 0 || index.x >= this.width || index.y < 0 || index.y >= this.height) {
+                return false;
+            }
             if (this.grid[index.y][index.x] != null) {
                 return false;
             }
@@ -121,14 +142,16 @@ export class InventorySystem {
 
     private createTiles(): void {
         this.tiles = this.game.add.group();
-
-        for (let i: number = 0; i < this.tileWidth; i++) {
-            for (let j: number = 0; j < this.tileHeight; j++) {
-                this.tiles.create(
-                    this.x + (32 * i),
-                    this.y + (32 * j),
-                    this.getTileSprite(),
-                );
+        console.log(this.grid);
+        for (let i: number = 0; i < this.width; i++) {
+            for (let j: number = 0; j < this.height; j++) {
+                if (this.grid[j][i] === null) {
+                    this.tiles.create(
+                        this.x + (32 * i),
+                        this.y + (32 * j),
+                        this.getTileSprite(),
+                    );
+                }
             }
         }
     }

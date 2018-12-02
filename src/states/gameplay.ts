@@ -130,12 +130,6 @@ export default class Startup extends Phaser.State {
                 this.bulletCollisionGroup]);
             enemyBody.fixedRotation = true;
         });
-
-    //     const basicGun1 = new BasicGun(this.game, inventorySystem, 600, 300);
-    //     const basicGun2 = new BasicGun(this.game, inventorySystem, 700, 300);
-
-    //     inventorySystem.place(basicGun1);
-    //     inventorySystem.place(basicGun2);
     }
 
     public update(): void {

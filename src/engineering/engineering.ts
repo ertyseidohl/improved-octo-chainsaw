@@ -2,7 +2,7 @@ import { BaseComponent } from "./inventory/base_component";
 import { BasicGun } from "./inventory/basic_gun";
 import { EnergyCell } from "./inventory/energy_cell";
 import { Engine } from "./inventory/engine";
-import { InventorySystem } from "./inventory/system";
+import { BasicShip, InventorySystem, NUM_TILE_SPRITES} from "./inventory/system";
 
 // TYPES
 interface PendingConnection {
@@ -71,7 +71,8 @@ export default class Engineering {
             this.game,
             600, 100,
             32, 32,
-            10, 20,
+            10, 12,
+            BasicShip,
         );
 
         this.comps = this.game.add.group();
@@ -100,6 +101,10 @@ export default class Engineering {
 
         this.game.load.spritesheet("gun_1", "../assets/gun_1.png", 32, 32 * 3, 5);
         this.game.load.spritesheet("energy_cell", "../assets/energy_cell.png", 35, 35, 5);
+
+        for (let i: number = 1; i <= NUM_TILE_SPRITES; i++) {
+            this.game.load.image(`floor_tile_${i}`, `../assets/floor_tile_${i}.png`);
+        }
     }
 
     public update(): void {
@@ -124,14 +129,17 @@ export default class Engineering {
     }
 
     private createComps(): void {
-        const gunCoord = this.inventorySystem.gridIndexToPixels(2, 3);
+        const gunCoord = this.inventorySystem.gridIndexToPixels(2, 4);
         this.inventorySystem.place(new BasicGun(this.game, this.inventorySystem, gunCoord.x, gunCoord.y));
 
-        const cellCoord = this.inventorySystem.gridIndexToPixels(5, 5);
+        const cellCoord = this.inventorySystem.gridIndexToPixels(5, 3);
         this.inventorySystem.place(new EnergyCell(this.game, this.inventorySystem, cellCoord.x, cellCoord.y));
 
-        const engCoord = this.inventorySystem.gridIndexToPixels(7, 8);
-        this.inventorySystem.place(new Engine(this.game, this.inventorySystem, engCoord.x, engCoord.y));
+        const engCoord1 = this.inventorySystem.gridIndexToPixels(3, 6);
+        this.inventorySystem.place(new Engine(this.game, this.inventorySystem, engCoord1.x, engCoord1.y));
+
+        const engCoord2 = this.inventorySystem.gridIndexToPixels(6, 6);
+        this.inventorySystem.place(new Engine(this.game, this.inventorySystem, engCoord2.x, engCoord2.y));
     }
 
     private findComponent(p: Phaser.Pointer): Phaser.Sprite | null {
