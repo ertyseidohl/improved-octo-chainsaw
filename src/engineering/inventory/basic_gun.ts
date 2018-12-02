@@ -1,4 +1,5 @@
 import { BaseComponent } from "./base_component";
+import { PowerFunction, StateConfig } from "./component_state";
 import { Constraints, InventorySystem } from "./system";
 
 export class BasicGun extends BaseComponent {
@@ -14,14 +15,22 @@ export class BasicGun extends BaseComponent {
         return Constraints.FRONT;
     }
 
+    public getStateConfig(): StateConfig {
+        return {
+            powerConsumer: {
+                powerLoad: 2,
+                minPowerDraw: 0.5,
+                powerFunction: PowerFunction.Fractional,
+                powerFunctionSteps: null,
+            },
+            powerSource: null,
+        };
+    }
+
     public getDescription(): string[] {
         return [
             "The GK-305 model is the hottest on the market! No seriously, you'll need, like, three heatsinks.",
         ];
-    }
-
-    public getPower(): number {
-        return 2;
     }
 
 }
