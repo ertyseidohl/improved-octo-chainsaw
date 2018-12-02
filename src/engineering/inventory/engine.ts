@@ -1,5 +1,5 @@
 import { BaseComponent } from "./base_component";
-import { InventorySystem } from "./system";
+import {  Constraints, InventorySystem } from "./system";
 
 export class Engine extends BaseComponent {
 
@@ -8,6 +8,10 @@ export class Engine extends BaseComponent {
 
         const engineAnimation: Phaser.Animation = this.animations.add("burn", [1, 2, 3, 4]);
         engineAnimation.play(20, true);
+    }
+
+    public getPlacementConstraint(): Constraints {
+        return Constraints.BACK;
     }
 
 }

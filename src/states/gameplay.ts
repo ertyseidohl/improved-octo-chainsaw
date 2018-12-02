@@ -198,7 +198,6 @@ export default class Startup extends Phaser.State {
         }
         this.engineering.update();
 
-
         if (this.playerDeathQueue.length && Math.random() < 0.2) {
             const playerDeathExplosion: Phaser.Sprite = this.playerDeathQueue.pop();
             playerDeathExplosion.visible = true;

@@ -1,9 +1,16 @@
 import { Game } from "phaser-ce";
-import { BaseComponent } from "./base_component";
+import { BaseComponent, isBaseComponent } from "./base_component";
 
 export const NUM_TILE_SPRITES = 9;
 
 type BaseComponentOrEmpty = BaseComponent | number;
+
+type SerializedIndex = string;
+
+export enum Constraints {
+    FRONT,
+    BACK,
+}
 
 export const BasicShip = [
     [0, 0, 0, 0, null, null, 0, 0, 0, 0],
@@ -16,9 +23,18 @@ export const BasicShip = [
     [0, 0, null, null, 0, 0, null, null, 0, 0],
 ];
 
-interface Index {
-    x: number;
-    y: number;
+class Index {
+    public x: number;
+    public y: number;
+
+    constructor(x: number, y: number) {
+        this.x = x;
+        this.y = y;
+    }
+
+    public toSerializedString(): string {
+        return this.x + "," + this.y;
+    }
 }
 
 export interface Coordinate {
@@ -35,6 +51,9 @@ export class InventorySystem {
 
     private game: Phaser.Game;
     private tiles: Phaser.Group;
+    private tileGrid: Phaser.Sprite[][];
+
+    private constraintMap: {[s: string]: Set<SerializedIndex>};
 
     private tileHeight: number;
     private tileWidth: number;
@@ -71,6 +90,12 @@ export class InventorySystem {
         }
 
         this.createTiles();
+
+        this.constraintMap = {
+            [Constraints.FRONT]: this.getFrontTileSet(),
+            [Constraints.BACK]: this.getRearTileSet(),
+        };
+
     }
 
     public release(component: BaseComponent): void {
@@ -83,6 +108,12 @@ export class InventorySystem {
         const index = this.pixelToGridIndex(component.x, component.y, true);
         const testIndexes = this.generate_indexes(index, component.tileWidth, component.tileHeight);
 
+        if (component.getPlacementConstraint() !== null) {
+            const tileset = this.constraintMap[component.getPlacementConstraint()];
+            if (! this.intersectionWithTileSet(testIndexes, tileset)) {
+                return false;
+            }
+        }
         return this.allNone(testIndexes);
     }
 
@@ -111,18 +142,15 @@ export class InventorySystem {
 
         const ix = Math.floor(dx / this.tileWidth);
         const iy = Math.floor(dy / this.tileHeight);
-    
-        return {
-            x: ix,
-            y: iy,
-        };
+
+        return new Index(ix, iy);
     }
 
     private generate_indexes(originIndex: Index, width: number, height: number) {
         const indexes = [];
         for (let x = 0; x < width; x += 1) {
             for (let y = 0; y < height; y += 1) {
-                indexes.push({x: originIndex.x + x , y: originIndex.y + y});
+                indexes.push(new Index(originIndex.x + x , originIndex.y + y));
             }
         }
         return indexes;
@@ -142,17 +170,58 @@ export class InventorySystem {
 
     private createTiles(): void {
         this.tiles = this.game.add.group();
-        for (let i: number = 0; i < this.width; i++) {
-            for (let j: number = 0; j < this.height; j++) {
+        this.tileGrid = [];
+
+        for (let j: number = 0; j < this.height; j++) {
+            this.tileGrid[j] = [];
+            for (let i: number = 0; i < this.width; i++) {
                 if (this.grid[j][i] === null) {
-                    this.tiles.create(
+                    const tile = this.tiles.create(
                         this.x + (32 * i),
                         this.y + (32 * j),
                         this.getTileSprite(),
                     );
+
+                    this.tileGrid[j][i] = tile;
                 }
             }
         }
+    }
+
+    private getFrontTileSet(): Set<SerializedIndex> {
+        const myset = new Set<SerializedIndex>();
+
+        for (let i: number = 0; i < this.width; i++) {
+            for (let j: number = 0; j < this.height; j++) {
+                if (this.tileGrid[j][i] && (j - 1 < 0 || !this.tileGrid[j - 1][i] )) {
+                    myset.add(new Index(i, j).toSerializedString());
+                }
+            }
+        }
+
+        return myset;
+    }
+
+    private getRearTileSet(): Set<SerializedIndex> {
+        const myset = new Set<SerializedIndex>();
+
+        for (let i: number = 0; i < this.width; i++) {
+            for (let j: number = 0; j < this.height; j++) {
+                if (this.tileGrid[j][i] && (j + 1 >= this.height || !this.tileGrid[j + 1][i] )) {
+                    myset.add(new Index(i, j).toSerializedString());
+                }
+            }
+        }
+        return myset;
+    }
+
+    private intersectionWithTileSet(indexes: Index[], tileSet: Set<SerializedIndex>) {
+        for (const index of indexes) {
+            if (tileSet.has(index.toSerializedString())) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private getTileSprite(): string {

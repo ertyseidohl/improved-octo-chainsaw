@@ -1,8 +1,12 @@
-import { InventorySystem } from "./system";
+import { Constraints, InventorySystem } from "./system";
 
 interface StateConfig {
     tint: number;
     alpha: number;
+}
+
+export function isBaseComponent(obj: any): obj is BaseComponent {
+    return (obj && obj.stateModifiers !== undefined);
 }
 
 export class BaseComponent extends Phaser.Sprite {
@@ -59,6 +63,10 @@ export class BaseComponent extends Phaser.Sprite {
 
     public getTileHeight() {
         return this.tileHeight;
+    }
+
+    public getPlacementConstraint(): Constraints {
+        return null;
     }
 
     private updateFromState() {
