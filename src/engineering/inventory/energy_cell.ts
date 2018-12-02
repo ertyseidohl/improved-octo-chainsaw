@@ -12,9 +12,12 @@ export class EnergyCell extends BaseComponent {
 
     public getDescription(): string[] {
         return [
-            "The ZZ 55000 is a real hair-raiser! Make sure to ground yourself before coming within 100 meters...",
-            "Power Supply: $$$$",
+            "The ZZ-55000 is a real hair-raiser! Make sure to ground yourself before coming within 100 meters...",
         ];
+    }
+
+    public getPower(): number {
+        return 4;
     }
 
 }
