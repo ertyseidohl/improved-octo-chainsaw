@@ -18,6 +18,8 @@ type SerializedIndex = string;
 export enum Constraints {
     FRONT,
     BACK,
+    DOUBLE_FRONT,
+    DOUBLE_BACK,
 }
 
 export const BasicShip = [
@@ -62,6 +64,7 @@ export class InventorySystem {
     private tileGrid: Phaser.Sprite[][];
 
     private constraintMap: {[s: string]: Set<SerializedIndex>};
+    private constraintCountMap: {[s: string]: number};
 
     private tileHeight: number;
     private tileWidth: number;
@@ -116,6 +119,15 @@ export class InventorySystem {
         this.constraintMap = {
             [Constraints.FRONT]: this.getFrontTileSet(),
             [Constraints.BACK]: this.getRearTileSet(),
+            [Constraints.DOUBLE_FRONT]: this.getFrontTileSet(),
+            [Constraints.DOUBLE_BACK]: this.getRearTileSet(),
+        };
+
+        this.constraintCountMap = {
+            [Constraints.FRONT]: 1,
+            [Constraints.BACK]: 1,
+            [Constraints.DOUBLE_FRONT]: 2,
+            [Constraints.DOUBLE_BACK]: 2,
         };
 
     }
@@ -129,10 +141,15 @@ export class InventorySystem {
     public test(component: BaseComponent): boolean {
         const index = this.pixelToGridIndex(component.x, component.y, true);
         const testIndexes = this.generate_indexes(index, component.tileWidth, component.tileHeight);
+        const currentConstraints: Constraints = component.getPlacementConstraint();
 
-        if (component.getPlacementConstraint() !== null) {
-            const tileset = this.constraintMap[component.getPlacementConstraint()];
-            if (! this.intersectionWithTileSet(testIndexes, tileset)) {
+        if (currentConstraints !== null) {
+            const tileset = this.constraintMap[currentConstraints];
+            console.log(
+                this.intersectionWithTileSet(testIndexes, tileset),
+                this.constraintCountMap[currentConstraints],
+            );
+            if (this.intersectionWithTileSet(testIndexes, tileset) < this.constraintCountMap[currentConstraints]) {
                 return false;
             }
         }
@@ -245,13 +262,15 @@ export class InventorySystem {
         return myset;
     }
 
-    private intersectionWithTileSet(indexes: Index[], tileSet: Set<SerializedIndex>) {
+    private intersectionWithTileSet(indexes: Index[], tileSet: Set<SerializedIndex>): number {
+        console.log(indexes);
+        let numIntersections: number = 0;
         for (const index of indexes) {
             if (tileSet.has(index.toSerializedString())) {
-                return true;
+                numIntersections ++;
             }
         }
-        return false;
+        return numIntersections;
     }
 
     private getTileSprite(): string {

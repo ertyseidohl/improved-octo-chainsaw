@@ -4,14 +4,14 @@ import { Constraints, InventorySystem } from "./system";
 export class MissileLauncher extends BaseComponent {
 
     constructor(game: Phaser.Game, inventorySystem: InventorySystem, x: number, y: number) {
-        super(game, inventorySystem, x, y, "missile_launcher", 1, 3);
+        super(game, inventorySystem, x, y, "missile_launcher", 2, 2);
 
         const missileFireAnimation: Phaser.Animation = this.animations.add("fire", [1, 2, 3, 4, 5, 6, 7]);
         missileFireAnimation.play(5, true);
     }
 
     public getPlacementConstraint(): Constraints {
-        return Constraints.FRONT;
+        return Constraints.DOUBLE_FRONT;
     }
 
     public getDescription(): string[] {
