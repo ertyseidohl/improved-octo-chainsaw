@@ -1,6 +1,10 @@
+import BaseEnemy from "../enemies/base_enemy";
+
 import { Game } from "phaser-ce";
 import { PhaserTextStyle } from "phaser-ce";
-import BaseEnemy from "../enemies/base_enemy";
+import { BasicGun } from "../inventory/basic_gun";
+import { InventorySystem } from "../inventory/system";
+
 import Engineering from "../engineering/engineering";
 import Player from "../player/player";
 
@@ -118,6 +122,13 @@ export default class Startup extends Phaser.State {
             enemyBody.fixedRotation = true;
         });
 
+        const inventorySystem = new InventorySystem(this.game.width / 2, 0, 32, 32, 20, 20);
+
+        const basicGun1 = new BasicGun(this.game, inventorySystem, 600, 300);
+        const basicGun2 = new BasicGun(this.game, inventorySystem, 700, 300);
+
+        inventorySystem.place(basicGun1);
+        inventorySystem.place(basicGun2);
     }
 
     public update(): void {
