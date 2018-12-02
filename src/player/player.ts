@@ -84,7 +84,9 @@ export default class Player extends Phaser.Sprite {
             this.playerBody.velocity.x = PLAYER_SPEED;
         }
         if (this.keyShoot.isDown) {
-            this.shoot();
+            if (this.alive) {
+                this.shoot();
+            }
         }
     }
 

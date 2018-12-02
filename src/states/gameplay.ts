@@ -12,11 +12,23 @@ import Player from "../player/player";
 const ENEMY_SPEED: number = 100;
 const ENEMY_SCALE: number = 1.5;
 const BULLET_SCALE: number = 1;
-const ENEMY_COUNT = 10;
-const ENEMY_SPAWN_TIME = 2000;
-const ENEMY_Y_SPAWN = -50;
-const EXPLOSION_X_OFFSET = -20;
-const EXPLOSTION_Y_OFFSET = 0;
+const SPAWN_WAVE_TIME_MAX: number = 4000;
+const SPAWN_RANDOM_ENEMY_MAX: number = 10;
+const ENEMY_COUNT: number = 10;
+const ENEMY_SPAWN_TIME: number = 2000;
+const ENEMY_Y_SPAWN: number = -50;
+const EXPLOSION_X_OFFSET: number = -20;
+const EXPLOSTION_Y_OFFSET: number = 0;
+
+// enums
+enum ENEMY_WAVE {
+    NONE,
+    RANDOM,
+    SWOOP,
+    BIGV,
+    ROWS,
+    LAST, // this is only to know max of enumerator
+}
 
 export default class Startup extends Phaser.State {
     // game objects
@@ -33,6 +45,9 @@ export default class Startup extends Phaser.State {
     private backgrounds: Phaser.TileSprite[] = [];
     private background: Phaser.Sprite;
     private playerDeathQueue: Phaser.Sprite[] = [];
+    private spawnWaveTime = this.game.time.now + SPAWN_WAVE_TIME_MAX;
+    private spawnWave: number;
+    private spawnRndmNumber: number;
 
     // Enemy vars
     private enemyCreateCoolDwn = ENEMY_SPAWN_TIME;
@@ -206,11 +221,28 @@ export default class Startup extends Phaser.State {
     }
 
     private updateShmup(): void {
-        // generate enemies
-        if (this.game.time.now >= this.enemyCreateTime) {
-            this.enemyCreateTime = this.game.time.now + this.enemyCreateCoolDwn;
-            const rndEnemySpawn: number = this.game.rnd.integerInRange(1, 5);
-            for (let i: number = 0; i < rndEnemySpawn; i++) {
+        // if time to spawn wave, generate enemies
+        if (this.game.time.now <= this.spawnWaveTime && this.spawnWave === ENEMY_WAVE.NONE) {
+            // use 1 because 0 is "NONE"
+            this.spawnWave = this.game.rnd.integerInRange(1, ENEMY_WAVE.LAST - 1);
+
+            // setup for wave
+            switch (this.spawnWave) {
+                case ENEMY_WAVE.RANDOM:
+                this.spawnRndmNumber = 0;
+                break;
+            }
+        }
+
+        switch (this.spawnWave) {
+            case ENEMY_WAVE.NONE:
+            // do nothing
+            break;
+            case ENEMY_WAVE.RANDOM:
+            if (this.game.time.now >= this.enemyCreateTime) {
+                this.enemyCreateTime = this.game.time.now + this.enemyCreateCoolDwn;
+                this.spawnRndmNumber++;
+                const rndEnemySpawn: number = this.game.rnd.integerInRange(1, 5);
                 const currEnemy: BaseEnemy = this.groupEnemies.getFirstExists(false);
                 if (currEnemy) {
                     currEnemy.randomizeTimes();
@@ -220,6 +252,18 @@ export default class Startup extends Phaser.State {
                     currEnemy.reset(this.game.rnd.integerInRange(minX, maxX), ENEMY_Y_SPAWN, currEnemy.maxHealth);
                 }
             }
+
+            // check for end of wave
+            if (this.spawnRndmNumber >= SPAWN_RANDOM_ENEMY_MAX) {
+                //
+            }
+            break;
+            case ENEMY_WAVE.SWOOP:
+            break;
+            case ENEMY_WAVE.BIGV:
+            break;
+            case ENEMY_WAVE.ROWS:
+            break;
         }
     }
 
@@ -279,4 +323,8 @@ export default class Startup extends Phaser.State {
         // not implemented
     }
 
+    private resetWave(): void {
+        this.spawnWaveTime = this.game.time.now + SPAWN_WAVE_TIME_MAX;
+        this.spawnWave = ENEMY_WAVE.NONE;
+    }
 }
