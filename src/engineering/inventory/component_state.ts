@@ -39,7 +39,7 @@ export class ComponentState {
         return this.powerConsumer.powerLoad;
     }
 
-    public applyPower(power: number): void {
+    public updatePower(power: number): void {
         if (power > this.powerConsumer.powerLoad) {
             power = this.powerConsumer.powerLoad;
         }
