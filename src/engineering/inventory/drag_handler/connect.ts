@@ -2,6 +2,7 @@
 import { BaseComponent } from "../base_component";
 import { BaseDragHandler } from "./base";
 import { InventorySystem } from "../system";
+import { PowerSubSystem } from "../power_subsystem";
 
 // TYPES
 class RopeWire extends Phaser.Rope {
@@ -91,6 +92,7 @@ export class ConnectDragHandler extends BaseDragHandler {
     constructor(
         private game: Phaser.Game,
         private inventorySystem: InventorySystem,
+        private powerSystem: PowerSubSystem,
     ) {
         super();
         this.wiresGroup = this.game.add.group();
@@ -125,6 +127,9 @@ export class ConnectDragHandler extends BaseDragHandler {
             this.wires.remove(wire, true);
         } else if (!this.connections.tryConnect(comp, sink, wire)) {
             this.wires.remove(wire, true);
+        } else {
+            this.powerSystem.attach(comp, sink);
+            this.powerSystem.updateAllComponents();
         }
         this.pendingConnect = null;
     }
