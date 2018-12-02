@@ -1,5 +1,5 @@
 import { BaseComponent } from "./base_component";
-import { PowerConsumerStateConfig, PowerFunction, StateConfig } from "./component_state";
+import { PowerConsumerStateConfig, StateConfig } from "./component_state";
 import { Constraints, InventorySystem } from "./system";
 
 export class MissileLauncher extends BaseComponent {
