@@ -1,12 +1,8 @@
-<<<<<<< HEAD
+import { BaseComponent } from "./inventory/base_component";
+import { BasicGun } from "./inventory/basic_gun";
+import { EnergyCell } from "./inventory/energy_cell";
+import { Engine } from "./inventory/engine";
 import { InventorySystem } from "./inventory/system";
-=======
-// CONSTANTS
-const ENGINEERING_TILES_WIDTH = 4;
-const ENGINEERING_TILES_HEIGHT = 10;
-
-const NUM_TILE_SPRITES = 9;
->>>>>>> master
 
 // TYPES
 interface PendingConnection {
@@ -128,48 +124,14 @@ export default class Engineering {
     }
 
     private createComps(): void {
-        this.addComponent(
-            this.game.add.sprite(
-                this.floorStartX,
-                this.floorStartY + (6 * 32),
-                "engine_1_dead",
-            ),
-            "engine1Dead",
-        );
+        const gunCoord = this.inventorySystem.gridIndexToPixels(2, 3);
+        this.inventorySystem.place(new BasicGun(this.game, this.inventorySystem, gunCoord.x, gunCoord.y));
 
-        const energyCell = this.addComponent(
-            this.game.add.sprite(
-                this.floorStartX + 128,
-                this.floorStartY + 128,
-                "energy_cell",
-            ),
-            "energyCell",
-        );
-        energyCell.x -= 0;
-        energyCell.y -= 4;
+        const cellCoord = this.inventorySystem.gridIndexToPixels(5, 5);
+        this.inventorySystem.place(new EnergyCell(this.game, this.inventorySystem, cellCoord.x, cellCoord.y));
 
-        const energyCellAnimation = energyCell.animations.add("zap", [1, 2, 3, 4]);
-        energyCellAnimation.play(20, true);
-
-        const engine1Live = this.addComponent(
-            this.game.add.sprite(
-                this.floorStartX + 32,
-                this.floorStartY + (6 * 32),
-                "engine_1_live",
-            ),
-            "engine1Live",
-        );
-
-        const gunOne = this.addComponent(
-            this.game.add.sprite(
-                this.floorStartX + 64,
-                this.floorStartY,
-                "gun_1",
-            ),
-            "gunOne",
-        );
-        const gunFireAnimation: Phaser.Animation = gunOne.animations.add("fire");
-        gunFireAnimation.play(20, true);
+        const engCoord = this.inventorySystem.gridIndexToPixels(7, 8);
+        this.inventorySystem.place(new Engine(this.game, this.inventorySystem, engCoord.x, engCoord.y));
     }
 
     private findComponent(p: Phaser.Pointer): Phaser.Sprite | null {

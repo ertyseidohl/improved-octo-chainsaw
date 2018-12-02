@@ -8,6 +8,11 @@ interface Index {
     y: number;
 }
 
+export interface Coordinate {
+    x: number;
+    y: number;
+}
+
 export class InventorySystem {
 
     private x: number;
@@ -37,12 +42,14 @@ export class InventorySystem {
         this.tileWidth = tileWidth;
 
         this.grid = [];
-        for (let i = 0; i < this.width; i++) {
+        for (let i = 0; i < this.height; i++) {
             this.grid[i] = [];
-            for (let j = 0; j < this.height; j ++) {
+            for (let j = 0; j < this.width; j ++) {
                 this.grid[i][j] = null;
             }
         }
+
+        // this.createTiles();
     }
 
     public preload(): void {
@@ -54,19 +61,29 @@ export class InventorySystem {
     public release(component: BaseComponent): void {
         const index = this.pixelToGridIndex(component.x, component.y);
         const indexes = this.generate_indexes(index, component.tileWidth, component.tileHeight);
-        indexes.map((i) => this.grid[i.x][i.y] = null);
+        indexes.map((i) => this.grid[i.y][i.x] = null);
     }
 
     public test(component: BaseComponent): boolean {
         const index = this.pixelToGridIndex(component.x, component.y);
         const testIndexes = this.generate_indexes(index, component.tileWidth, component.tileHeight);
+
         return this.allNone(testIndexes);
     }
 
     public place(component: BaseComponent): void {
         const index = this.pixelToGridIndex(component.x, component.y);
         const indexes = this.generate_indexes(index, component.tileWidth, component.tileHeight);
-        indexes.map((i) => this.grid[i.y][i.y] = component);
+        indexes.map((i) => this.grid[i.y][i.x] = component);
+
+        console.log(indexes);
+        console.log(this.grid);
+    }
+
+    public gridIndexToPixels(xIndex: number, yIndex: number): Coordinate {
+        const x = this.x + (xIndex * this.tileWidth);
+        const y = this.y + (yIndex * this.tileHeight);
+        return {x, y};
     }
 
     private pixelToGridIndex(x: number, y: number): Index {
@@ -95,7 +112,7 @@ export class InventorySystem {
 
     private allNone(indexes: Index[]): boolean {
         for (const index of indexes) {
-            if (this.grid[index.x][index.y] != null) {
+            if (this.grid[index.y][index.x] != null) {
                 return false;
             }
         }

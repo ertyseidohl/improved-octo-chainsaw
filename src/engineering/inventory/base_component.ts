@@ -42,7 +42,7 @@ export class BaseComponent extends Phaser.Sprite {
 
         this.inputEnabled = true;
         this.input.enableDrag();
-        this.input.enableSnap(8, 8, false, true);
+        this.input.enableSnap(32, 32, false, true);
 
         this.physicsEnabled = true;
 
@@ -74,6 +74,7 @@ export class BaseComponent extends Phaser.Sprite {
         this.oldX = this.x;
         this.oldY = this.y;
 
+        this.inventorySystem.release(this);
         this.updateFromState();
     }
 
