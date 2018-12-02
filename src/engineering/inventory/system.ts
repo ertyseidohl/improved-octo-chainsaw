@@ -1,5 +1,5 @@
 import { Game } from "phaser-ce";
-import { BaseComponent, isBaseComponent } from "./base_component";
+import { BaseComponent } from "./base_component";
 
 export const NUM_TILE_SPRITES = 9;
 
@@ -154,11 +154,11 @@ export class InventorySystem {
     }
 
     public setDisplayText(text: string[]): void {
-        this.displayText.setText(text);
+        this.displayText.setText(text.join("\n"));
     }
 
     public clearText(): void {
-        this.displayText.clear();
+        this.displayText.setText("");
     }
 
     private pixelToGridIndex(x: number, y: number, tile: boolean): Index {

@@ -1,6 +1,7 @@
 import { BaseComponent } from "./inventory/base_component";
 import { BasicGun } from "./inventory/basic_gun";
 import { EnergyCell } from "./inventory/energy_cell";
+import { EnergyCellHD } from "./inventory/energy_cell_hd";
 import { Engine } from "./inventory/engine";
 import { BasicShip, InventorySystem, NUM_TILE_SPRITES} from "./inventory/system";
 
@@ -139,6 +140,7 @@ export default class Engineering {
 
         this.game.load.spritesheet("gun_1", "../assets/gun_1.png", 32, 32 * 3, 5);
         this.game.load.spritesheet("energy_cell", "../assets/energy_cell.png", 32, 32, 5);
+        this.game.load.spritesheet("energy_cell_2", "../assets/energy_cell_2.png", 32, 32, 5);
 
         for (let i: number = 1; i <= NUM_TILE_SPRITES; i++) {
             this.game.load.image(`floor_tile_${i}`, `../assets/floor_tile_${i}.png`);
@@ -174,6 +176,9 @@ export default class Engineering {
 
         const cellCoord = this.inventorySystem.gridIndexToPixels(5, 3);
         this.inventorySystem.place(new EnergyCell(this.game, this.inventorySystem, cellCoord.x, cellCoord.y));
+
+        const cellHDCoord = this.inventorySystem.gridIndexToPixels(6, 3);
+        this.inventorySystem.place(new EnergyCellHD(this.game, this.inventorySystem, cellCoord.x, cellCoord.y));
 
         const engCoord1 = this.inventorySystem.gridIndexToPixels(3, 6);
         this.inventorySystem.place(new Engine(this.game, this.inventorySystem, engCoord1.x, engCoord1.y));
