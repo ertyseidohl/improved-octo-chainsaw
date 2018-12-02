@@ -14,4 +14,14 @@ export class BasicGun extends BaseComponent {
         return Constraints.FRONT;
     }
 
+    public getDescription(): string[] {
+        return [
+            "The GK-305 model is the hottest on the market! No seriously, you'll need, like, three heatsinks.",
+        ];
+    }
+
+    public getPower(): number {
+        return 2;
+    }
+
 }

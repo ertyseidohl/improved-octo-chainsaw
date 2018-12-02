@@ -5,11 +5,7 @@ interface StateConfig {
     alpha: number;
 }
 
-export function isBaseComponent(obj: any): obj is BaseComponent {
-    return (obj && obj.stateModifiers !== undefined);
-}
-
-export class BaseComponent extends Phaser.Sprite {
+export abstract class BaseComponent extends Phaser.Sprite {
 
     public tileWidth: number;
     public tileHeight: number;
@@ -54,14 +50,20 @@ export class BaseComponent extends Phaser.Sprite {
         this.events.onDragStop.add(this.onDragStop, this);
         this.events.onDragUpdate.add(this.onDragUpdate, this);
 
+        this.events.onInputOver.add(this.onInputOver, this);
+        this.events.onInputOut.add(this.onInputOver, this);
+
         game.add.existing(this);
     }
 
-    public getTileWidth() {
+    public abstract getDescription(): string[];
+    public abstract getPower(): number;
+
+    public getTileWidth(): number {
         return this.tileWidth;
     }
 
-    public getTileHeight() {
+    public getTileHeight(): number {
         return this.tileHeight;
     }
 
@@ -76,7 +78,7 @@ export class BaseComponent extends Phaser.Sprite {
         this.alpha = modifiers.alpha;
     }
 
-    private onDragStart(sprite: Phaser.Sprite, pointer: Phaser.Pointer) {
+    private onDragStart(sprite: Phaser.Sprite, pointer: Phaser.Pointer): void {
         this.state = "draggingOkay";
         this.bringToTop();
 
@@ -87,7 +89,7 @@ export class BaseComponent extends Phaser.Sprite {
         this.updateFromState();
     }
 
-    private onDragStop(sprite: Phaser.Sprite, pointer: Phaser.Pointer) {
+    private onDragStop(sprite: Phaser.Sprite, pointer: Phaser.Pointer): void {
         this.state = "locked";
 
         if (this.inventorySystem.test(this)) {
@@ -102,13 +104,21 @@ export class BaseComponent extends Phaser.Sprite {
         this.updateFromState();
     }
 
-    private onDragUpdate(sprite: Phaser.Sprite, pointer: Phaser.Pointer) {
+    private onDragUpdate(sprite: Phaser.Sprite, pointer: Phaser.Pointer): void {
         if (! this.inventorySystem.test(this)) {
             this.state = "draggingBad";
         } else {
             this.state = "draggingOkay";
         }
         this.updateFromState();
+    }
+
+    private onInputOver(): void {
+        this.inventorySystem.setDisplayText(this.getDescription());
+    }
+
+    private onInputOut(): void {
+        this.inventorySystem.clearText();
     }
 
 }

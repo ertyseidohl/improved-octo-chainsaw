@@ -14,4 +14,13 @@ export class Engine extends BaseComponent {
         return Constraints.BACK;
     }
 
+    public getDescription(): string[] {
+        return [
+            "This engine can burn kerosene, oil, antimatter, and three kinds of aliens for fuel.",
+        ];
+    }
+
+    public getPower(): number {
+        return -2;
+    }
 }

@@ -10,4 +10,14 @@ export class EnergyCell extends BaseComponent {
         energyCellAnimation.play(20, true);
     }
 
+    public getDescription(): string[] {
+        return [
+            "The ZZ-55000 is a real hair-raiser! Make sure to ground yourself before coming within 100 meters...",
+        ];
+    }
+
+    public getPower(): number {
+        return 4;
+    }
+
 }
