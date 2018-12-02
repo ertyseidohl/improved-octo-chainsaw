@@ -7,6 +7,7 @@ import { InputC } from "./inventory/input_c";
 import { InputX } from "./inventory/input_x";
 import { InputZ } from "./inventory/input_z";
 import { Prince } from "./inventory/prince";
+import { SmallGun } from "./inventory/small_gun";
 // import { MissileLauncher } from "./inventory/missile_launcher";
 import { BasicShip, InventorySystem, NUM_TILE_SPRITES} from "./inventory/system";
 
@@ -144,6 +145,7 @@ export default class Engineering {
         this.game.load.spritesheet("engine_1", "../assets/engine_1.png", 32, 64, 5);
 
         this.game.load.spritesheet("gun_1", "../assets/gun_1.png", 32, 32 * 3, 5);
+        this.game.load.spritesheet("gun_small", "../assets/gun_small.png", 32, 32 * 2, 5);
         this.game.load.spritesheet("energy_cell", "../assets/energy_cell.png", 32, 32, 5);
         this.game.load.spritesheet("energy_cell_2", "../assets/energy_cell_2.png", 32, 32, 5);
 
@@ -178,6 +180,9 @@ export default class Engineering {
     private createComps(): void {
         const gunCoord = this.inventorySystem.gridIndexToPixels(2, 4);
         this.inventorySystem.place(new BasicGun(this.game, this.inventorySystem, gunCoord.x, gunCoord.y));
+
+        const smallGunCoord = this.inventorySystem.gridIndexToPixels(2, 5);
+        this.inventorySystem.place(new SmallGun(this.game, this.inventorySystem, smallGunCoord.x, smallGunCoord.y));
 
         // const cellCoord = this.inventorySystem.gridIndexToPixels(5, 3);
         // this.inventorySystem.place(new EnergyCell(this.game, this.inventorySystem, cellCoord.x, cellCoord.y));
