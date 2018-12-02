@@ -42,13 +42,13 @@ export class BaseComponent extends Phaser.Sprite {
 
         this.inputEnabled = true;
         this.input.enableDrag();
-        this.input.enableSnap(8, 8, false, true);
 
-        this.physicsEnabled = true;
+        this.anchor.x = 0;
+        this.anchor.y = 0;
 
         this.events.onDragStart.add(this.onDragStart, this);
         this.events.onDragStop.add(this.onDragStop, this);
-        // this.events.onDragUpdate.add(this.onDragUpdate, this);
+        this.events.onDragUpdate.add(this.onDragUpdate, this);
 
         game.add.existing(this);
     }
@@ -70,10 +70,12 @@ export class BaseComponent extends Phaser.Sprite {
 
     private onDragStart(sprite: Phaser.Sprite, pointer: Phaser.Pointer) {
         this.state = "draggingOkay";
+        this.bringToTop();
 
         this.oldX = this.x;
         this.oldY = this.y;
 
+        this.inventorySystem.release(this);
         this.updateFromState();
     }
 
@@ -81,12 +83,23 @@ export class BaseComponent extends Phaser.Sprite {
         this.state = "locked";
 
         if (this.inventorySystem.test(this)) {
-            this.inventorySystem.place(this);
+            const coord = this.inventorySystem.place(this);
+            this.x = coord.x;
+            this.y = coord.y;
         } else {
             this.x = this.oldX;
             this.y = this.oldY;
         }
 
+        this.updateFromState();
+    }
+
+    private onDragUpdate(sprite: Phaser.Sprite, pointer: Phaser.Pointer) {
+        if (! this.inventorySystem.test(this)) {
+            this.state = "draggingBad";
+        } else {
+            this.state = "draggingOkay";
+        }
         this.updateFromState();
     }
 
