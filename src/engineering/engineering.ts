@@ -1,21 +1,63 @@
+// DEPENDENCIES
+import Chain from "./chain";
+
 // CONSTANTS
-const ENGINEERING_TILES_WIDTH = 4;
-const ENGINEERING_TILES_HEIGHT = 10;
+const ENGINEERING_TILES_WIDTH = 8;
+const ENGINEERING_TILES_HEIGHT = 8;
 
 const NUM_TILE_SPRITES = 9;
 
 // TYPES
+class RopeWire extends Phaser.Rope {
+
+    constructor(
+        game: Phaser.Game,
+        parent: PIXI.DisplayObjectContainer,
+        name: string,
+        private source: Phaser.Point,
+        sink: Phaser.Point,
+    ) {
+        super(
+            game,
+            source.x,
+            source.y,
+            "wire",
+            0,
+            [
+                new Phaser.Point(0, 0),
+                new Phaser.Point(0, 0),
+            ],
+        );
+        parent.addChild(this);
+    }
+
+    set sinkPoint(value: Phaser.Point) {
+        this.points = [
+            new Phaser.Point(0, 0),
+            value.clone().subtract(this.x, this.y),
+        ];
+    }
+}
+
+type Wire = RopeWire;
+const Wire = RopeWire;
+
 interface PendingConnection {
-    rope: Phaser.Rope;
+    wire: Wire;
     start: Phaser.Sprite;
 }
 
 interface ConnectionState {
-    rope: Phaser.Rope;
+    wire: Wire;
 }
 
-type TargetToRope = Map<Phaser.Sprite, ConnectionState>;
-type SourceToTarget = Map<Phaser.Sprite, TargetToRope>;
+interface Coordinate {
+    x: number;
+    y: number;
+}
+
+type TargetToState = Map<Phaser.Sprite, ConnectionState>;
+type SourceToTarget = Map<Phaser.Sprite, TargetToState>;
 
 class Connections {
 
@@ -26,7 +68,7 @@ class Connections {
     public tryConnect(
         source: Phaser.Sprite,
         target: Phaser.Sprite,
-        rope: Phaser.Rope,
+        wire: Wire,
     ): boolean {
         let existing = this.entries.get(source);
         if (undefined === existing) {
@@ -36,15 +78,15 @@ class Connections {
         if (existing.has(target)) {
             return false;
         }
-        existing.set(target, { rope });
+        existing.set(target, { wire });
         return true;
     }
 
 }
 
-// =================
-// class Engineering
-// =================
+                             // =================
+                             // class Engineering
+                             // =================
 
 export default class Engineering {
 
@@ -58,7 +100,6 @@ export default class Engineering {
     private floorStartX: number;
     private floorStartY: number;
 
-    private connectTexture: Phaser.BitmapData;
     private connections: Connections = new Connections();
     private mouseInBounds: boolean = false;
     private pendingConnect: PendingConnection | null = null;
@@ -76,8 +117,6 @@ export default class Engineering {
         this.createComps();
 
         // setup mouse for connections
-        this.connectTexture = this.game.add.bitmapData();
-        this.connectTexture.fill(0, 192, 255, 127);
         this.game.canvas.addEventListener(
             "mousemove",
             this.onMouseMove.bind(this),
@@ -103,6 +142,8 @@ export default class Engineering {
         for (let i: number = 1; i <= NUM_TILE_SPRITES; i++) {
             this.game.load.image(`floor_tile_${i}`, `../assets/floor_tile_${i}.png`);
         }
+
+        this.game.load.spritesheet("wire", "../assets/wire.png", 4, 4, 2);
     }
 
     public update(): void {
@@ -192,7 +233,7 @@ export default class Engineering {
         const children = this.comps.children.slice();
         while (0 < children.length) {
             const child = children.shift();
-            if (child instanceof Phaser.Sprite) {
+            if (child instanceof Phaser.Sprite && child.input) {
                 if (child.input.pointerOver(p.id)) {
                     return child;
                 }
@@ -209,7 +250,6 @@ export default class Engineering {
     }
 
     private onMouseDown(): void {
-        console.log("overEngineering?", this.mouseInBounds);
         if (!this.mouseInBounds) {
             return;
         }
@@ -217,19 +257,16 @@ export default class Engineering {
         const p = this.game.input.mousePointer;
         const sprite = this.findComponent(p);
         if (sprite) {
-            console.log("got start", sprite.name);
             this.pendingConnect = {
                 start: sprite,
-                rope: this.comps.add(
-                    this.game.add.rope(p.x, p.y, this.connectTexture, null, [
-                        new Phaser.Point(0, 0),
-                        new Phaser.Point(0, 0),
-                    ]),
+                wire: new Wire(
+                    this.game,
+                    this.comps,
+                    "",
+                    p.position,
+                    p.position,
                 ),
             };
-            this.pendingConnect.rope.scale.set(0.025, 0.025);
-        } else {
-            console.log("no sprite found");
         }
     }
 
@@ -237,14 +274,11 @@ export default class Engineering {
         const p = this.game.input.mousePointer;
         this.mouseInBounds = this.bounds.contains(p.x, p.y);
         if (this.pendingConnect) {
-            const { rope } = this.pendingConnect;
+            const { wire } = this.pendingConnect;
             if (this.mouseInBounds) {  // update the endpoint
-                rope.points = [
-                    new Phaser.Point(0, 0),
-                    new Phaser.Point(40 * (p.x - rope.x), 40 * (p.y - rope.y)),
-                ];
+                wire.sinkPoint = p.position;
             } else {  // remove the rope
-                this.comps.remove(rope, true);
+                this.comps.remove(wire, true);
                 this.pendingConnect = null;
             }
         }
@@ -254,16 +288,16 @@ export default class Engineering {
         if (!this.mouseInBounds || null === this.pendingConnect) {
             return;
         }
-        const { start, rope } = this.pendingConnect;
+        const { start, wire } = this.pendingConnect;
         const p = this.game.input.mousePointer;
         const sprite = this.findComponent(p);
         if (null === sprite || sprite === start) {
             // nothing to connect to, or connected to start
-            this.comps.remove(rope, true);
+            this.comps.remove(wire, true);
         }
-        if (!this.connections.tryConnect(start, sprite, rope)) {
+        if (!this.connections.tryConnect(start, sprite, wire)) {
             // already connected
-            this.comps.remove(rope, true);
+            this.comps.remove(wire, true);
         }
         this.pendingConnect = null;
     }
