@@ -26,6 +26,7 @@ export default class Startup extends Phaser.State {
     private enemyCollisionGroup: Phaser.Physics.P2.CollisionGroup;
     private bulletCollisionGroup: Phaser.Physics.P2.CollisionGroup;
     private worldCollisionGroup: Phaser.Physics.P2.CollisionGroup;
+    private background: Phaser.TileSprite;
 
     // Enemy vars
     private enemyCreateCoolDwn = 1000;
@@ -90,7 +91,7 @@ export default class Startup extends Phaser.State {
         );
 
         // background
-        this.game.add.tileSprite(
+        this.background = this.game.add.tileSprite(
             this.shmupBounds.x,
             this.shmupBounds.y,
             this.shmupBounds.width,
@@ -141,6 +142,7 @@ export default class Startup extends Phaser.State {
 
     public update(): void {
         this.updateShmup();
+        this.background.tilePosition.y += 2;
         this.engineering.update();
     }
 

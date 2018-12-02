@@ -1,4 +1,12 @@
+<<<<<<< HEAD
 import { InventorySystem } from "./inventory/system";
+=======
+// CONSTANTS
+const ENGINEERING_TILES_WIDTH = 4;
+const ENGINEERING_TILES_HEIGHT = 10;
+
+const NUM_TILE_SPRITES = 9;
+>>>>>>> master
 
 // TYPES
 interface PendingConnection {
