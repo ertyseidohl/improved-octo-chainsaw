@@ -5,7 +5,7 @@ interface StateConfig {
     alpha: number;
 }
 
-export class BaseComponent extends Phaser.Sprite {
+export abstract class BaseComponent extends Phaser.Sprite {
 
     public tileWidth: number;
     public tileHeight: number;
@@ -52,6 +52,8 @@ export class BaseComponent extends Phaser.Sprite {
 
         game.add.existing(this);
     }
+
+    public abstract getDescription(): string[];
 
     public getTileWidth() {
         return this.tileWidth;

@@ -10,4 +10,10 @@ export class Engine extends BaseComponent {
         engineAnimation.play(20, true);
     }
 
+    public getDescription(): string[] {
+        return [
+            "This engine can burn kerosene, carbohydrates, neutrino soup, and three kinds of aliens for fuel.",
+            "Energy draw: $",
+        ];
+    }
 }
