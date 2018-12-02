@@ -11,9 +11,9 @@ import { ShieldGenerator } from "./inventory/shield_generator";
 import { SmallGun } from "./inventory/small_gun";
 // import { MissileLauncher } from "./inventory/missile_launcher";
 
+import { HandlerType, MultiDragHandler } from "./inventory/drag_handler/multi";
 import { PowerSubSystem } from "./inventory/power_subsystem";
 import { BasicShip, InventorySystem, NUM_TILE_SPRITES} from "./inventory/system";
-import { HandlerType, MultiDragHandler } from "./inventory/drag_handler/multi";
 
 // =================
 // class Engineering
@@ -163,11 +163,13 @@ export default class Engineering {
             case HandlerType.MOVE: {  // transition to 'CONNECT'
                 this.dragBitmap.fill(0, 255, 0);
                 this.dragHandler.handler = HandlerType.CONNECT;
-            } break;
+                break;
+            }
             case HandlerType.CONNECT: {  // transition to 'MOVE'
                 this.dragBitmap.fill(255, 0, 0);
                 this.dragHandler.handler = HandlerType.MOVE;
-            } break;
+                break;
+            }
         }
     }
 
