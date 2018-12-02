@@ -12,8 +12,11 @@ import Player from "../player/player";
 const ENEMY_SPEED: number = 100;
 const ENEMY_SCALE: number = 1.5;
 const BULLET_SCALE: number = 1;
-const ENEMY_COUNT = 30;
+const ENEMY_COUNT = 10;
+const ENEMY_SPAWN_TIME = 2000;
 const ENEMY_Y_SPAWN = -50;
+const EXPLOSION_X_OFFSET = -20;
+const EXPLOSTION_Y_OFFSET = 0;
 
 export default class Startup extends Phaser.State {
     // game objects
@@ -26,14 +29,19 @@ export default class Startup extends Phaser.State {
     private enemyCollisionGroup: Phaser.Physics.P2.CollisionGroup;
     private bulletCollisionGroup: Phaser.Physics.P2.CollisionGroup;
     private worldCollisionGroup: Phaser.Physics.P2.CollisionGroup;
-    private background: Phaser.TileSprite;
+    private powerupCollisionGroup: Phaser.Physics.P2.CollisionGroup;
+    private backgrounds: Phaser.TileSprite[] = [];
+    private background: Phaser.Sprite;
 
     // Enemy vars
-    private enemyCreateCoolDwn = 1000;
+    private enemyCreateCoolDwn = ENEMY_SPAWN_TIME;
     private enemyCreateTime = 0;
 
     // groups
     private groupEnemies: Phaser.Group;
+    private groupExplosions: Phaser.Group;
+    private groupExplosionsSmall: Phaser.Group;
+    private groupPowerups: Phaser.Group;
 
     private shmupBounds: Phaser.Rectangle;
     private engineeringBounds: Phaser.Rectangle;
@@ -50,8 +58,16 @@ export default class Startup extends Phaser.State {
         this.game.load.image("enemy", "../assets/enemy_1.png");
         this.game.load.image("border", "../assets/border.png");
         this.game.load.image("bullet", "../assets/laser.png");
+        this.game.load.image("enemyBullet", "../assets/enemy-bullet.png");
+        this.game.load.image("powerup", "../assets/firstaid.png");
 
+        this.game.load.spritesheet("prince", "../assets/prince.png", 128, 128, 4);
+        this.game.load.spritesheet("explosion", "../assets/explosion.png", 64, 64, 6);
+        this.game.load.spritesheet("explosion_small", "../assets/explosion_small.png", 32, 32, 4);
+        this.game.load.image("background", "../assets/background.png");
         this.game.load.image("stars_1", "../assets/stars_1.png");
+        this.game.load.image("stars_2", "../assets/stars_2.png");
+        this.game.load.image("stars_3", "../assets/stars_3.png");
         this.engineering.preload();
     }
 
@@ -63,6 +79,7 @@ export default class Startup extends Phaser.State {
         this.bulletCollisionGroup = this.game.physics.p2.createCollisionGroup();
         this.worldCollisionGroup = this.game.physics.p2.createCollisionGroup();
         this.enemyCollisionGroup = this.game.physics.p2.createCollisionGroup();
+        this.powerupCollisionGroup = this.game.physics.p2.createCollisionGroup();
 
         // This part is vital if you want the objects
         // with their own collision groups to still collide with the world bounds
@@ -91,20 +108,51 @@ export default class Startup extends Phaser.State {
         );
 
         // background
-        this.background = this.game.add.tileSprite(
+        this.background = this.game.add.sprite(
+            this.shmupBounds.x,
+            this.shmupBounds.y,
+            "background",
+        );
+
+        this.backgrounds.push(this.game.add.tileSprite(
             this.shmupBounds.x,
             this.shmupBounds.y,
             this.shmupBounds.width,
             this.shmupBounds.height,
             "stars_1",
-        );
+        ));
+
+        this.backgrounds.push(this.game.add.tileSprite(
+            this.shmupBounds.x,
+            this.shmupBounds.y,
+            this.shmupBounds.width,
+            this.shmupBounds.height,
+            "stars_2",
+        ));
+
+        this.backgrounds.push(this.game.add.tileSprite(
+            this.shmupBounds.x,
+            this.shmupBounds.y,
+            this.shmupBounds.width,
+            this.shmupBounds.height,
+            "stars_3",
+        ));
+
+        // prince test
+        const prince: Phaser.Sprite = this.game.add.sprite(100, 100, "prince");
+        prince.animations.add("glow");
+        prince.animations.getAnimation("glow").play(3, true);
 
         // setup engineering
         this.engineering.create();
 
         // sprites and physics
-        this.player = new Player(this.game, 200, 200, "player");
+        this.player = new Player(this.game, this.game.width / 4, this.game.height - 50, "player");
         this.game.add.existing(this.player);
+
+        this.groupPowerups = this.game.add.group();
+        this.groupPowerups.createMultiple(30, "powerup");
+        // groups
 
         // assign collision groups
         this.player.body.setCollisionGroup(this.playerCollisionGroup);
@@ -118,6 +166,8 @@ export default class Startup extends Phaser.State {
         this.groupEnemies = this.game.add.group();
         for (let i: number = 0; i < ENEMY_COUNT; i++) {
             const newEnemy: BaseEnemy = new BaseEnemy(this.game, Math.random(), 0, "enemy");
+            newEnemy.setBulletsCollisionGroup(this.bulletCollisionGroup);
+            newEnemy.setBulletsCollides(this.playerCollisionGroup, this.bulletHitPlayer, this);
             this.groupEnemies.add(newEnemy);
             newEnemy.kill();
         }
@@ -126,15 +176,24 @@ export default class Startup extends Phaser.State {
         this.groupEnemies.forEach((enemy: Phaser.Sprite) => {
             const enemyBody: Phaser.Physics.P2.Body = enemy.body;
             enemyBody.setCollisionGroup(this.enemyCollisionGroup);
-            enemyBody.collides([this.playerCollisionGroup, this.enemyCollisionGroup,
-                this.bulletCollisionGroup]);
+            enemyBody.collides([this.playerCollisionGroup, this.bulletCollisionGroup]);
             enemyBody.fixedRotation = true;
         });
+
+        this.groupExplosions = this.game.add.group();
+        this.groupExplosions.createMultiple(30, "explosion");
+        this.groupExplosions.forEach((explosion: Phaser.Sprite) => explosion.animations.add("explode"));
+
+        this.groupExplosionsSmall = this.game.add.group();
+        this.groupExplosionsSmall.createMultiple(10, "explosion_small");
+        this.groupExplosionsSmall.forEach((explosion: Phaser.Sprite) => explosion.animations.add("explode"));
     }
 
     public update(): void {
         this.updateShmup();
-        this.background.tilePosition.y += 2;
+        for (let i: number = 0; i < this.backgrounds.length; i++) {
+            this.backgrounds[i].tilePosition.y += (i + 1);
+        }
         this.engineering.update();
     }
 
@@ -142,19 +201,48 @@ export default class Startup extends Phaser.State {
         // generate enemies
         if (this.game.time.now >= this.enemyCreateTime) {
             this.enemyCreateTime = this.game.time.now + this.enemyCreateCoolDwn;
-            this.enemy = this.groupEnemies.getFirstExists(false);
-            if (this.enemy) {
-                this.enemyBody = this.enemy.body;
-                const minX: number = this.enemy.width;
-                const maxX: number = this.shmupBounds.width - this.borderSprite.width / 2 - this.enemy.width;
-                this.enemy.reset(this.game.rnd.integerInRange(minX, maxX), ENEMY_Y_SPAWN);
+            const rndEnemySpawn: number = this.game.rnd.integerInRange(1, 5);
+            for (let i: number = 0; i < rndEnemySpawn; i++) {
+                const currEnemy: BaseEnemy = this.groupEnemies.getFirstExists(false);
+                if (currEnemy) {
+                    currEnemy.randomizeTimes();
+                    const currEnemyBody = currEnemy.body;
+                    const minX: number = currEnemy.width;
+                    const maxX: number = this.shmupBounds.width - this.borderSprite.width / 2 - currEnemy.width;
+                    currEnemy.reset(this.game.rnd.integerInRange(minX, maxX), ENEMY_Y_SPAWN, currEnemy.maxHealth);
+                }
             }
         }
     }
 
     private bulletHitEnemy(bullet: Phaser.Physics.P2.Body, enemy: Phaser.Physics.P2.Body): void {
+        const explosion: Phaser.Sprite = this.groupExplosionsSmall.getFirstExists(false);
+        if (explosion) {
+            explosion.reset(bullet.x, bullet.y);
+            explosion.play("explode", 30, false, true);
+        }
+
+        if (bullet.sprite.alive) {
+            enemy.sprite.damage(1);
+            console.log(enemy.sprite.width);
+        }
+
+        if (enemy.sprite.health <= 0) {
+            const deathExplosion: Phaser.Sprite = this.groupExplosions.getFirstExists(false);
+            deathExplosion.reset(enemy.x, enemy.y);
+            deathExplosion.play("explode", 30, false, true);
+        }
+
         bullet.sprite.kill();
-        enemy.sprite.kill();
+    }
+
+    private bulletHitPlayer(bullet: Phaser.Physics.P2.Body, player: Phaser.Physics.P2.Body): void {
+        bullet.sprite.kill();
+        player.sprite.kill();
+    }
+
+    private powerUpHitPlayer(): void {
+        // not implemented
     }
 
 }

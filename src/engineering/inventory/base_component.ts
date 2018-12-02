@@ -71,7 +71,7 @@ export class BaseComponent extends Phaser.Sprite {
     private onDragStart(sprite: Phaser.Sprite, pointer: Phaser.Pointer) {
         this.state = "draggingOkay";
         this.bringToTop();
-        
+
         this.oldX = this.x;
         this.oldY = this.y;
 
