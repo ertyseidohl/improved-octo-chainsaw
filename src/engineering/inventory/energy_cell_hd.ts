@@ -1,4 +1,5 @@
 import { BaseComponent } from "./base_component";
+import { PowerFunction, StateConfig } from "./component_state";
 import { InventorySystem } from "./system";
 
 export class EnergyCellHD extends BaseComponent {
@@ -10,14 +11,19 @@ export class EnergyCellHD extends BaseComponent {
         energyCellAnimation.play(5, true);
     }
 
+    public getStateConfig(): StateConfig {
+        return {
+            powerSource: {
+                power: 8,
+            },
+            powerConsumer: null,
+        };
+    }
+
     public getDescription(): string[] {
         return [
             "This high-density energy cell requires at least fifteen people to lift (according to Space-OSHA)",
         ];
-    }
-
-    public getPower(): number {
-        return 8;
     }
 
 }
