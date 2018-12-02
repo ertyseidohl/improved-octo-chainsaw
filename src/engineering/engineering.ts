@@ -66,6 +66,11 @@ export default class Engineering {
         );
         dragSwitch.inputEnabled = true;
         dragSwitch.events.onInputDown.add(this.dragSwitchPressed, this);
+
+        this.game.canvas.addEventListener(
+            "mousedown",
+            this.onMouseDown.bind(this),
+        );
     }
 
     public preload(): void {
@@ -159,7 +164,14 @@ export default class Engineering {
         // this.inventorySystem.place(new Prince(this.game, this.inventorySystem, prince.x, prince.y));
     }
 
-    private dragSwitchPressed(dragSwitch: Phaser.Sprite, p: Phaser.Pointer) {
+    private onMouseDown() {
+        const p = this.game.input.mousePointer;
+        if (this.bounds.contains(p.x, p.y) && p.rightButton.isDown) {
+            this.dragSwitchPressed(null, this.game.input.mousePointer);
+        }
+    }
+
+    private dragSwitchPressed(_: any, p: Phaser.Pointer) {
         switch (this.dragHandler.handler) {
             case HandlerType.MOVE:  // transition to 'CONNECT'
                 this.dragBitmap.fill(0, 255, 0);

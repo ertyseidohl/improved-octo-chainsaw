@@ -1,7 +1,6 @@
 // DEPENDENCIES
 import { BaseComponent } from "../base_component";
 import { BaseDragHandler } from "./base";
-
 import { InventorySystem } from "../system";
 
 // TYPES
@@ -120,12 +119,11 @@ export class ConnectDragHandler extends BaseDragHandler {
         const { wire } = this.pendingConnect;
         const p = this.game.input.mousePointer;
         const sink = this.inventorySystem.find(p);
-        if (comp === sink) {
-            // nothing to connect to, or connected to start
+        if (undefined === sink) {
             this.wires.remove(wire, true);
-        }
-        if (!this.connections.tryConnect(comp, sink, wire)) {
-            // already connected
+        } else if (comp === sink) {
+            this.wires.remove(wire, true);
+        } else if (!this.connections.tryConnect(comp, sink, wire)) {
             this.wires.remove(wire, true);
         }
         this.pendingConnect = null;
@@ -145,4 +143,5 @@ export class ConnectDragHandler extends BaseDragHandler {
     get wires(): Phaser.Group {
         return this.wiresGroup;
     }
+
 }
