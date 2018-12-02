@@ -142,6 +142,14 @@ export class InventorySystem {
         indexes.map((i) => this.grid[i.y][i.x] = null);
     }
 
+    public explode(): void {
+        this.game.physics.p2.enable(this.tiles);
+        this.tiles.forEach((tile: Phaser.Sprite) => {
+            tile.body.velocity.x = (Math.random() * 128) - 64;
+            tile.body.velocity.y = (Math.random() * 128) - 64;
+        });
+    }
+
     public test(component: BaseComponent): boolean {
         const index = this.pixelToGridIndex(component.x, component.y, true);
         const testIndexes = this.generate_indexes(index, component.tileWidth, component.tileHeight);

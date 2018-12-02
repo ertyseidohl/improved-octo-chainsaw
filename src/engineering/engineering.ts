@@ -171,6 +171,10 @@ export default class Engineering {
         return this.state.game;
     }
 
+    public explode(): void {
+        this.inventorySystem.explode();
+    }
+
     // PRIVATE METHODS
     private addComponent<C>(comp: C, name?: string): C {
         this.comps.add(comp);

@@ -44,7 +44,7 @@ export default class Chain extends Phaser.Group {
                     this.source.x,
                     this.source.y,
                     "wire",
-                    i
+                    i,
                 );
             } else {
                 last = this.children[this.children.length - 1] as Phaser.Sprite;
@@ -65,9 +65,6 @@ export default class Chain extends Phaser.Group {
             }
             this.addChild(link);
         }
-        //for (let i = this.children.length - 1; numLinks <= i; --i) {
-        //    this.removeChildAt(i);
-        //}
         for (let i = 0; i < numLinks; ++i) {
             const child = this.children[i] as Phaser.Sprite;
             child.body.mass = numLinks / i;

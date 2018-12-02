@@ -550,6 +550,7 @@ export default class Startup extends Phaser.State {
     }
 
     private playerIsDead(player: Phaser.Sprite): void {
+        this.engineering.explode();
         for (let i: number = 0; i < 60; i++) {
             const deathExplosion: Phaser.Sprite = this.groupExplosions.getFirstExists(false);
             if (deathExplosion) {
