@@ -38,14 +38,12 @@ export const BasicShip: Ship = {
         [null, null, null, null, null, null, null, null, null, null],
         [0, 0, null, null, 0, 0, null, null, 0, 0],
         [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
         [0, null, null, null, null, null, null, null, null, 0],
         [null, null, null, null, null, null, null, null, null, null],
         [null, null, null, null, null, null, null, null, null, null],
         [0, null, null, null, null, null, null, null, null, 0],
     ],
-    cargoHoldYStart: 10,
+    cargoHoldYStart: 8,
 };
 
 class Index {
