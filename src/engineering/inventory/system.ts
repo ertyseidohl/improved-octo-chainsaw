@@ -1,6 +1,8 @@
 import { Game } from "phaser-ce";
 import { BaseComponent } from "./base_component";
 
+const NUM_TILE_SPRITES = 9;
+
 interface Index {
     x: number;
     y: number;
@@ -13,14 +15,18 @@ export class InventorySystem {
     private width: number;
     private height: number;
 
+    private game: Phaser.Game;
+    private tiles: Phaser.Group;
+
     private tileHeight: number;
     private tileWidth: number;
 
     private grid: BaseComponent[][];
 
-    constructor(x: number, y: number,
+    constructor(game: Phaser.Game, x: number, y: number,
                 tileWidth: number, tileHeight: number,
                 startingWidth: number, startingHeight: number) {
+
         this.width = startingWidth;
         this.height = startingHeight;
 
@@ -39,7 +45,13 @@ export class InventorySystem {
         }
     }
 
-    public release(component: BaseComponent) {
+    public preload(): void {
+        for (let i: number = 1; i <= NUM_TILE_SPRITES; i++) {
+            this.game.load.image(`floor_tile_${i}`, `../assets/floor_tile_${i}.png`);
+        }
+    }
+
+    public release(component: BaseComponent): void {
         const index = this.pixelToGridIndex(component.x, component.y);
         const indexes = this.generate_indexes(index, component.tileWidth, component.tileHeight);
         indexes.map((i) => this.grid[i.x][i.y] = null);
@@ -51,7 +63,7 @@ export class InventorySystem {
         return this.allNone(testIndexes);
     }
 
-    public place(component: BaseComponent) {
+    public place(component: BaseComponent): void {
         const index = this.pixelToGridIndex(component.x, component.y);
         const indexes = this.generate_indexes(index, component.tileWidth, component.tileHeight);
         indexes.map((i) => this.grid[i.y][i.y] = component);
@@ -88,6 +100,25 @@ export class InventorySystem {
             }
         }
         return true;
+    }
+
+    private createTiles(): void {
+        this.tiles = this.game.add.group();
+
+        for (let i: number = 0; i < this.tileWidth; i++) {
+            for (let j: number = 0; j < this.tileHeight; j++) {
+                this.tiles.create(
+                    this.x + (32 * i),
+                    this.y + (32 * j),
+                    this.getTileSprite(),
+                );
+            }
+        }
+    }
+
+    private getTileSprite(): string {
+        const r: number = Math.floor(Math.random() * NUM_TILE_SPRITES) + 1;
+        return `floor_tile_${r}`;
     }
 
 }

@@ -2,8 +2,8 @@ import BaseEnemy from "../enemies/base_enemy";
 
 import { Game } from "phaser-ce";
 import { PhaserTextStyle } from "phaser-ce";
-import { BasicGun } from "../inventory/basic_gun";
-import { InventorySystem } from "../inventory/system";
+import { BasicGun } from "../engineering/inventory/basic_gun";
+import { InventorySystem } from "../engineering/inventory/system";
 
 import Engineering from "../engineering/engineering";
 import Player from "../player/player";
