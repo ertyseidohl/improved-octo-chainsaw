@@ -53,7 +53,7 @@ export default class Engineering {
         this.powerSystem = new PowerSubSystem();
 
         this.comps = this.game.add.group();
-        this.createComps();
+        this.createStartingComponents();
 
         // button to switch drag modes
         const corner = this.bounds.topRight;
@@ -109,7 +109,7 @@ export default class Engineering {
         return comp;
     }
 
-    private createComps(): void {
+    private createStartingComponents(): void {
         const gunCoord = this.inventorySystem.gridIndexToPixels(2, 4);
         const basicGun = new BasicGun(this.game, this.inventorySystem, gunCoord.x, gunCoord.y);
         this.inventorySystem.place(basicGun);
@@ -121,14 +121,17 @@ export default class Engineering {
         this.powerSystem.attach(cell, basicGun);
         this.powerSystem.attach(cell, basicGun);
         this.powerSystem.updateAllComponents();
+
         const smallGunCoord = this.inventorySystem.gridIndexToPixels(1, 5);
-        this.inventorySystem.place(new SmallGun(this.game, this.inventorySystem, smallGunCoord.x, smallGunCoord.y));
+        const smallGun = new SmallGun(this.game, this.inventorySystem, smallGunCoord.x, smallGunCoord.y);
 
         // const cellHDCoord = this.inventorySystem.gridIndexToPixels(6, 3);
         // this.inventorySystem.place(new EnergyCellHD(this.game, this.inventorySystem, cellHDCoord.x, cellHDCoord.y));
 
         const engCoord1 = this.inventorySystem.gridIndexToPixels(3, 6);
-        this.inventorySystem.place(new Engine(this.game, this.inventorySystem, engCoord1.x, engCoord1.y));
+
+        const b: Engine = new Engine(this.game, this.inventorySystem, engCoord1.x, engCoord1.y);
+        this.inventorySystem.place(b);
 
         const engCoord2 = this.inventorySystem.gridIndexToPixels(6, 6);
         this.inventorySystem.place(new Engine(this.game, this.inventorySystem, engCoord2.x, engCoord2.y));
@@ -162,10 +165,12 @@ export default class Engineering {
     private dragSwitchPressed(dragSwitch: Phaser.Sprite, p: Phaser.Pointer) {
         switch (this.dragHandler.handler) {
             case HandlerType.MOVE:  // transition to 'CONNECT'
+                this.comps.setAll("alpha", 0.5);
                 this.dragBitmap.fill(0, 255, 0);
                 this.dragHandler.handler = HandlerType.CONNECT;
                 break;
             case HandlerType.CONNECT:  // transition to 'MOVE'
+                this.comps.setAll("alpha", 1);
                 this.dragBitmap.fill(255, 0, 0);
                 this.dragHandler.handler = HandlerType.MOVE;
                 break;
