@@ -3,6 +3,7 @@ import { BasicGun } from "./inventory/basic_gun";
 import { EnergyCell } from "./inventory/energy_cell";
 import { EnergyCellHD } from "./inventory/energy_cell_hd";
 import { Engine } from "./inventory/engine";
+import { MissileLauncher } from "./inventory/missile_launcher";
 import { BasicShip, InventorySystem, NUM_TILE_SPRITES} from "./inventory/system";
 
 import Chain from "./chain";
@@ -185,6 +186,14 @@ export default class Engineering {
 
         const engCoord2 = this.inventorySystem.gridIndexToPixels(6, 6);
         this.inventorySystem.place(new Engine(this.game, this.inventorySystem, engCoord2.x, engCoord2.y));
+
+        const missileLauncher = this.inventorySystem.gridIndexToPixels(3, 2);
+        this.inventorySystem.place(new MissileLauncher(
+            this.game,
+            this.inventorySystem,
+            missileLauncher.x,
+            missileLauncher.y,
+        ));
     }
 
     private findComponent(p: Phaser.Pointer): Phaser.Sprite | null {
