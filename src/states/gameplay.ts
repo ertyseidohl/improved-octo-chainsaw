@@ -45,6 +45,7 @@ export default class Startup extends Phaser.State {
         this.game.load.image("border", "../assets/border.png");
         this.game.load.image("bullet", "../assets/laser.png");
 
+        this.game.load.image("stars_1", "../assets/stars_1.png");
         this.engineering.preload();
     }
 
@@ -78,14 +79,21 @@ export default class Startup extends Phaser.State {
             this.game.height,
         );
 
+        // background
+        this.game.add.tileSprite(
+            this.shmupBounds.x,
+            this.shmupBounds.y,
+            this.shmupBounds.width,
+            this.shmupBounds.height,
+            "stars_1",
+        );
+
         // setup engineering
         this.engineering.create();
 
         // sprites and physics
         this.player = new Player(this.game, 200, 200, "player");
         this.game.add.existing(this.player);
-
-        // groups
 
         // assign collision groups
         this.player.body.setCollisionGroup(this.playerCollisionGroup);
