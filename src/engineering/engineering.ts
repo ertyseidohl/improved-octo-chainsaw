@@ -7,8 +7,11 @@ import { InputC } from "./inventory/input_c";
 import { InputX } from "./inventory/input_x";
 import { InputZ } from "./inventory/input_z";
 import { Prince } from "./inventory/prince";
+import { ShieldGenerator } from "./inventory/shield_generator";
 import { SmallGun } from "./inventory/small_gun";
 // import { MissileLauncher } from "./inventory/missile_launcher";
+
+import { PowerSubSystem } from "./inventory/power_subsystem";
 import { BasicShip, InventorySystem, NUM_TILE_SPRITES} from "./inventory/system";
 
 import Chain from "./chain";
@@ -107,6 +110,7 @@ export default class Engineering {
     private pendingConnect: PendingConnection | null = null;
 
     private inventorySystem: InventorySystem;
+    private powerSystem: PowerSubSystem;
 
     // CREATORS
     constructor(private state: Phaser.State) {
@@ -122,6 +126,8 @@ export default class Engineering {
             10, 12,
             BasicShip,
         );
+
+        this.powerSystem = new PowerSubSystem();
 
         this.comps = this.game.add.group();
         this.createComps();
@@ -148,6 +154,7 @@ export default class Engineering {
         this.game.load.spritesheet("gun_small", "../assets/gun_small.png", 32, 32 * 2, 5);
         this.game.load.spritesheet("energy_cell", "../assets/energy_cell.png", 32, 32, 5);
         this.game.load.spritesheet("energy_cell_2", "../assets/energy_cell_2.png", 32, 32, 5);
+        this.game.load.spritesheet("shield_generator", "../assets/shield_generator.png", 64, 32, 5);
 
         for (let i: number = 1; i <= NUM_TILE_SPRITES; i++) {
             this.game.load.image(`floor_tile_${i}`, `../assets/floor_tile_${i}.png`);
@@ -179,13 +186,18 @@ export default class Engineering {
 
     private createComps(): void {
         const gunCoord = this.inventorySystem.gridIndexToPixels(2, 4);
-        this.inventorySystem.place(new BasicGun(this.game, this.inventorySystem, gunCoord.x, gunCoord.y));
+        const basicGun = new BasicGun(this.game, this.inventorySystem, gunCoord.x, gunCoord.y);
+        this.inventorySystem.place(basicGun);
 
-        const smallGunCoord = this.inventorySystem.gridIndexToPixels(2, 5);
+        const cellCoord = this.inventorySystem.gridIndexToPixels(5, 3);
+        const cell = new EnergyCell(this.game, this.inventorySystem, cellCoord.x, cellCoord.y);
+        this.inventorySystem.place(cell);
+
+        this.powerSystem.attach(cell, basicGun);
+        this.powerSystem.attach(cell, basicGun);
+        this.powerSystem.updateAllComponents();
+        const smallGunCoord = this.inventorySystem.gridIndexToPixels(1, 5);
         this.inventorySystem.place(new SmallGun(this.game, this.inventorySystem, smallGunCoord.x, smallGunCoord.y));
-
-        // const cellCoord = this.inventorySystem.gridIndexToPixels(5, 3);
-        // this.inventorySystem.place(new EnergyCell(this.game, this.inventorySystem, cellCoord.x, cellCoord.y));
 
         // const cellHDCoord = this.inventorySystem.gridIndexToPixels(6, 3);
         // this.inventorySystem.place(new EnergyCellHD(this.game, this.inventorySystem, cellHDCoord.x, cellHDCoord.y));
@@ -205,6 +217,11 @@ export default class Engineering {
         const inputC = this.inventorySystem.gridIndexToPixels(7, 5);
         this.inventorySystem.place(new InputC(this.game, this.inventorySystem, inputC.x, inputC.y));
 
+        const shieldGenerator = this.inventorySystem.gridIndexToPixels(5, 5);
+        this.inventorySystem.place(
+            new ShieldGenerator(this.game, this.inventorySystem, shieldGenerator.x, shieldGenerator.y),
+        );
+
         // const missileLauncher = this.inventorySystem.gridIndexToPixels(3, 2);
         // this.inventorySystem.place(new MissileLauncher(
         //     this.game,
@@ -213,8 +230,8 @@ export default class Engineering {
         //     missileLauncher.y,
         // ));
 
-        const prince = this.inventorySystem.gridIndexToPixels(3, 1);
-        this.inventorySystem.place(new Prince(this.game, this.inventorySystem, prince.x, prince.y));
+        // const prince = this.inventorySystem.gridIndexToPixels(3, 1);
+        // this.inventorySystem.place(new Prince(this.game, this.inventorySystem, prince.x, prince.y));
     }
 
     private findComponent(p: Phaser.Pointer): Phaser.Sprite | null {
