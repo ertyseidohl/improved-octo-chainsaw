@@ -93,8 +93,7 @@ export default class Engineering {
     }
 
     public preload(): void {
-        this.game.load.image("engine_1_dead", "../assets/engine_1_dead.png");
-        this.game.load.image("engine_1_live", "../assets/engine_1_live.png");
+        this.game.load.spritesheet("engine_1", "../assets/engine_1.png", 32, 64, 5);
 
         this.game.load.spritesheet("gun_1", "../assets/gun_1.png", 32, 32 * 3, 5);
 
@@ -127,15 +126,6 @@ export default class Engineering {
     }
 
     private createComps(): void {
-        this.addComponent(
-            this.game.add.sprite(
-                this.floorStartX,
-                this.floorStartY + (6 * 32),
-                "engine_1_dead",
-            ),
-            "engine1Dead",
-        );
-
         const energyCell = this.addComponent(
             this.game.add.sprite(
                 this.floorStartX + 128,
@@ -154,10 +144,12 @@ export default class Engineering {
             this.game.add.sprite(
                 this.floorStartX + 32,
                 this.floorStartY + (6 * 32),
-                "engine_1_live",
+                "engine_1",
             ),
-            "engine1Live",
+            "engine1",
         );
+        const engineAnimation: Phaser.Animation = engine1Live.animations.add("burn", [1, 2, 3, 4]);
+        engineAnimation.play(20, true);
 
         const gunOne = this.addComponent(
             this.game.add.sprite(

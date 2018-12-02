@@ -26,7 +26,8 @@ export default class Startup extends Phaser.State {
     private enemyCollisionGroup: Phaser.Physics.P2.CollisionGroup;
     private bulletCollisionGroup: Phaser.Physics.P2.CollisionGroup;
     private worldCollisionGroup: Phaser.Physics.P2.CollisionGroup;
-    private background: Phaser.TileSprite;
+    private backgrounds: Phaser.TileSprite[] = [];
+    private background: Phaser.Sprite;
 
     // Enemy vars
     private enemyCreateCoolDwn = 1000;
@@ -50,8 +51,12 @@ export default class Startup extends Phaser.State {
         this.game.load.image("enemy", "../assets/enemy_1.png");
         this.game.load.image("border", "../assets/border.png");
         this.game.load.image("bullet", "../assets/laser.png");
-
+        this.game.load.spritesheet("prince", "../assets/prince.png", 128, 128, 4);
+        this.game.load.spritesheet("explosion", "../assets/explosion.png", 64, 64, 6);
+        this.game.load.image("background", "../assets/background.png");
         this.game.load.image("stars_1", "../assets/stars_1.png");
+        this.game.load.image("stars_2", "../assets/stars_2.png");
+        this.game.load.image("stars_3", "../assets/stars_3.png");
         this.engineering.preload();
     }
 
@@ -91,13 +96,45 @@ export default class Startup extends Phaser.State {
         );
 
         // background
-        this.background = this.game.add.tileSprite(
+        this.background = this.game.add.sprite(
+            this.shmupBounds.x,
+            this.shmupBounds.y,
+            "background",
+        );
+
+        this.backgrounds.push(this.game.add.tileSprite(
             this.shmupBounds.x,
             this.shmupBounds.y,
             this.shmupBounds.width,
             this.shmupBounds.height,
             "stars_1",
-        );
+        ));
+
+        this.backgrounds.push(this.game.add.tileSprite(
+            this.shmupBounds.x,
+            this.shmupBounds.y,
+            this.shmupBounds.width,
+            this.shmupBounds.height,
+            "stars_2",
+        ));
+
+        this.backgrounds.push(this.game.add.tileSprite(
+            this.shmupBounds.x,
+            this.shmupBounds.y,
+            this.shmupBounds.width,
+            this.shmupBounds.height,
+            "stars_3",
+        ));
+
+        // explosion test
+        const explosion: Phaser.Sprite = this.game.add.sprite(300, 300, "explosion");
+        explosion.animations.add("explode");
+        explosion.animations.getAnimation("explode").play(30, false, true);
+
+        // prince test
+        const prince: Phaser.Sprite = this.game.add.sprite(100, 100, "prince");
+        prince.animations.add("glow");
+        prince.animations.getAnimation("glow").play(3, true);
 
         // setup engineering
         this.engineering.create();
@@ -142,7 +179,9 @@ export default class Startup extends Phaser.State {
 
     public update(): void {
         this.updateShmup();
-        this.background.tilePosition.y += 2;
+        for (let i: number = 0; i < this.backgrounds.length; i++) {
+            this.backgrounds[i].tilePosition.y += (i + 1);
+        }
         this.engineering.update();
     }
 
