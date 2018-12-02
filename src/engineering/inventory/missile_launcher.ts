@@ -1,4 +1,5 @@
 import { BaseComponent } from "./base_component";
+import { PowerConsumerStateConfig, PowerFunction, StateConfig } from "./component_state";
 import { Constraints, InventorySystem } from "./system";
 
 export class MissileLauncher extends BaseComponent {
@@ -18,6 +19,15 @@ export class MissileLauncher extends BaseComponent {
         return [
             "This fires 4 missiles at once, which is 4 times more than one missile!",
         ];
+    }
+
+    public getStateConfig(): StateConfig {
+        return {
+            powerSource: {
+                power: 4,
+            },
+            powerConsumer: null,
+        };
     }
 
     public getPower(): number {

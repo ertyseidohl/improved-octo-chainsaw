@@ -1,12 +1,12 @@
 export enum PowerFunction {
     StepFunction,
     Fractional,
-    Source,
+    OnOff,
 }
 
 export interface StateConfig {
-    powerConsumer: PowerConsumerStateConfig;
-    powerSource: PowerSourceStateConfig;
+    powerConsumer?: PowerConsumerStateConfig;
+    powerSource?: PowerSourceStateConfig;
 }
 
 export interface PowerSourceStateConfig {

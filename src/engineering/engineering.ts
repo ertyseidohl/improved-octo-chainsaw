@@ -7,7 +7,7 @@ import { InputC } from "./inventory/input_c";
 import { InputX } from "./inventory/input_x";
 import { InputZ } from "./inventory/input_z";
 import { Prince } from "./inventory/prince";
-import { MissileLauncher } from "./inventory/missile_launcher";
+// import { MissileLauncher } from "./inventory/missile_launcher";
 import { BasicShip, InventorySystem, NUM_TILE_SPRITES} from "./inventory/system";
 
 import Chain from "./chain";

@@ -1,4 +1,5 @@
 import { BaseComponent } from "./base_component";
+import { StateConfig } from "./component_state";
 import { Constraints, InventorySystem } from "./system";
 
 export abstract class BaseInput extends BaseComponent {
@@ -9,6 +10,15 @@ export abstract class BaseInput extends BaseComponent {
 
     public getPower(): number {
         return 0;
+    }
+
+    public getStateConfig(): StateConfig {
+        return {
+            powerSource: {
+                power: 0,
+            },
+            powerConsumer: null,
+        };
     }
 
 }

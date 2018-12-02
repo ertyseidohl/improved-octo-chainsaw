@@ -1,4 +1,5 @@
 import { BaseComponent } from "./base_component";
+import { StateConfig } from "./component_state";
 import {  Constraints, InventorySystem } from "./system";
 
 export class Prince extends BaseComponent {
@@ -14,6 +15,15 @@ export class Prince extends BaseComponent {
         return [
             "Returning this [pri]mary [n]etwork [c]ontrol [e]lement is your objective!",
         ];
+    }
+
+    public getStateConfig(): StateConfig {
+        return {
+            powerSource: {
+                power: 4,
+            },
+            powerConsumer: null,
+        };
     }
 
     public getPower(): number {
