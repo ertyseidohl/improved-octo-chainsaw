@@ -1,5 +1,6 @@
 import { BaseComponent } from "./base_component";
-import {  Constraints, InventorySystem } from "./system";
+import { PowerFunction, StateConfig } from "./component_state";
+import { Constraints, InventorySystem } from "./system";
 
 export class Engine extends BaseComponent {
 
@@ -14,13 +15,22 @@ export class Engine extends BaseComponent {
         return Constraints.BACK;
     }
 
+    public getStateConfig(): StateConfig {
+        return {
+            powerSource: null,
+            powerConsumer: {
+                powerLoad: 2,
+                minPowerDraw: 0,
+                powerFunction: PowerFunction.Fractional,
+                powerFunctionSteps: null,
+            },
+        };
+    }
+
     public getDescription(): string[] {
         return [
             "This engine can burn kerosene, oil, antimatter, and three kinds of aliens for fuel.",
         ];
     }
 
-    public getPower(): number {
-        return -2;
-    }
 }
