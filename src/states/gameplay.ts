@@ -86,6 +86,11 @@ export default class Startup extends Phaser.State {
         this.game.load.image("stars_1", "../assets/stars_1.png");
         this.game.load.image("stars_2", "../assets/stars_2.png");
         this.game.load.image("stars_3", "../assets/stars_3.png");
+
+        this.game.load.spritesheet("button_z", "../assets/button_z.png", 32, 32, 2);
+        this.game.load.spritesheet("button_x", "../assets/button_x.png", 32, 32, 2);
+        this.game.load.spritesheet("button_c", "../assets/button_c.png", 32, 32, 2);
+
         this.engineering.preload();
     }
 
@@ -156,11 +161,6 @@ export default class Startup extends Phaser.State {
             this.shmupBounds.height,
             "stars_3",
         ));
-
-        // prince test
-        const prince: Phaser.Sprite = this.game.add.sprite(100, 100, "prince");
-        prince.animations.add("glow");
-        prince.animations.getAnimation("glow").play(3, true);
 
         // setup engineering
         this.engineering.create();
