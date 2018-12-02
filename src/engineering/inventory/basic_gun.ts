@@ -10,4 +10,11 @@ export class BasicGun extends BaseComponent {
         gunFireAnimation.play(20, true);
     }
 
+    public getDescription(): string[] {
+        return [
+            "The GK-305 model is the hottest on the market! No seriously, you'll need, like, three heatsinks.",
+            "Power Draw: $$",
+        ];
+    }
+
 }

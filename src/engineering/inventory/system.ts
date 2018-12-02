@@ -111,7 +111,7 @@ export class InventorySystem {
 
         const ix = Math.floor(dx / this.tileWidth);
         const iy = Math.floor(dy / this.tileHeight);
-    
+
         return {
             x: ix,
             y: iy,
