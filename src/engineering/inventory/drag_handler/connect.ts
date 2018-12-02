@@ -1,6 +1,7 @@
 // DEPENDENCIES
 import { BaseComponent } from "../base_component";
 import { BaseDragHandler } from "./base";
+
 import { InventorySystem } from "../system";
 
 // TYPES
@@ -144,6 +145,4 @@ export class ConnectDragHandler extends BaseDragHandler {
     get wires(): Phaser.Group {
         return this.wiresGroup;
     }
-
 }
-
