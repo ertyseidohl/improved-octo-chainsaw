@@ -32,6 +32,7 @@ export default class Startup extends Phaser.State {
     private powerupCollisionGroup: Phaser.Physics.P2.CollisionGroup;
     private backgrounds: Phaser.TileSprite[] = [];
     private background: Phaser.Sprite;
+    private playerDeathQueue: Phaser.Sprite[] = [];
 
     // Enemy vars
     private enemyCreateCoolDwn = ENEMY_SPAWN_TIME;
@@ -158,6 +159,7 @@ export default class Startup extends Phaser.State {
         this.player.body.setCollisionGroup(this.playerCollisionGroup);
         this.player.body.collides(this.worldCollisionGroup);
         this.player.body.collides(this.enemyCollisionGroup);
+        this.player.body.collides(this.bulletCollisionGroup);
 
         this.player.setBulletsCollisionGroup(this.bulletCollisionGroup);
         this.player.setBulletsCollides(this.enemyCollisionGroup, this.bulletHitEnemy, this);
@@ -203,6 +205,13 @@ export default class Startup extends Phaser.State {
             this.backgrounds[i].tilePosition.y += (i + 1);
         }
         this.engineering.update();
+
+
+        if (this.playerDeathQueue.length && Math.random() < 0.2) {
+            const playerDeathExplosion: Phaser.Sprite = this.playerDeathQueue.pop();
+            playerDeathExplosion.visible = true;
+            playerDeathExplosion.animations.getAnimation("explode").play(30, false, true);
+        }
     }
 
     private updateShmup(): void {
@@ -232,21 +241,47 @@ export default class Startup extends Phaser.State {
 
         if (bullet.sprite.alive) {
             enemy.sprite.damage(1);
-            console.log(enemy.sprite.width);
         }
 
         if (enemy.sprite.health <= 0) {
             const deathExplosion: Phaser.Sprite = this.groupExplosions.getFirstExists(false);
-            deathExplosion.reset(enemy.x, enemy.y);
-            deathExplosion.play("explode", 30, false, true);
+            if (deathExplosion) {
+                deathExplosion.reset(enemy.x, enemy.y);
+                deathExplosion.play("explode", 30, false, true);
+            }
         }
 
         bullet.sprite.kill();
     }
 
     private bulletHitPlayer(bullet: Phaser.Physics.P2.Body, player: Phaser.Physics.P2.Body): void {
+        const explosion: Phaser.Sprite = this.groupExplosionsSmall.getFirstExists(false);
+        if (explosion) {
+            explosion.reset(bullet.x, bullet.y);
+            explosion.play("explode", 30, false, true);
+        }
+
+        player.sprite.damage(1);
+
+        if (player.sprite.health <= 0) {
+            this.playerIsDead(this.player);
+        }
+
         bullet.sprite.kill();
-        player.sprite.kill();
+    }
+
+    private playerIsDead(player: Phaser.Sprite): void {
+        for (let i: number = 0; i < 30; i++) {
+            const deathExplosion: Phaser.Sprite = this.groupExplosions.getFirstExists(false);
+            if (deathExplosion) {
+                deathExplosion.reset(
+                    player.x + ((Math.random() * 200) - 100),
+                    player.y + ((Math.random() * 200) - 100),
+                );
+                deathExplosion.visible = false;
+                this.playerDeathQueue.push(deathExplosion);
+            }
+        }
     }
 
     private powerUpHitPlayer(): void {

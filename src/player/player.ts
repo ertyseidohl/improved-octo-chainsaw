@@ -2,6 +2,7 @@ const PLAYER_SPEED: number = 400; // EVAN wanted this faster
 const PLAYER_SCALE: number = 2;
 
 const BULLET_SPEED: number = 700;
+const MAX_HEALTH: number = 1;
 
 export default class Player extends Phaser.Sprite {
     public playerBody: Phaser.Physics.P2.Body;
@@ -24,6 +25,9 @@ export default class Player extends Phaser.Sprite {
         this.playerBody = this.body;
 
         this.playerBody.fixedRotation = true; // forbid rotation
+
+        this.maxHealth = MAX_HEALTH;
+        this.health = this.maxHealth;
 
         // input
         this.keyUp = this.game.input.keyboard.addKey(Phaser.Keyboard.UP);
