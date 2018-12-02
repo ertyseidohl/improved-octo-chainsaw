@@ -1,3 +1,5 @@
+import { ENEMY_WAVE } from "../constants";
+
 const ENEMY_SPEED_MIN: number = 100;
 const ENEMY_SPEED_MAX: number = 200;
 const DIR_MIN: number = 0;
@@ -18,6 +20,7 @@ export default class BaseEnemy extends Phaser.Sprite {
     private BOUND_Y_MAX: number = this.game.height - this.height;
     private actionTime: number;
     private shootTime: number;
+    private waveType: number;
 
     public constructor(game: Phaser.Game, x: number, y: number, key: string) {
         super(game, x, y, key);
@@ -26,6 +29,7 @@ export default class BaseEnemy extends Phaser.Sprite {
         this.enemyBody.fixedRotation = true;
         this.actionTime = this.game.time.now + this.game.rnd.integerInRange(0, ACTION_TIME_MAX);
         this.shootTime = this.game.time.now + this.game.rnd.integerInRange(0, SHOOT_TIME_MAX);
+        this.waveType = ENEMY_WAVE.NONE;
 
         this.maxHealth = HEALTH_MAX;
 
@@ -64,54 +68,71 @@ export default class BaseEnemy extends Phaser.Sprite {
         }
         super.update();
 
-        if (!this.isInWindow()) {
-            this.enemyBody.velocity.y = ENEMY_SPEED_MAX;
-        } else {
-            if (this.game.time.now >= this.actionTime) {
-                // re-assign action time
-                this.actionTime = this.game.time.now + this.game.rnd.integerInRange(ACTION_TIME_MIN, ACTION_TIME_MAX);
+        switch (this.waveType) {
+            case ENEMY_WAVE.NONE:
+            break;
+            case ENEMY_WAVE.RANDOM:
+            if (!this.isInWindow()) {
+                this.enemyBody.velocity.y = ENEMY_SPEED_MAX;
+            } else {
+                if (this.game.time.now >= this.actionTime) {
+                    // re-assign action time
+                    this.actionTime = this.game.time.now + 
+                        this.game.rnd.integerInRange(ACTION_TIME_MIN, ACTION_TIME_MAX);
 
-                // randomize velocities
-                let direction: number = this.game.rnd.integerInRange(DIR_MIN, DIR_MAX); // get either 0, or 1;
-                if (direction === 0) {
-                    direction = -1;
+                    // randomize velocities
+                    let direction: number = this.game.rnd.integerInRange(DIR_MIN, DIR_MAX); // get either 0, or 1;
+                    if (direction === 0) {
+                        direction = -1;
+                    }
+                    let speed: number = this.game.rnd.integerInRange(ENEMY_SPEED_MIN, ENEMY_SPEED_MAX);
+                    this.enemyBody.velocity.x = speed * direction;
+
+                    direction = this.game.rnd.integerInRange(DIR_MIN, DIR_MAX); // get either -1, 0, or 1;
+                    if (direction === 0) {
+                        direction = -1;
+                    }
+                    speed = this.game.rnd.integerInRange(ENEMY_SPEED_MIN, ENEMY_SPEED_MAX);
+                    this.enemyBody.velocity.y = speed * direction;
                 }
-                let speed: number = this.game.rnd.integerInRange(ENEMY_SPEED_MIN, ENEMY_SPEED_MAX);
-                this.enemyBody.velocity.x = speed * direction;
 
-                direction = this.game.rnd.integerInRange(DIR_MIN, DIR_MAX); // get either -1, 0, or 1;
-                if (direction === 0) {
-                    direction = -1;
+                // shoot
+                if (this.game.time.now >= this.shootTime) {
+                    this.shootTime = this.game.time.now + this.game.rnd.integerInRange(SHOOT_TIME_MIN, SHOOT_TIME_MAX);
+                    this.shoot();
                 }
-                speed = this.game.rnd.integerInRange(ENEMY_SPEED_MIN, ENEMY_SPEED_MAX);
-                this.enemyBody.velocity.y = speed * direction;
-            }
 
-            // shoot
-            if (this.game.time.now >= this.shootTime) {
-                this.shootTime = this.game.time.now + this.game.rnd.integerInRange(SHOOT_TIME_MIN, SHOOT_TIME_MAX);
-                this.shoot();
+                // boundaries
+                if (this.enemyBody.x < this.BOUND_X_MIN) {
+                    this.enemyBody.x = this.BOUND_X_MIN;
+                    this.enemyBody.velocity.x = -this.enemyBody.velocity.x;
+                }
+                if (this.enemyBody.x > this.BOUND_X_MAX) {
+                    this.enemyBody.x = this.BOUND_X_MAX;
+                    this.enemyBody.velocity.x = - this.enemyBody.velocity.x;
+                }
+                if (this.enemyBody.y < this.BOUND_Y_MIN) {
+                    this.enemyBody.y = this.BOUND_Y_MIN;
+                    this.enemyBody.velocity.y = -this.enemyBody.velocity.y;
+                }
+                if (this.enemyBody.y > this.BOUND_Y_MAX) {
+                    this.enemyBody.y = this.BOUND_Y_MAX;
+                    this.enemyBody.velocity.y = - this.enemyBody.velocity.y;
+                }
             }
-
-            // boundaries
-            if (this.enemyBody.x < this.BOUND_X_MIN) {
-                this.enemyBody.x = this.BOUND_X_MIN;
-                this.enemyBody.velocity.x = -this.enemyBody.velocity.x;
-            }
-            if (this.enemyBody.x > this.BOUND_X_MAX) {
-                this.enemyBody.x = this.BOUND_X_MAX;
-                this.enemyBody.velocity.x = - this.enemyBody.velocity.x;
-            }
-            if (this.enemyBody.y < this.BOUND_Y_MIN) {
-                this.enemyBody.y = this.BOUND_Y_MIN;
-                this.enemyBody.velocity.y = -this.enemyBody.velocity.y;
-            }
-            if (this.enemyBody.y > this.BOUND_Y_MAX) {
-                this.enemyBody.y = this.BOUND_Y_MAX;
-                this.enemyBody.velocity.y = - this.enemyBody.velocity.y;
-            }
+            break;
+            case ENEMY_WAVE.SWOOP:
+            break;
+            case ENEMY_WAVE.BIGV:
+            break;
+            case ENEMY_WAVE.ROWS:
+            break;
         }
 
+    }
+
+    public setWaveType(type: number): void {
+        this.waveType = type;
     }
 
     private shoot(): void {
