@@ -1,5 +1,5 @@
 import { BaseComponent } from "./base_component";
-import { InventorySystem } from "./system";
+import { Constraints, InventorySystem } from "./system";
 
 export class BasicGun extends BaseComponent {
 
@@ -8,6 +8,10 @@ export class BasicGun extends BaseComponent {
 
         const gunFireAnimation: Phaser.Animation = this.animations.add("fire");
         gunFireAnimation.play(20, true);
+    }
+
+    public getPlacementConstraint(): Constraints {
+        return Constraints.FRONT;
     }
 
     public getDescription(): string[] {

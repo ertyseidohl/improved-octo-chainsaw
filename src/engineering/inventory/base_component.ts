@@ -1,4 +1,4 @@
-import { InventorySystem } from "./system";
+import { Constraints, InventorySystem } from "./system";
 
 interface StateConfig {
     tint: number;
@@ -65,6 +65,10 @@ export abstract class BaseComponent extends Phaser.Sprite {
 
     public getTileHeight(): number {
         return this.tileHeight;
+    }
+
+    public getPlacementConstraint(): Constraints {
+        return null;
     }
 
     private updateFromState() {
