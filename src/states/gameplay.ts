@@ -300,7 +300,7 @@ export default class Startup extends Phaser.State {
                 this.spawnEnmyNumber++;
                 const minX: number = ENEMY_WIDTH;
                 const maxX: number = this.shmupBounds.width - this.borderSprite.width / 2 - ENEMY_WIDTH;
-                this.createEnemy(this.spawnWaveType, this.game.rnd.integerInRange(minX, maxX))
+                this.createEnemy(this.spawnWaveType, this.game.rnd.integerInRange(minX, maxX));
             }
             // check for end of wave
             if (this.spawnEnmyNumber >= WAVE_RANDOM_ENEMY_MAX) {
