@@ -76,6 +76,10 @@ export abstract class BaseComponent extends Phaser.Sprite {
         return null;
     }
 
+    public updatePower(power: number): void {
+        return this.componentState.updatePower(power);
+    }
+
     private updateFromState() {
         const modifiers = this.stateModifiers[this.dragState];
 

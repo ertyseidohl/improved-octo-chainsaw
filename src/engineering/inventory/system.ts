@@ -145,10 +145,6 @@ export class InventorySystem {
 
         if (currentConstraints !== null) {
             const tileset = this.constraintMap[currentConstraints];
-            console.log(
-                this.intersectionWithTileSet(testIndexes, tileset),
-                this.constraintCountMap[currentConstraints],
-            );
             if (this.intersectionWithTileSet(testIndexes, tileset) < this.constraintCountMap[currentConstraints]) {
                 return false;
             }
@@ -263,7 +259,6 @@ export class InventorySystem {
     }
 
     private intersectionWithTileSet(indexes: Index[], tileSet: Set<SerializedIndex>): number {
-        console.log(indexes);
         let numIntersections: number = 0;
         for (const index of indexes) {
             if (tileSet.has(index.toSerializedString())) {
