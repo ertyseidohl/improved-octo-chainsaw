@@ -10,7 +10,7 @@ import { Prince } from "./inventory/prince";
 import { ShieldGenerator } from "./inventory/shield_generator";
 import { SmallGun } from "./inventory/small_gun";
 // import { MissileLauncher } from "./inventory/missile_launcher";
-import { BasicShip, InventorySystem, NUM_TILE_SPRITES} from "./inventory/system";
+import { BasicShip, InventorySystem, NUM_TILE_SPRITES } from "./inventory/system";
 
 import Chain from "./chain";
 
@@ -91,9 +91,9 @@ class Connections {
 
 }
 
-                             // =================
-                             // class Engineering
-                             // =================
+// =================
+// class Engineering
+// =================
 
 export default class Engineering {
 
@@ -120,7 +120,6 @@ export default class Engineering {
             this.game,
             600, 100,
             32, 32,
-            10, 12,
             BasicShip,
         );
 

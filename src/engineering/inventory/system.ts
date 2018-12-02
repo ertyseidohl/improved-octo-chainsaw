@@ -22,16 +22,31 @@ export enum Constraints {
     DOUBLE_BACK,
 }
 
-export const BasicShip = [
-    [0, 0, 0, 0, null, null, 0, 0, 0, 0],
-    [0, 0, 0, null, null, null, null, 0, 0, 0],
-    [0, 0, 0, null, null, null, null, 0, 0, 0],
-    [0, 0, 0, null, null, null, null, 0, 0, 0],
-    [0, 0, null, null, null, null, null, null, 0, 0],
-    [0, null, null, null, null, null, null, null, null, 0],
-    [null, null, null, null, null, null, null, null, null, null],
-    [0, 0, null, null, 0, 0, null, null, 0, 0],
-];
+interface Ship {
+    map: BaseComponentOrEmpty[][];
+    cargoHoldYStart: number;
+}
+
+export const BasicShip: Ship = {
+    map: [
+        [0, 0, 0, 0, null, null, 0, 0, 0, 0],
+        [0, 0, 0, null, null, null, null, 0, 0, 0],
+        [0, 0, 0, null, null, null, null, 0, 0, 0],
+        [0, 0, 0, null, null, null, null, 0, 0, 0],
+        [0, 0, null, null, null, null, null, null, 0, 0],
+        [0, null, null, null, null, null, null, null, null, 0],
+        [null, null, null, null, null, null, null, null, null, null],
+        [0, 0, null, null, 0, 0, null, null, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        [0, null, null, null, null, null, null, null, null, 0],
+        [null, null, null, null, null, null, null, null, null, null],
+        [null, null, null, null, null, null, null, null, null, null],
+        [0, null, null, null, null, null, null, null, null, 0],
+    ],
+    cargoHoldYStart: 10,
+};
 
 class Index {
     public x: number;
@@ -60,6 +75,7 @@ export class InventorySystem {
     private height: number;
 
     private game: Phaser.Game;
+    private ship: Ship;
     private tiles: Phaser.Group;
     private tileGrid: Phaser.Sprite[][];
 
@@ -75,12 +91,13 @@ export class InventorySystem {
 
     constructor(game: Phaser.Game, x: number, y: number,
                 tileWidth: number, tileHeight: number,
-                startingWidth: number, startingHeight: number, shipMap: BaseComponentOrEmpty[][]) {
+                ship: Ship) {
 
         this.game = game;
+        this.ship = ship;
 
-        this.width = startingWidth;
-        this.height = startingHeight;
+        this.height = ship.map.length;
+        this.width = ship.map[0].length;
 
         this.x = x;
         this.y = y;
@@ -88,19 +105,7 @@ export class InventorySystem {
         this.tileHeight = tileHeight;
         this.tileWidth = tileWidth;
 
-        if (shipMap) {
-            this.grid = shipMap;
-            this.height = shipMap.length;
-            this.width = shipMap[0].length;
-        } else  {
-            this.grid = [];
-            for (let i = 0; i < this.height; i++) {
-                this.grid[i] = [];
-                for (let j = 0; j < this.width; j ++) {
-                    this.grid[i][j] = null;
-                }
-            }
-        }
+        this.grid = ship.map;
 
         this.displayText = new Phaser.Text(
             this.game,
@@ -135,6 +140,7 @@ export class InventorySystem {
     public release(component: BaseComponent): void {
         const index = this.pixelToGridIndex(component.x, component.y, true);
         const indexes = this.generate_indexes(index, component.tileWidth, component.tileHeight);
+        component.onShip = false;
         indexes.map((i) => this.grid[i.y][i.x] = null);
     }
 
@@ -142,6 +148,10 @@ export class InventorySystem {
         const index = this.pixelToGridIndex(component.x, component.y, true);
         const testIndexes = this.generate_indexes(index, component.tileWidth, component.tileHeight);
         const currentConstraints: Constraints = component.getPlacementConstraint();
+
+        if (index.y > this.ship.cargoHoldYStart) {
+            return this.allNone(testIndexes);
+        }
 
         if (currentConstraints !== null) {
             const tileset = this.constraintMap[currentConstraints];
@@ -160,6 +170,12 @@ export class InventorySystem {
         const index = this.pixelToGridIndex(component.x, component.y, true);
         const indexes = this.generate_indexes(index, component.tileWidth, component.tileHeight);
         indexes.map((i) => this.grid[i.y][i.x] = component);
+
+        if (index.y > this.ship.cargoHoldYStart) {
+            component.onShip = false;
+        } else {
+            component.onShip = true;
+        }
 
         return this.gridIndexToPixels(index.x, index.y);
     }

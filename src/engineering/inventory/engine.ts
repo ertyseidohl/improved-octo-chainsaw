@@ -4,11 +4,22 @@ import { Constraints, InventorySystem } from "./system";
 
 export class Engine extends BaseComponent {
 
+    private animating: boolean = false;
+
     constructor(game: Phaser.Game, inventorySystem: InventorySystem, x: number, y: number) {
         super(game, inventorySystem, x, y, "engine_1", 1, 2);
+    }
 
-        const engineAnimation: Phaser.Animation = this.animations.add("burn", [1, 2, 3, 4]);
-        engineAnimation.play(20, true);
+    public update(): void {
+        if (this.onShip && !this.animating) {
+            this.animating = true;
+            const engineAnimation: Phaser.Animation = this.animations.add("burn", [1, 2, 3, 4]);
+            engineAnimation.play(20, true);
+        } else if (!this.onShip) {
+            this.animating = false;
+            this.animations.getAnimation("burn").stop();
+            this.frame = 0;
+        }
     }
 
     public getPlacementConstraint(): Constraints {

@@ -2,23 +2,13 @@ import BaseEnemy from "../enemies/base_enemy";
 
 import { ENEMY_WAVE } from "../constants";
 
-import { Game } from "phaser-ce";
-import { PhaserTextStyle } from "phaser-ce";
-import { BasicGun } from "../engineering/inventory/basic_gun";
-import { InventorySystem } from "../engineering/inventory/system";
-
 import Engineering from "../engineering/engineering";
 import Player from "../player/player";
 
 // constants
-const ENEMY_SPEED: number = 100;
-const ENEMY_SCALE: number = 1.5;
-const BULLET_SCALE: number = 1;
 const ENEMY_POOL_COUNT: number = 30;
 const ENEMY_SPAWN_TIME: number = 2000;
 const ENEMY_Y_SPAWN: number = -20;
-const EXPLOSION_X_OFFSET: number = -20;
-const EXPLOSTION_Y_OFFSET: number = 0;
 const ENEMY_WIDTH: number = 100; // spacing number for spawning enemies
 
 // wave constants
@@ -53,17 +43,11 @@ enum SWOOP_TYPE {
 export default class Startup extends Phaser.State {
     // game objects
     private player: Player;
-    private enemy: Phaser.Sprite;
-    private bullet: Phaser.Sprite;
-    private enemyBody: Phaser.Physics.P2.Body; // same deal for enemy and all others
-    private bulletBody: Phaser.Physics.P2.Body;
     private playerCollisionGroup: Phaser.Physics.P2.CollisionGroup;
     private enemyCollisionGroup: Phaser.Physics.P2.CollisionGroup;
     private bulletCollisionGroup: Phaser.Physics.P2.CollisionGroup;
     private worldCollisionGroup: Phaser.Physics.P2.CollisionGroup;
-    private powerupCollisionGroup: Phaser.Physics.P2.CollisionGroup;
     private backgrounds: Phaser.TileSprite[] = [];
-    private background: Phaser.Sprite;
     private playerDeathQueue: Phaser.Sprite[] = [];
     private spawnEnmyNumber: number; // we'll use this variable for all wave types
     private spawnWaveTime: number;
@@ -129,7 +113,6 @@ export default class Startup extends Phaser.State {
         this.bulletCollisionGroup = this.game.physics.p2.createCollisionGroup();
         this.worldCollisionGroup = this.game.physics.p2.createCollisionGroup();
         this.enemyCollisionGroup = this.game.physics.p2.createCollisionGroup();
-        this.powerupCollisionGroup = this.game.physics.p2.createCollisionGroup();
 
         // This part is vital if you want the objects
         // with their own collision groups to still collide with the world bounds
@@ -159,7 +142,7 @@ export default class Startup extends Phaser.State {
         this.engineering.bounds = this.engineeringBounds;
 
         // background
-        this.background = this.game.add.sprite(
+        this.game.add.sprite(
             this.shmupBounds.x,
             this.shmupBounds.y,
             "background",

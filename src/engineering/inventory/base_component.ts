@@ -11,6 +11,8 @@ export abstract class BaseComponent extends Phaser.Sprite {
     public tileWidth: number;
     public tileHeight: number;
 
+    public onShip: boolean;
+
     private stateModifiers: { [s: string]: DragStateConfig} = {
         draggingOkay: {
             tint: Phaser.Color.WHITE,
