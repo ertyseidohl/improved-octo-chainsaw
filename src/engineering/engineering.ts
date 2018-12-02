@@ -13,6 +13,7 @@ import { SmallGun } from "./inventory/small_gun";
 
 import { PowerSubSystem } from "./inventory/power_subsystem";
 import { BasicShip, InventorySystem, NUM_TILE_SPRITES} from "./inventory/system";
+import { MultiDragHandler } from "./inventory/drag_handler/multi";
 
 import Chain from "./chain";
 
@@ -125,6 +126,7 @@ export default class Engineering {
             32, 32,
             BasicShip,
         );
+        this.inventorySystem.dragHandler = new MultiDragHandler(this.inventorySystem);
 
         this.powerSystem = new PowerSubSystem();
 

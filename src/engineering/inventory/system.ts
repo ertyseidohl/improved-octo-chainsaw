@@ -1,5 +1,6 @@
 import { Game } from "phaser-ce";
 import { BaseComponent } from "./base_component";
+import { BaseDragHandler } from "./drag_handler/base";
 
 export const NUM_TILE_SPRITES = 9;
 
@@ -66,6 +67,8 @@ export interface Coordinate {
 }
 
 export class InventorySystem {
+
+    public dragHandler: BaseDragHandler;
 
     private x: number;
     private y: number;

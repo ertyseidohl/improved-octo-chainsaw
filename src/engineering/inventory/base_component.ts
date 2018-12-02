@@ -1,11 +1,6 @@
 import { ComponentState, StateConfig } from "./component_state";
 import { Constraints, InventorySystem } from "./system";
 
-interface DragStateConfig {
-    tint: number;
-    alpha: number;
-}
-
 export abstract class BaseComponent extends Phaser.Sprite {
 
     public tileWidth: number;
@@ -13,22 +8,6 @@ export abstract class BaseComponent extends Phaser.Sprite {
 
     public onShip: boolean;
 
-    private stateModifiers: { [s: string]: DragStateConfig} = {
-        draggingOkay: {
-            tint: Phaser.Color.WHITE,
-            alpha: 0.5,
-        },
-        draggingBad: {
-            tint: Phaser.Color.RED,
-            alpha: 0.5,
-        },
-        locked : {
-            tint: Phaser.Color.WHITE,
-            alpha: 1.0,
-        },
-    };
-
-    private dragState: string = "locked";
     private inventorySystem: InventorySystem;
 
     private componentState: ComponentState;
@@ -82,47 +61,16 @@ export abstract class BaseComponent extends Phaser.Sprite {
         return this.componentState.updatePower(power);
     }
 
-    private updateFromState() {
-        const modifiers = this.stateModifiers[this.dragState];
-
-        this.tint = modifiers.tint;
-        this.alpha = modifiers.alpha;
+    private onDragStart(): void {
+        this.inventorySystem.dragHandler.dragStart(this);
     }
 
-    private onDragStart(sprite: Phaser.Sprite, pointer: Phaser.Pointer): void {
-        this.dragState = "draggingOkay";
-        this.bringToTop();
-
-        this.oldX = this.x;
-        this.oldY = this.y;
-
-        this.inventorySystem.release(this);
-        this.updateFromState();
+    private onDragStop(): void {
+        this.inventorySystem.dragHandler.dragStop(this);
     }
 
-    private onDragStop(sprite: Phaser.Sprite, pointer: Phaser.Pointer): void {
-        this.dragState = "locked";
-
-        if (this.inventorySystem.test(this)) {
-            const coord = this.inventorySystem.place(this);
-            this.x = coord.x;
-            this.y = coord.y;
-        } else {
-            this.x = this.oldX;
-            this.y = this.oldY;
-            this.inventorySystem.place(this);
-        }
-
-        this.updateFromState();
-    }
-
-    private onDragUpdate(sprite: Phaser.Sprite, pointer: Phaser.Pointer): void {
-        if (! this.inventorySystem.test(this)) {
-            this.dragState = "draggingBad";
-        } else {
-            this.dragState = "draggingOkay";
-        }
-        this.updateFromState();
+    private onDragUpdate(): void {
+        this.inventorySystem.dragHandler.dragUpdate(this);
     }
 
     private onInputOver(): void {
