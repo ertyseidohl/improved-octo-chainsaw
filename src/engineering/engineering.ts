@@ -13,6 +13,7 @@ import { SmallGun } from "./inventory/small_gun";
 
 import { PowerSubSystem } from "./inventory/power_subsystem";
 import { BasicShip, InventorySystem, NUM_TILE_SPRITES} from "./inventory/system";
+
 import { HandlerType, MultiDragHandler } from "./inventory/drag_handler/multi";
 
 // =================
@@ -160,14 +161,14 @@ export default class Engineering {
 
     private dragSwitchPressed(dragSwitch: Phaser.Sprite, p: Phaser.Pointer) {
         switch (this.dragHandler.handler) {
-            case HandlerType.MOVE: {  // transition to 'CONNECT'
+            case HandlerType.MOVE:  // transition to 'CONNECT'
                 this.dragBitmap.fill(0, 255, 0);
                 this.dragHandler.handler = HandlerType.CONNECT;
-            } break;
-            case HandlerType.CONNECT: {  // transition to 'MOVE'
+                break;
+            case HandlerType.CONNECT:  // transition to 'MOVE'
                 this.dragBitmap.fill(255, 0, 0);
                 this.dragHandler.handler = HandlerType.MOVE;
-            } break;
+                break;
         }
     }
 
