@@ -96,12 +96,6 @@ export default class BaseEnemy extends Phaser.Sprite {
                     this.enemyBody.velocity.y = speed * direction;
                 }
 
-                // shoot
-                if (this.game.time.now >= this.shootTime) {
-                    this.shootTime = this.game.time.now + this.game.rnd.integerInRange(SHOOT_TIME_MIN, SHOOT_TIME_MAX);
-                    this.shoot();
-                }
-
                 // boundaries
                 if (this.enemyBody.x < this.BOUND_X_MIN) {
                     this.enemyBody.x = this.BOUND_X_MIN;
@@ -122,17 +116,38 @@ export default class BaseEnemy extends Phaser.Sprite {
             }
             break;
             case ENEMY_WAVE.SWOOP:
+            this.enemyBody.velocity.y = ENEMY_SPEED_MAX * 2;
+            if (this.enemyBody.y > this.BOUND_Y_MAX + this.height * 2) {
+                this.kill();
+            }
             break;
             case ENEMY_WAVE.BIGV:
+            this.enemyBody.velocity.y = ENEMY_SPEED_MAX;
+            if (this.enemyBody.y > this.BOUND_Y_MAX + this.height * 2) {
+                this.kill();
+            }
             break;
             case ENEMY_WAVE.ROWS:
+            this.enemyBody.velocity.y = ENEMY_SPEED_MAX;
+            if (this.enemyBody.y > this.BOUND_Y_MAX + this.height * 2) {
+                this.kill();
+            }
             break;
         }
 
+        // shoot (shooting is always random regardless of wave)
+        if (this.game.time.now >= this.shootTime) {
+            this.shootTime = this.game.time.now + this.game.rnd.integerInRange(SHOOT_TIME_MIN, SHOOT_TIME_MAX);
+            this.shoot();
+        }
     }
 
     public setWaveType(type: number): void {
         this.waveType = type;
+    }
+
+    public setXVel(xVel: number): void {
+        this.enemyBody.velocity.x = xVel;
     }
 
     private shoot(): void {
@@ -141,6 +156,9 @@ export default class BaseEnemy extends Phaser.Sprite {
             const bulletBody: Phaser.Physics.P2.Body = bullet.body;
             bullet.reset(this.x, this.y + 20);
             bulletBody.velocity.y = BULLET_SPEED;
+            if (this.waveType === ENEMY_WAVE.SWOOP) {
+                bulletBody.velocity.x = this.enemyBody.velocity.x;
+            }
         }
     }
 
