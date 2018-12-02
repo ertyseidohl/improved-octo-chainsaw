@@ -1,6 +1,7 @@
-import { InventorySystem } from "./system";
+import { ComponentState, StateConfig } from "./component_state";
+import { Constraints, InventorySystem } from "./system";
 
-interface StateConfig {
+interface DragStateConfig {
     tint: number;
     alpha: number;
 }
@@ -10,7 +11,7 @@ export abstract class BaseComponent extends Phaser.Sprite {
     public tileWidth: number;
     public tileHeight: number;
 
-    private stateModifiers: { [s: string]: StateConfig} = {
+    private stateModifiers: { [s: string]: DragStateConfig} = {
         draggingOkay: {
             tint: Phaser.Color.WHITE,
             alpha: 0.5,
@@ -25,8 +26,10 @@ export abstract class BaseComponent extends Phaser.Sprite {
         },
     };
 
-    private state: string = "locked";
+    private dragState: string = "locked";
     private inventorySystem: InventorySystem;
+
+    private componentState: ComponentState;
 
     private oldX: number;
     private oldY: number;
@@ -53,11 +56,13 @@ export abstract class BaseComponent extends Phaser.Sprite {
         this.events.onInputOver.add(this.onInputOver, this);
         this.events.onInputOut.add(this.onInputOver, this);
 
+        this.componentState = new ComponentState(this.getStateConfig());
+
         game.add.existing(this);
     }
 
     public abstract getDescription(): string[];
-    public abstract getPower(): number;
+    public abstract getStateConfig(): StateConfig;
 
     public getTileWidth(): number {
         return this.tileWidth;
@@ -67,15 +72,19 @@ export abstract class BaseComponent extends Phaser.Sprite {
         return this.tileHeight;
     }
 
+    public getPlacementConstraint(): Constraints {
+        return null;
+    }
+
     private updateFromState() {
-        const modifiers = this.stateModifiers[this.state];
+        const modifiers = this.stateModifiers[this.dragState];
 
         this.tint = modifiers.tint;
         this.alpha = modifiers.alpha;
     }
 
     private onDragStart(sprite: Phaser.Sprite, pointer: Phaser.Pointer): void {
-        this.state = "draggingOkay";
+        this.dragState = "draggingOkay";
         this.bringToTop();
 
         this.oldX = this.x;
@@ -86,7 +95,7 @@ export abstract class BaseComponent extends Phaser.Sprite {
     }
 
     private onDragStop(sprite: Phaser.Sprite, pointer: Phaser.Pointer): void {
-        this.state = "locked";
+        this.dragState = "locked";
 
         if (this.inventorySystem.test(this)) {
             const coord = this.inventorySystem.place(this);
@@ -95,6 +104,7 @@ export abstract class BaseComponent extends Phaser.Sprite {
         } else {
             this.x = this.oldX;
             this.y = this.oldY;
+            this.inventorySystem.place(this);
         }
 
         this.updateFromState();
@@ -102,9 +112,9 @@ export abstract class BaseComponent extends Phaser.Sprite {
 
     private onDragUpdate(sprite: Phaser.Sprite, pointer: Phaser.Pointer): void {
         if (! this.inventorySystem.test(this)) {
-            this.state = "draggingBad";
+            this.dragState = "draggingBad";
         } else {
-            this.state = "draggingOkay";
+            this.dragState = "draggingOkay";
         }
         this.updateFromState();
     }

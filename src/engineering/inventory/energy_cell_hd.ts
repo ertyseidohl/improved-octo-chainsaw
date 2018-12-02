@@ -2,26 +2,26 @@ import { BaseComponent } from "./base_component";
 import { StateConfig } from "./component_state";
 import { InventorySystem } from "./system";
 
-export class EnergyCell extends BaseComponent {
+export class EnergyCellHD extends BaseComponent {
 
     constructor(game: Phaser.Game, inventorySystem: InventorySystem, x: number, y: number) {
-        super(game, inventorySystem, x, y, "energy_cell", 1, 1);
+        super(game, inventorySystem, x, y, "energy_cell_2", 1, 1);
 
         const energyCellAnimation = this.animations.add("zap", [1, 2, 3, 4]);
-        energyCellAnimation.play(20, true);
+        energyCellAnimation.play(5, true);
     }
 
     public getStateConfig(): StateConfig {
         return {
             powerSource: {
-                power: 4,
+                power: 8,
             },
         };
     }
 
     public getDescription(): string[] {
         return [
-            "The ZZ-55000 is a real hair-raiser! Make sure to ground yourself before coming within 100 meters...",
+            "This high-density energy cell requires at least fifteen people to lift (according to Space-OSHA)",
         ];
     }
 

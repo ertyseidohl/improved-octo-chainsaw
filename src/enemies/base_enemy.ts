@@ -77,7 +77,7 @@ export default class BaseEnemy extends Phaser.Sprite {
             } else {
                 if (this.game.time.now >= this.actionTime) {
                     // re-assign action time
-                    this.actionTime = this.game.time.now + 
+                    this.actionTime = this.game.time.now +
                         this.game.rnd.integerInRange(ACTION_TIME_MIN, ACTION_TIME_MAX);
 
                     // randomize velocities

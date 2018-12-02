@@ -2,13 +2,13 @@ import { BaseComponent } from "./base_component";
 import { StateConfig } from "./component_state";
 import { Constraints, InventorySystem } from "./system";
 
-export class BasicGun extends BaseComponent {
+export class SmallGun extends BaseComponent {
 
     constructor(game: Phaser.Game, inventorySystem: InventorySystem, x: number, y: number) {
-        super(game, inventorySystem, x, y, "gun_1", 1, 3);
+        super(game, inventorySystem, x, y, "gun_small", 1, 2);
 
-        const gunFireAnimation: Phaser.Animation = this.animations.add("fire");
-        gunFireAnimation.play(20, true);
+        const gunFireAnimation: Phaser.Animation = this.animations.add("fire", [1, 2, 3, 4]);
+        gunFireAnimation.play(10, true);
     }
 
     public getPlacementConstraint(): Constraints {
@@ -18,15 +18,16 @@ export class BasicGun extends BaseComponent {
     public getStateConfig(): StateConfig {
         return {
             powerConsumer: {
-                powerLoad: 2,
-                minPowerDraw: 1,
+                powerLoad: 1,
+                minPowerDraw: 0.5,
             },
+            powerSource: null,
         };
     }
 
     public getDescription(): string[] {
         return [
-            "The GK-305 model is the hottest on the market! No seriously, you'll need, like, three heatsinks.",
+            "This gun is actually just four smaller guns taped together.",
         ];
     }
 

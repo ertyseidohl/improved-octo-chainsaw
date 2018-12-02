@@ -108,10 +108,16 @@ export default class Startup extends Phaser.State {
         this.game.load.spritesheet("prince", "../assets/prince.png", 128, 128, 4);
         this.game.load.spritesheet("explosion", "../assets/explosion.png", 64, 64, 6);
         this.game.load.spritesheet("explosion_small", "../assets/explosion_small.png", 32, 32, 4);
+        this.game.load.spritesheet("missile_launcher", "../assets/missile_launcher.png", 64, 64, 8);
         this.game.load.image("background", "../assets/background.png");
         this.game.load.image("stars_1", "../assets/stars_1.png");
         this.game.load.image("stars_2", "../assets/stars_2.png");
         this.game.load.image("stars_3", "../assets/stars_3.png");
+
+        this.game.load.spritesheet("button_z", "../assets/button_z.png", 32, 32, 2);
+        this.game.load.spritesheet("button_x", "../assets/button_x.png", 32, 32, 2);
+        this.game.load.spritesheet("button_c", "../assets/button_c.png", 32, 32, 2);
+
         this.engineering.preload();
     }
 
@@ -144,12 +150,13 @@ export default class Startup extends Phaser.State {
             width / 2 - this.borderSprite.width / 2,
             height,
         );
-        this.engineering.bounds = new Phaser.Rectangle(
+        this.engineeringBounds = new Phaser.Rectangle(
             this.shmupBounds.width + this.borderSprite.width,
             0,
             this.shmupBounds.width,
             this.game.height,
         );
+        this.engineering.bounds = this.engineeringBounds;
 
         // background
         this.background = this.game.add.sprite(
@@ -181,11 +188,6 @@ export default class Startup extends Phaser.State {
             this.shmupBounds.height,
             "stars_3",
         ));
-
-        // prince test
-        const prince: Phaser.Sprite = this.game.add.sprite(100, 100, "prince");
-        prince.animations.add("glow");
-        prince.animations.getAnimation("glow").play(3, true);
 
         // setup engineering
         this.engineering.create();
@@ -229,7 +231,7 @@ export default class Startup extends Phaser.State {
         });
 
         this.groupExplosions = this.game.add.group();
-        this.groupExplosions.createMultiple(30, "explosion");
+        this.groupExplosions.createMultiple(60, "explosion");
         this.groupExplosions.forEach((explosion: Phaser.Sprite) => explosion.animations.add("explode"));
 
         this.groupExplosionsSmall = this.game.add.group();
@@ -538,13 +540,20 @@ export default class Startup extends Phaser.State {
     }
 
     private playerIsDead(player: Phaser.Sprite): void {
-        for (let i: number = 0; i < 30; i++) {
+        for (let i: number = 0; i < 60; i++) {
             const deathExplosion: Phaser.Sprite = this.groupExplosions.getFirstExists(false);
             if (deathExplosion) {
-                deathExplosion.reset(
-                    player.x + ((Math.random() * 200) - 100),
-                    player.y + ((Math.random() * 200) - 100),
-                );
+                if (Math.random() < 0.5) {
+                    deathExplosion.reset(
+                        player.x + ((Math.random() * 200) - 100),
+                        player.y + ((Math.random() * 200) - 100),
+                    );
+                } else {
+                    deathExplosion.reset(
+                        this.engineeringBounds.x + (Math.random() * this.engineeringBounds.width),
+                        this.engineeringBounds.y + (Math.random() * this.engineeringBounds.height),
+                    );
+                }
                 deathExplosion.visible = false;
                 this.playerDeathQueue.push(deathExplosion);
             }

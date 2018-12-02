@@ -1,7 +1,14 @@
 import { BaseComponent } from "./inventory/base_component";
 import { BasicGun } from "./inventory/basic_gun";
 import { EnergyCell } from "./inventory/energy_cell";
+import { EnergyCellHD } from "./inventory/energy_cell_hd";
 import { Engine } from "./inventory/engine";
+import { InputC } from "./inventory/input_c";
+import { InputX } from "./inventory/input_x";
+import { InputZ } from "./inventory/input_z";
+import { Prince } from "./inventory/prince";
+import { SmallGun } from "./inventory/small_gun";
+// import { MissileLauncher } from "./inventory/missile_launcher";
 import { BasicShip, InventorySystem, NUM_TILE_SPRITES} from "./inventory/system";
 
 import Chain from "./chain";
@@ -138,7 +145,9 @@ export default class Engineering {
         this.game.load.spritesheet("engine_1", "../assets/engine_1.png", 32, 64, 5);
 
         this.game.load.spritesheet("gun_1", "../assets/gun_1.png", 32, 32 * 3, 5);
-        this.game.load.spritesheet("energy_cell", "../assets/energy_cell.png", 35, 35, 5);
+        this.game.load.spritesheet("gun_small", "../assets/gun_small.png", 32, 32 * 2, 5);
+        this.game.load.spritesheet("energy_cell", "../assets/energy_cell.png", 32, 32, 5);
+        this.game.load.spritesheet("energy_cell_2", "../assets/energy_cell_2.png", 32, 32, 5);
 
         for (let i: number = 1; i <= NUM_TILE_SPRITES; i++) {
             this.game.load.image(`floor_tile_${i}`, `../assets/floor_tile_${i}.png`);
@@ -172,14 +181,40 @@ export default class Engineering {
         const gunCoord = this.inventorySystem.gridIndexToPixels(2, 4);
         this.inventorySystem.place(new BasicGun(this.game, this.inventorySystem, gunCoord.x, gunCoord.y));
 
-        const cellCoord = this.inventorySystem.gridIndexToPixels(5, 3);
-        this.inventorySystem.place(new EnergyCell(this.game, this.inventorySystem, cellCoord.x, cellCoord.y));
+        const smallGunCoord = this.inventorySystem.gridIndexToPixels(2, 5);
+        this.inventorySystem.place(new SmallGun(this.game, this.inventorySystem, smallGunCoord.x, smallGunCoord.y));
+
+        // const cellCoord = this.inventorySystem.gridIndexToPixels(5, 3);
+        // this.inventorySystem.place(new EnergyCell(this.game, this.inventorySystem, cellCoord.x, cellCoord.y));
+
+        // const cellHDCoord = this.inventorySystem.gridIndexToPixels(6, 3);
+        // this.inventorySystem.place(new EnergyCellHD(this.game, this.inventorySystem, cellHDCoord.x, cellHDCoord.y));
 
         const engCoord1 = this.inventorySystem.gridIndexToPixels(3, 6);
         this.inventorySystem.place(new Engine(this.game, this.inventorySystem, engCoord1.x, engCoord1.y));
 
         const engCoord2 = this.inventorySystem.gridIndexToPixels(6, 6);
         this.inventorySystem.place(new Engine(this.game, this.inventorySystem, engCoord2.x, engCoord2.y));
+
+        const inputZ = this.inventorySystem.gridIndexToPixels(7, 7);
+        this.inventorySystem.place(new InputZ(this.game, this.inventorySystem, inputZ.x, inputZ.y));
+
+        const inputX = this.inventorySystem.gridIndexToPixels(7, 6);
+        this.inventorySystem.place(new InputX(this.game, this.inventorySystem, inputX.x, inputX.y));
+
+        const inputC = this.inventorySystem.gridIndexToPixels(7, 5);
+        this.inventorySystem.place(new InputC(this.game, this.inventorySystem, inputC.x, inputC.y));
+
+        // const missileLauncher = this.inventorySystem.gridIndexToPixels(3, 2);
+        // this.inventorySystem.place(new MissileLauncher(
+        //     this.game,
+        //     this.inventorySystem,
+        //     missileLauncher.x,
+        //     missileLauncher.y,
+        // ));
+
+        const prince = this.inventorySystem.gridIndexToPixels(3, 1);
+        this.inventorySystem.place(new Prince(this.game, this.inventorySystem, prince.x, prince.y));
     }
 
     private findComponent(p: Phaser.Pointer): Phaser.Sprite | null {
