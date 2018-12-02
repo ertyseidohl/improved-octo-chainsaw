@@ -1,6 +1,10 @@
+import BaseEnemy from "../enemies/base_enemy";
+
 import { Game } from "phaser-ce";
 import { PhaserTextStyle } from "phaser-ce";
-import BaseEnemy from "../enemies/base_enemy";
+import { BasicGun } from "../inventory/basic_gun";
+import { InventorySystem } from "../inventory/system";
+
 import Engineering from "../engineering/engineering";
 import Player from "../player/player";
 
@@ -26,6 +30,8 @@ export default class Startup extends Phaser.State {
     private bulletCollisionGroup: Phaser.Physics.P2.CollisionGroup;
     private worldCollisionGroup: Phaser.Physics.P2.CollisionGroup;
     private powerupCollisionGroup: Phaser.Physics.P2.CollisionGroup;
+    private backgrounds: Phaser.TileSprite[] = [];
+    private background: Phaser.Sprite;
 
     // Enemy vars
     private enemyCreateCoolDwn = ENEMY_SPAWN_TIME;
@@ -55,6 +61,12 @@ export default class Startup extends Phaser.State {
         this.game.load.spritesheet("kaboom", "../assets/explode.png", 128, 128);
         this.game.load.image("powerup", "../assets/firstaid.png");
 
+        this.game.load.spritesheet("prince", "../assets/prince.png", 128, 128, 4);
+        this.game.load.spritesheet("explosion", "../assets/explosion.png", 64, 64, 6);
+        this.game.load.image("background", "../assets/background.png");
+        this.game.load.image("stars_1", "../assets/stars_1.png");
+        this.game.load.image("stars_2", "../assets/stars_2.png");
+        this.game.load.image("stars_3", "../assets/stars_3.png");
         this.engineering.preload();
     }
 
@@ -93,6 +105,47 @@ export default class Startup extends Phaser.State {
             this.shmupBounds.width,
             this.game.height,
         );
+
+        // background
+        this.background = this.game.add.sprite(
+            this.shmupBounds.x,
+            this.shmupBounds.y,
+            "background",
+        );
+
+        this.backgrounds.push(this.game.add.tileSprite(
+            this.shmupBounds.x,
+            this.shmupBounds.y,
+            this.shmupBounds.width,
+            this.shmupBounds.height,
+            "stars_1",
+        ));
+
+        this.backgrounds.push(this.game.add.tileSprite(
+            this.shmupBounds.x,
+            this.shmupBounds.y,
+            this.shmupBounds.width,
+            this.shmupBounds.height,
+            "stars_2",
+        ));
+
+        this.backgrounds.push(this.game.add.tileSprite(
+            this.shmupBounds.x,
+            this.shmupBounds.y,
+            this.shmupBounds.width,
+            this.shmupBounds.height,
+            "stars_3",
+        ));
+
+        // explosion test
+        const explosion: Phaser.Sprite = this.game.add.sprite(300, 300, "explosion");
+        explosion.animations.add("explode");
+        explosion.animations.getAnimation("explode").play(30, false, true);
+
+        // prince test
+        const prince: Phaser.Sprite = this.game.add.sprite(100, 100, "prince");
+        prince.animations.add("glow");
+        prince.animations.getAnimation("glow").play(3, true);
 
         // setup engineering
         this.engineering.create();
@@ -135,12 +188,20 @@ export default class Startup extends Phaser.State {
             enemyBody.fixedRotation = true;
         });
 
-        // powerups
+        const inventorySystem = new InventorySystem(this.game.width / 2, 0, 32, 32, 20, 20);
 
+        const basicGun1 = new BasicGun(this.game, inventorySystem, 600, 300);
+        const basicGun2 = new BasicGun(this.game, inventorySystem, 700, 300);
+
+        inventorySystem.place(basicGun1);
+        inventorySystem.place(basicGun2);
     }
 
     public update(): void {
         this.updateShmup();
+        for (let i: number = 0; i < this.backgrounds.length; i++) {
+            this.backgrounds[i].tilePosition.y += (i + 1);
+        }
         this.engineering.update();
     }
 
