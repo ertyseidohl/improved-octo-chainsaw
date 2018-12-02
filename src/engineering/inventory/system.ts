@@ -185,6 +185,18 @@ export class InventorySystem {
         return this.gridIndexToPixels(index.x, index.y);
     }
 
+    public find(point: Coordinate): BaseComponent | undefined {
+        const i = this.pixelToGridIndex(point.x, point.y, true);
+        const col = this.grid[i.y];
+        if (col) {
+            const elem = col[i.x];
+            if (elem instanceof BaseComponent) {
+                return elem;
+            }
+        }
+        return undefined;
+    }
+
     public gridIndexToPixels(xIndex: number, yIndex: number): Coordinate {
         const x = this.x + (xIndex * this.tileWidth);
         const y = this.y + (yIndex * this.tileHeight);

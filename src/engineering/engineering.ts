@@ -13,86 +13,7 @@ import { SmallGun } from "./inventory/small_gun";
 
 import { PowerSubSystem } from "./inventory/power_subsystem";
 import { BasicShip, InventorySystem, NUM_TILE_SPRITES} from "./inventory/system";
-import { MultiDragHandler } from "./inventory/drag_handler/multi";
-
-import Chain from "./chain";
-
-// TYPES
-class RopeWire extends Phaser.Rope {
-
-    constructor(
-        game: Phaser.Game,
-        parent: PIXI.DisplayObjectContainer,
-        name: string,
-        private source: Phaser.Point,
-        sink: Phaser.Point,
-    ) {
-        super(
-            game,
-            source.x,
-            source.y,
-            "wire",
-            0,
-            [
-                new Phaser.Point(0, 0),
-                new Phaser.Point(0, 0),
-            ],
-        );
-        parent.addChild(this);
-    }
-
-    set sinkPoint(value: Phaser.Point) {
-        this.points = [
-            new Phaser.Point(0, 0),
-            value.clone().subtract(this.x, this.y),
-        ];
-    }
-}
-
-type Wire = RopeWire;
-const Wire = RopeWire;
-
-interface PendingConnection {
-    wire: Wire;
-    start: Phaser.Sprite;
-}
-
-interface ConnectionState {
-    wire: Wire;
-}
-
-interface Coordinate {
-    x: number;
-    y: number;
-}
-
-type TargetToState = Map<Phaser.Sprite, ConnectionState>;
-type SourceToTarget = Map<Phaser.Sprite, TargetToState>;
-
-class Connections {
-
-    // PRIVATE DATA
-    private entries: SourceToTarget = new Map();
-
-    // PUBLIC METHODS
-    public tryConnect(
-        source: Phaser.Sprite,
-        target: Phaser.Sprite,
-        wire: Wire,
-    ): boolean {
-        let existing = this.entries.get(source);
-        if (undefined === existing) {
-            existing = new Map();
-            this.entries.set(source, existing);
-        }
-        if (existing.has(target)) {
-            return false;
-        }
-        existing.set(target, { wire });
-        return true;
-    }
-
-}
+import { HandlerType, MultiDragHandler } from "./inventory/drag_handler/multi";
 
 // =================
 // class Engineering
@@ -105,11 +26,10 @@ export default class Engineering {
 
     private comps: Phaser.Group;
 
-    private connectTexture: Phaser.BitmapData;
-    private connections: Connections = new Connections();
     private mouseInBounds: boolean = false;
-    private pendingConnect: PendingConnection | null = null;
 
+    private dragBitmap: Phaser.BitmapData;
+    private dragHandler: MultiDragHandler;
     private inventorySystem: InventorySystem;
     private powerSystem: PowerSubSystem;
 
@@ -126,26 +46,25 @@ export default class Engineering {
             32, 32,
             BasicShip,
         );
-        this.inventorySystem.dragHandler = new MultiDragHandler(this.inventorySystem);
+        this.dragHandler = new MultiDragHandler(this.game, this.inventorySystem);
+        this.inventorySystem.dragHandler = this.dragHandler;
 
         this.powerSystem = new PowerSubSystem();
 
         this.comps = this.game.add.group();
         this.createComps();
 
-        // setup mouse for connections
-        this.game.canvas.addEventListener(
-            "mousemove",
-            this.onMouseMove.bind(this),
+        // button to switch drag modes
+        const corner = this.bounds.topRight;
+        this.dragBitmap = this.game.add.bitmapData(32, 32);
+        this.dragBitmap.fill(255, 0, 0);
+        const dragSwitch = this.game.add.sprite(
+            corner.x - 32,
+            corner.y,
+            this.dragBitmap,
         );
-        this.game.canvas.addEventListener(
-            "mousedown",
-            this.onMouseDown.bind(this),
-        );
-        this.game.canvas.addEventListener(
-            "mouseup",
-            this.onMouseUp.bind(this),
-        );
+        dragSwitch.inputEnabled = true;
+        dragSwitch.events.onInputDown.add(this.dragSwitchPressed, this);
     }
 
     public preload(): void {
@@ -239,71 +158,17 @@ export default class Engineering {
         // this.inventorySystem.place(new Prince(this.game, this.inventorySystem, prince.x, prince.y));
     }
 
-    private findComponent(p: Phaser.Pointer): Phaser.Sprite | null {
-        const children = this.comps.children.slice();
-        while (0 < children.length) {
-            const child = children.shift();
-            if (child instanceof Phaser.Sprite && child.input) {
-                if (child.input.pointerOver(p.id)) {
-                    return child;
-                }
-            } else if (child instanceof Phaser.Group) {
-                children.push.apply(children, child.children);
-            }
-        }
-        return null;
-    }
-
-    private onMouseDown(): void {
-        if (!this.mouseInBounds) {
-            return;
-        }
-        // find sprite
-        const p = this.game.input.mousePointer;
-        const sprite = this.findComponent(p);
-        if (sprite) {
-            this.pendingConnect = {
-                start: sprite,
-                wire: new Wire(
-                    this.game,
-                    this.comps,
-                    "",
-                    p.position,
-                    p.position,
-                ),
-            };
+    private dragSwitchPressed(dragSwitch: Phaser.Sprite, p: Phaser.Pointer) {
+        switch (this.dragHandler.handler) {
+            case HandlerType.MOVE: {  // transition to 'CONNECT'
+                this.dragBitmap.fill(0, 255, 0);
+                this.dragHandler.handler = HandlerType.CONNECT;
+            } break;
+            case HandlerType.CONNECT: {  // transition to 'MOVE'
+                this.dragBitmap.fill(255, 0, 0);
+                this.dragHandler.handler = HandlerType.MOVE;
+            } break;
         }
     }
 
-    private onMouseMove(): void {
-        const p = this.game.input.mousePointer;
-        this.mouseInBounds = this.bounds.contains(p.x, p.y);
-        if (this.pendingConnect) {
-            const { wire } = this.pendingConnect;
-            if (this.mouseInBounds) {  // update the endpoint
-                wire.sinkPoint = p.position;
-            } else {  // remove the rope
-                this.comps.remove(wire, true);
-                this.pendingConnect = null;
-            }
-        }
-    }
-
-    private onMouseUp(): void {
-        if (!this.mouseInBounds || null === this.pendingConnect) {
-            return;
-        }
-        const { start, wire } = this.pendingConnect;
-        const p = this.game.input.mousePointer;
-        const sprite = this.findComponent(p);
-        if (null === sprite || sprite === start) {
-            // nothing to connect to, or connected to start
-            this.comps.remove(wire, true);
-        }
-        if (!this.connections.tryConnect(start, sprite, wire)) {
-            // already connected
-            this.comps.remove(wire, true);
-        }
-        this.pendingConnect = null;
-    }
 }
