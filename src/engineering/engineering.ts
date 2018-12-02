@@ -138,7 +138,7 @@ export default class Engineering {
         this.game.load.spritesheet("engine_1", "../assets/engine_1.png", 32, 64, 5);
 
         this.game.load.spritesheet("gun_1", "../assets/gun_1.png", 32, 32 * 3, 5);
-        this.game.load.spritesheet("energy_cell", "../assets/energy_cell.png", 35, 35, 5);
+        this.game.load.spritesheet("energy_cell", "../assets/energy_cell.png", 32, 32, 5);
 
         for (let i: number = 1; i <= NUM_TILE_SPRITES; i++) {
             this.game.load.image(`floor_tile_${i}`, `../assets/floor_tile_${i}.png`);
