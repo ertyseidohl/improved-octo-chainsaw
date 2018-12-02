@@ -1,5 +1,5 @@
 import { BaseComponent } from "./base_component";
-import { PowerFunction, StateConfig } from "./component_state";
+import { StateConfig } from "./component_state";
 import { Constraints, InventorySystem } from "./system";
 
 export class BasicGun extends BaseComponent {
@@ -19,11 +19,8 @@ export class BasicGun extends BaseComponent {
         return {
             powerConsumer: {
                 powerLoad: 2,
-                minPowerDraw: 0.5,
-                powerFunction: PowerFunction.Fractional,
-                powerFunctionSteps: null,
+                minPowerDraw: 1,
             },
-            powerSource: null,
         };
     }
 
