@@ -1,5 +1,5 @@
 import { Game } from "phaser-ce";
-import { BaseComponent, isBaseComponent } from "./base_component";
+import { BaseComponent } from "./base_component";
 
 export const NUM_TILE_SPRITES = 9;
 

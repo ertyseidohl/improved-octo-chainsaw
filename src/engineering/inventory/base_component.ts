@@ -99,6 +99,7 @@ export abstract class BaseComponent extends Phaser.Sprite {
         } else {
             this.x = this.oldX;
             this.y = this.oldY;
+            this.inventorySystem.place(this);
         }
 
         this.updateFromState();
