@@ -142,7 +142,6 @@ export class InventorySystem {
 
     private createTiles(): void {
         this.tiles = this.game.add.group();
-        console.log(this.grid);
         for (let i: number = 0; i < this.width; i++) {
             for (let j: number = 0; j < this.height; j++) {
                 if (this.grid[j][i] === null) {
