@@ -24,18 +24,20 @@ const ENEMY_WIDTH: number = 100; // spacing number for spawning enemies
 // wave constants
 const WAVE_TIME_MAX: number = 2000;
 const WAVE_RANDOM_ENEMY_MAX: number = 6;
+const WAVE_RANDOM_ENEMY_TIME: number = 1000;
 const WAVE_ROWS_MAX = 4; // number of rows spawned in row wave
 const WAVE_ROW_XOFFSET = 60;
 const WAVE_ROWS_ENEMY_COUNT_MAX = 5;
-const WAVE_ROWS_TIME_MAX = 1000; // time between row spawns
+const WAVE_ROWS_TIME_MAX = 1500; // time between row spawns
 const WAVE_ROWS_ENEMY_TIME_MAX = 300; // time between enemy spawns in rows (only for right and left)
 const WAVE_BIGV_SPACER = 50;
-const WAVE_BIGV_XSPREAD = 30;
+const WAVE_BIGV_XSPREAD = 20;
 const WAVE_SWOOP_MAX = 3; // this is the number of swoops we've have during a swoop wave
-const WAVE_SWOOP_ENEMY_COUNT_MAX = 8;
+const WAVE_SWOOP_OFFSET = 30;
+const WAVE_SWOOP_ENEMY_COUNT_MAX = 5;
 const WAVE_SWOOP_TIME_MAX = 500;
 const WAVE_SWOOP_ENEMY_TIME_MAX = 400;
-const WAVE_SWOOP_XVEL = 250;
+const WAVE_SWOOP_XVEL = 210;
 
 enum ROW_TYPE {
     LEFT,
@@ -296,7 +298,7 @@ export default class Startup extends Phaser.State {
             break;
             case ENEMY_WAVE.RANDOM:
             if (this.game.time.now >= this.enemyCreateTime) {
-                this.enemyCreateTime = this.game.time.now + this.enemyRndmCreateCoolDwn;
+                this.enemyCreateTime = this.game.time.now + WAVE_RANDOM_ENEMY_TIME;
                 this.spawnEnmyNumber++;
                 const minX: number = ENEMY_WIDTH;
                 const maxX: number = this.shmupBounds.width - this.borderSprite.width / 2 - ENEMY_WIDTH;
@@ -337,7 +339,7 @@ export default class Startup extends Phaser.State {
                             this.enemyCreateTime = this.game.time.now + WAVE_SWOOP_ENEMY_TIME_MAX;
                             const currEnemy: BaseEnemy = this.groupEnemies.getFirstExists(false);
                             if (currEnemy) {
-                                currEnemy.reset(0, ENEMY_Y_SPAWN, currEnemy.maxHealth);
+                                currEnemy.reset(0 + WAVE_SWOOP_OFFSET, ENEMY_Y_SPAWN, currEnemy.maxHealth);
                                 currEnemy.randomizeTimes();
                                 currEnemy.setWaveType(this.spawnWaveType);
                                 currEnemy.setXVel(WAVE_SWOOP_XVEL);
@@ -357,7 +359,8 @@ export default class Startup extends Phaser.State {
                             this.enemyCreateTime = this.game.time.now + WAVE_SWOOP_ENEMY_TIME_MAX;
                             const currEnemy: BaseEnemy = this.groupEnemies.getFirstExists(false);
                             if (currEnemy) {
-                                currEnemy.reset(this.game.width / 2, ENEMY_Y_SPAWN, currEnemy.maxHealth);
+                                currEnemy.reset(this.game.width / 2 - WAVE_SWOOP_OFFSET,
+                                    ENEMY_Y_SPAWN, currEnemy.maxHealth);
                                 currEnemy.randomizeTimes();
                                 currEnemy.setWaveType(this.spawnWaveType);
                                 currEnemy.setXVel(-WAVE_SWOOP_XVEL);
@@ -417,6 +420,30 @@ export default class Startup extends Phaser.State {
                 bigVEnemy.reset(xSpawn, ENEMY_Y_SPAWN - WAVE_BIGV_SPACER * 2, bigVEnemy.maxHealth);
                 bigVEnemy.setWaveType(this.spawnWaveType);
                 bigVEnemy.setXVel(2 * WAVE_BIGV_XSPREAD);
+            }
+            bigVEnemy = this.groupEnemies.getFirstExists(false);
+            if (bigVEnemy) {
+                bigVEnemy.reset(xSpawn, ENEMY_Y_SPAWN - WAVE_BIGV_SPACER * 3, bigVEnemy.maxHealth);
+                bigVEnemy.setWaveType(this.spawnWaveType);
+                bigVEnemy.setXVel(-3 * WAVE_BIGV_XSPREAD);
+            }
+            bigVEnemy = this.groupEnemies.getFirstExists(false);
+            if (bigVEnemy) {
+                bigVEnemy.reset(xSpawn, ENEMY_Y_SPAWN - WAVE_BIGV_SPACER * 3, bigVEnemy.maxHealth);
+                bigVEnemy.setWaveType(this.spawnWaveType);
+                bigVEnemy.setXVel(3 * WAVE_BIGV_XSPREAD);
+            }
+            bigVEnemy = this.groupEnemies.getFirstExists(false);
+            if (bigVEnemy) {
+                bigVEnemy.reset(xSpawn, ENEMY_Y_SPAWN - WAVE_BIGV_SPACER * 4, bigVEnemy.maxHealth);
+                bigVEnemy.setWaveType(this.spawnWaveType);
+                bigVEnemy.setXVel(-4 * WAVE_BIGV_XSPREAD);
+            }
+            bigVEnemy = this.groupEnemies.getFirstExists(false);
+            if (bigVEnemy) {
+                bigVEnemy.reset(xSpawn, ENEMY_Y_SPAWN - WAVE_BIGV_SPACER * 4, bigVEnemy.maxHealth);
+                bigVEnemy.setWaveType(this.spawnWaveType);
+                bigVEnemy.setXVel(4 * WAVE_BIGV_XSPREAD);
             }
             this.resetWave();
             break;

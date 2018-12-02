@@ -14,9 +14,9 @@ const HEALTH_MAX: number = 3;
 export default class BaseEnemy extends Phaser.Sprite {
     private enemyBody: Phaser.Physics.P2.Body;
     private bulletsGroup: Phaser.Group;
-    private BOUND_X_MIN: number = 50;
-    private BOUND_X_MAX: number = this.game.width / 2 - this.width;
-    private BOUND_Y_MIN: number = 50;
+    private BOUND_X_MIN: number = 30;
+    private BOUND_X_MAX: number = this.game.width / 2 - 30;
+    private BOUND_Y_MIN: number = 0;
     private BOUND_Y_MAX: number = this.game.height - this.height;
     private actionTime: number;
     private shootTime: number;
@@ -133,6 +133,18 @@ export default class BaseEnemy extends Phaser.Sprite {
                 this.kill();
             }
             break;
+        }
+
+        // boundaries
+        if (this.enemyBody.y > this.BOUND_Y_MIN) {
+            if (this.enemyBody.x < this.BOUND_X_MIN) {
+                this.enemyBody.x = this.BOUND_X_MIN;
+                this.enemyBody.velocity.x = -this.enemyBody.velocity.x;
+            }
+            if (this.enemyBody.x > this.BOUND_X_MAX) {
+                this.enemyBody.x = this.BOUND_X_MAX;
+                this.enemyBody.velocity.x = - this.enemyBody.velocity.x;
+            }
         }
 
         // shoot (shooting is always random regardless of wave)
