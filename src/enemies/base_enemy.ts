@@ -1,5 +1,7 @@
 import { COMPONENT_TYPES, WAVE_TYPE } from "../constants";
 
+const SHOOT_LOWER_BOUND = 550;
+
 export default abstract class BaseEnemy extends Phaser.Sprite {
     protected enemyBody: Phaser.Physics.P2.Body;
     protected bulletsGroup: Phaser.Group;
@@ -169,6 +171,9 @@ export default abstract class BaseEnemy extends Phaser.Sprite {
     }
 
     protected shoot(): void {
+        if (this.y >= SHOOT_LOWER_BOUND) {
+            return;
+        }
         const bullet = this.bulletsGroup.getFirstExists(false);
         if (bullet) {
             const bulletBody: Phaser.Physics.P2.Body = bullet.body;

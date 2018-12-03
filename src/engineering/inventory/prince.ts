@@ -11,6 +11,12 @@ export class Prince extends BaseComponent {
         princeAnimation.play(5, true);
     }
 
+    public reset(x: number, y: number, health?: number): Phaser.Sprite {
+        if (y < this.height) {
+            y = this.height;
+        }
+        return super.reset(x, y, health);
+    }
     public getDescription(): string[] {
         return [
             "Returning this [pri]mary [n]etwork [c]ontrol [e]lement is your objective!",

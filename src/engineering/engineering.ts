@@ -87,6 +87,8 @@ export default class Engineering {
 
     private testComponent: BaseComponent;
 
+    private cargoHoldText: Phaser.Text;
+
     // CREATORS
     constructor(private state: Phaser.State) {
     }
@@ -175,7 +177,7 @@ export default class Engineering {
             );
         }
 
-        this.game.add.text(
+        this.cargoHoldText = this.game.add.text(
             this.game.width / 2 + 195, // dOnT uSe mAgiC nUmBErS
             440, // MAGIC NUMBER
             "Cargo Hold",
@@ -243,6 +245,7 @@ export default class Engineering {
     }
 
     public explode(): void {
+        this.cargoHoldText.visible = false;
         this.inventorySystem.explode();
         this.game.physics.enable(this.componentGroup);
         this.componentGroup.forEach((c: BaseComponent) => {

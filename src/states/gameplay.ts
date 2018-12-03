@@ -635,7 +635,7 @@ export default class Gameplay extends Phaser.State {
         this.game.physics.p2.enable(powerup);
         const powerupBody: Phaser.Physics.P2.Body = powerup.body;
         powerupBody.setCollisionGroup(this.powerupCollisionGroup);
-        powerupBody.velocity.y = Math.random() * 42;
+        powerupBody.velocity.y = Math.random() * 20;
         powerupBody.velocity.x = Math.random() * 42 - 84;
         powerupBody.fixedRotation = true;
         this.game.add.existing(powerup);
