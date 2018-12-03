@@ -4,6 +4,7 @@ import { ENEMY_WAVE } from "../constants";
 
 import Engineering from "../engineering/engineering";
 import Player from "../player/player";
+import { Powerup } from "../player/powerup";
 
 // constants
 const ENEMY_POOL_COUNT: number = 30;
@@ -51,6 +52,8 @@ export default class Startup extends Phaser.State {
     private enemyCollisionGroup: Phaser.Physics.P2.CollisionGroup;
     private bulletCollisionGroup: Phaser.Physics.P2.CollisionGroup;
     private worldCollisionGroup: Phaser.Physics.P2.CollisionGroup;
+    private powerupCollisionGroup: Phaser.Physics.P2.CollisionGroup;
+
     private backgrounds: Phaser.TileSprite[] = [];
     private playerDeathQueue: Phaser.Sprite[] = [];
     private spawnEnmyNumber: number; // we'll use this variable for all wave types
@@ -77,8 +80,6 @@ export default class Startup extends Phaser.State {
 
     private shmupBounds: Phaser.Rectangle;
     private engineeringBounds: Phaser.Rectangle;
-
-    private liveComponents: Phaser.Group;
 
     private borderSprite: Phaser.Sprite;
 
@@ -120,6 +121,7 @@ export default class Startup extends Phaser.State {
         this.bulletCollisionGroup = this.game.physics.p2.createCollisionGroup();
         this.worldCollisionGroup = this.game.physics.p2.createCollisionGroup();
         this.enemyCollisionGroup = this.game.physics.p2.createCollisionGroup();
+        this.powerupCollisionGroup = this.game.physics.p2.createCollisionGroup();
 
         // This part is vital if you want the objects
         // with their own collision groups to still collide with the world bounds
@@ -132,7 +134,12 @@ export default class Startup extends Phaser.State {
         const borderSpriteBody: Phaser.Physics.P2.Body = this.borderSprite.body;
         borderSpriteBody.static = true;
         borderSpriteBody.setCollisionGroup(this.worldCollisionGroup);
-        borderSpriteBody.collides([this.playerCollisionGroup, this.enemyCollisionGroup, this.bulletCollisionGroup]);
+        borderSpriteBody.collides([
+            this.playerCollisionGroup,
+            this.enemyCollisionGroup,
+            this.bulletCollisionGroup,
+            this.powerupCollisionGroup,
+        ]);
 
         this.shmupBounds = new Phaser.Rectangle(
             0,
@@ -192,9 +199,13 @@ export default class Startup extends Phaser.State {
         this.player.body.collides(this.worldCollisionGroup);
         this.player.body.collides(this.enemyCollisionGroup);
         this.player.body.collides(this.bulletCollisionGroup);
+        this.player.body.collides(this.powerupCollisionGroup);
 
         this.player.setBulletsCollisionGroup(this.bulletCollisionGroup);
         this.player.setBulletsCollides(this.enemyCollisionGroup, this.bulletHitEnemy, this);
+
+        // powerups
+        this.groupPowerups = this.game.add.group();
 
         // enemies
         this.spawnWaveTime = this.game.time.now + WAVE_TIME_MAX;
@@ -514,14 +525,26 @@ export default class Startup extends Phaser.State {
     }
 
     private spawnPowerup(enemy: Phaser.Physics.P2.Body) {
-        // const powerup = this.groupPowerups.getFirstExists(false);
-        // if (powerup) {
-        //     powerup.reset(enemy.sprite.x, enemy.sprite.y);
-        //     const powerupBody: Phaser.Physics.P2.Body = powerup.body;
-        //     powerupBody.velocity.y = Math.random() * 42;
-        //     powerupBody.velocity.x = Math.random() * 42 - 84;
-        //     powerupBody.fixedRotation = true;
-        // }
+        const powerup = Powerup.createRandom(this.game, enemy.x, enemy.y);
+        this.groupPowerups.add(powerup);
+        this.game.physics.p2.enable(powerup);
+        const powerupBody: Phaser.Physics.P2.Body = powerup.body;
+        powerupBody.setCollisionGroup(this.powerupCollisionGroup);
+        powerupBody.velocity.y = Math.random() * 42;
+        powerupBody.velocity.x = Math.random() * 42 - 84;
+        powerupBody.fixedRotation = true;
+        this.game.add.existing(powerup);
+        powerupBody.collides([this.playerCollisionGroup, this.worldCollisionGroup], this.collectPowerup, this);
+    }
+
+    private collectPowerup(powerup: Phaser.Physics.P2.Body, player: Phaser.Physics.P2.Body): void {
+        if (player !== this.player.body) {
+            return;
+        }
+        const powerupSprite: Powerup = powerup.sprite as Powerup;
+        if (this.engineering.createComponentByName(powerupSprite.getComponentName())) {
+            powerupSprite.destroy();
+        }
     }
 
     private bulletHitEnemy(bullet: Phaser.Physics.P2.Body, enemy: Phaser.Physics.P2.Body): void {
@@ -586,10 +609,6 @@ export default class Startup extends Phaser.State {
                 this.playerDeathQueue.push(deathExplosion);
             }
         }
-    }
-
-    private powerUpHitPlayer(): void {
-        // not implemented
     }
 
     private createEnemy(waveType: number, xSpawn: number) {
