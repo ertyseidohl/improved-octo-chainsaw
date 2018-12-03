@@ -12,9 +12,11 @@ export class Engine extends BaseComponent {
     }
 
     public update(): void {
-        if (this.onShip && !this.animation.isPlaying) {
+        super.update();
+
+        if (this.onShip && this.isOnline() && !this.animation.isPlaying) {
             this.animation.play(20, true);
-        } else if (!this.onShip) {
+        } else if (!this.onShip || !this.isOnline()) {
             this.animation.stop();
             this.frame = 0;
         }
@@ -36,13 +38,20 @@ export class Engine extends BaseComponent {
     }
 
     public getSpeed(): number {
-        return 2;
+        return this.getPower();
     }
 
     public getDescription(): string[] {
         return [
             "This engine can burn kerosene, oil, antimatter, and three kinds of aliens for fuel.",
         ];
+    }
+
+    public getPowerPads(index: number): Phaser.Point {
+        return new Phaser.Point(
+            this.x + this.powerPadsOffsets[index].x,
+            this.y + this.powerPadsOffsets[index].y,
+        );
     }
 
 }

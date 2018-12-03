@@ -4,11 +4,12 @@ import { Constraints, InventorySystem } from "./system";
 
 export class BasicGun extends BaseComponent {
 
+    private animation: Phaser.Animation;
     constructor(game: Phaser.Game, inventorySystem: InventorySystem, position?: Phaser.Point) {
         super(game, inventorySystem, "gun_1", 1, 3, position);
 
-        const gunFireAnimation: Phaser.Animation = this.animations.add("fire");
-        gunFireAnimation.play(20, true);
+        this.animation = this.animations.add("fire");
+        this.animation.play(20, true);
     }
 
     public getPlacementConstraint(): Constraints {
@@ -26,6 +27,17 @@ export class BasicGun extends BaseComponent {
         };
     }
 
+    public update(): void {
+        super.update();
+
+        if (this.onShip && this.isOnline() && !this.animation.isPlaying) {
+            this.animation.play(20, true);
+        } else if (!this.onShip || !this.isOnline()) {
+            this.animation.stop();
+            this.frame = 0;
+        }
+    }
+
     public getDescription(): string[] {
         return [
             "The GK-305 model is the hottest on the market! No seriously, you'll need, like, three heatsinks.",
@@ -33,7 +45,7 @@ export class BasicGun extends BaseComponent {
     }
 
     public getGuns(): number {
-        return 1;
+        return this.getPower();
     }
 
     public getPowerPads(index: number): Phaser.Point {
