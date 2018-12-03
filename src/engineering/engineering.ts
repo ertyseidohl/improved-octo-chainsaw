@@ -256,8 +256,7 @@ export default class Engineering {
     }
 
     public hasConnectedTestComponent(): boolean {
-        // TODO
-        return true;
+        return this.testComponent.getPower() > 0;
     }
 
     public princeInInventory(): boolean {
@@ -311,8 +310,9 @@ export default class Engineering {
     // PRIVATE METHODS
     private addComponent(
         newComponent: BaseComponent, gridPos?: Phaser.Point, destroyOnFail: boolean = false,
+        isStartingComponent: boolean = false,
     ): BaseComponent {
-        if (!this.testComponent) {
+        if (!isStartingComponent && !this.testComponent) {
             this.testComponent = newComponent;
         }
         const originalPosition: Phaser.Point = new Phaser.Point(newComponent.x, newComponent.y);
@@ -338,22 +338,22 @@ export default class Engineering {
 
     private createStartingComponents(): void {
         const firstGun = new BasicGun(this.game, this.inventorySystem);
-        this.addComponent(firstGun);
+        this.addComponent(firstGun, null, false, true);
 
         const secondGun = new BasicGun(this.game, this.inventorySystem);
-        this.addComponent(secondGun);
+        this.addComponent(secondGun, null, false, true);
 
         const firstPowerSource = new EnergyCell(this.game, this.inventorySystem);
-        this.addComponent(firstPowerSource, new Phaser.Point(4, 4));
+        this.addComponent(firstPowerSource, new Phaser.Point(4, 4), false, true);
 
         const secondPowerSource = new EnergyCell(this.game, this.inventorySystem);
-        this.addComponent(secondPowerSource, new Phaser.Point(5, 4));
+        this.addComponent(secondPowerSource, new Phaser.Point(5, 4), false, true);
 
         const firstEngine = new Engine(this.game, this.inventorySystem);
-        this.addComponent(firstEngine, new Phaser.Point(3, 6));
+        this.addComponent(firstEngine, new Phaser.Point(3, 6), false, true);
 
         const secondEngine = new Engine(this.game, this.inventorySystem);
-        this.addComponent(secondEngine, new Phaser.Point(6, 6));
+        this.addComponent(secondEngine, new Phaser.Point(6, 6), false, true);
     }
 
     private dragSwitchPressed(_: any, p: Phaser.Pointer) {

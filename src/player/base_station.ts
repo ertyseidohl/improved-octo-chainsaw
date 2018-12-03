@@ -8,6 +8,6 @@ export default class BaseStation extends Phaser.Sprite {
     }
 
     public getDockPoint(): number {
-        return this.x + 165; // magic number
+        return this.x + 110; // magic number
     }
 }
