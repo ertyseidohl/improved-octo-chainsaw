@@ -38,12 +38,10 @@ export class MultiDragHandler extends BaseDragHandler {
     // PUBLIC METHODS
     public dragStart(comp: BaseComponent): void {
         this.handlers[this.current].dragStart(comp);
-        this.globalDragState.currentlyActive = true;
     }
 
     public dragStop(comp: BaseComponent): void {
         this.handlers[this.current].dragStop(comp);
-        this.globalDragState.currentlyActive = false;
     }
 
     public dragUpdate(comp: BaseComponent): void {

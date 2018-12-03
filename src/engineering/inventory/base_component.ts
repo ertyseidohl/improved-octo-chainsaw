@@ -1,6 +1,8 @@
 import { ComponentState, StateConfig } from "./component_state";
 import { Constraints, InventorySystem } from "./system";
 
+import { Pointer } from "phaser-ce";
+
 export enum PowerType {
     None,
     Source,
@@ -43,7 +45,7 @@ export abstract class BaseComponent extends Phaser.Sprite {
         this.events.onDragUpdate.add(this.onDragUpdate, this);
 
         this.events.onInputOver.add(this.onInputOver, this);
-        this.events.onInputOut.add(this.onInputOver, this);
+        this.events.onInputOut.add(this.onInputOut, this);
 
         this.componentState = new ComponentState(this.getStateConfig());
 

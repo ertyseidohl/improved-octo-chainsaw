@@ -75,11 +75,6 @@ export default class Engineering {
         );
         dragSwitch.inputEnabled = true;
         dragSwitch.events.onInputDown.add(this.dragSwitchPressed, this);
-
-        this.game.canvas.addEventListener(
-            "mousedown",
-            this.onMouseDown.bind(this),
-        );
     }
 
     public preload(): void {
@@ -169,13 +164,6 @@ export default class Engineering {
 
         const secondEngine = new Engine(this.game, this.inventorySystem);
         this.addComponent(secondEngine, new Phaser.Point(6, 6));
-    }
-
-    private onMouseDown() {
-        const p = this.game.input.mousePointer;
-        if (this.bounds.contains(p.x, p.y) && p.rightButton.isDown && !p.leftButton.isDown) {
-            this.dragSwitchPressed(null, this.game.input.mousePointer);
-        }
     }
 
     private dragSwitchPressed(_: any, p: Phaser.Pointer) {

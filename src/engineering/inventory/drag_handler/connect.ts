@@ -8,8 +8,6 @@ import { PowerSubSystem } from "../power_subsystem";
 
 // TYPES
 class RopeWire extends Phaser.Group {
-
-    public sourcePad: Phaser.Sprite;
     public sinkPad: Phaser.Sprite;
 
     private rope: Phaser.Rope;
@@ -36,9 +34,6 @@ class RopeWire extends Phaser.Group {
         ));
         const padBitmap = this.game.add.bitmapData(10, 10);
         padBitmap.fill(0, 0, 255);
-        this.sourcePad = this.add(this.game.add.sprite(source.x - 5,
-                                                       source.y - 5,
-                                                       padBitmap));
         this.sinkPad = this.add(this.game.add.sprite(source.x - 5,
                                                      source.y - 5,
                                                      padBitmap));
