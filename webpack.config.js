@@ -26,8 +26,7 @@ module.exports = {
     },
     plugins: [new HtmlWebpackPlugin({
         hash: true,
-        title: 'My Awesome application',
-        myPageHeader: 'Hello World',
+        title: 'the [prince] mission',
         template: './src/index.html',
         filename: './index.html'
     })],

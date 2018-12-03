@@ -25,6 +25,7 @@ export class System {
         return {
             guns,
             topSpeed,
+            weight,
         };
     }
 

@@ -5,6 +5,7 @@ import "pixi";
 // tslint:disable-next-line
 import "phaser";
 
+import GameOver from "./states/gameover";
 import Gameplay from "./states/gameplay";
 import Splash from "./states/splash";
 import Startup from "./states/startup";
@@ -21,6 +22,7 @@ class App extends Phaser.Game {
         this.state.add("splash", Splash);
         this.state.add("gameplay", Gameplay);
         this.state.add("youwin", YouWin);
+        this.state.add("gameover", GameOver);
 
         this.state.start("startup");
     }

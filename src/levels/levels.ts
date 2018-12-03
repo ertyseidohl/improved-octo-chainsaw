@@ -24,12 +24,24 @@ function textLevel(text: string, duration: number): Level {
 }
 
 export const LEVELS: Level[] = [
-    textLevel("[The Mining Guild] has invaded our system! [enter to progress]", 400),
-    textLevel("They stole our [pri]mary [n]etwork [c]ontrol [e]lements, our only defense!", 400),
-    textLevel("You two, with your scrappy ship, are our last hope to recover these [prince]s.", 400),
-    textLevel("You should learn! Here's a dummy drone. Shoot it down.", 400),
+    textLevel("The Mining Guild has invaded our system! [enter to progress]", 400),
+    textLevel("They stole our [pri]mary [n]etwork [c]ontrol [e]lements, our only defence!", 400),
     {
         init: (gameState: Gameplay) => {
+            gameState.displayText(
+                "You two, with your scrappy ship, are our last hope to recover these [prince]s.", 400);
+            gameState.generateBaseStation();
+        },
+        update: (gameState: Gameplay) => { /* empty */ },
+        isOver: (gameState: Gameplay) => {
+            return gameState.baseStationDone();
+        },
+        cleanup: (gameState: Gameplay) => { /* empty */ },
+    },
+    {
+        init: (gameState: Gameplay) => {
+            gameState.displayText(
+                "You should learn! Here's a dummy drone. Shoot it down.", 400);
             gameState.setUpcomingWaves([
                 new Wave(0, WAVE_TYPE.DUMMY_DRONE),
             ]);
@@ -38,7 +50,7 @@ export const LEVELS: Level[] = [
             // todo
         },
         isOver: (gameState: Gameplay) => {
-            return gameState.waveIndexAllDead(0);
+            return gameState.allWavesDead();
         },
         cleanup: () => {
             // todo
@@ -75,7 +87,7 @@ export const LEVELS: Level[] = [
             // todo
         },
         isOver: (gameState: Gameplay) => {
-            return gameState.waveIndexAllDead(0);
+            return gameState.allWavesDead();
         },
         cleanup: () => {
             // todo
@@ -93,26 +105,49 @@ export const LEVELS: Level[] = [
             // todo
         },
         isOver: (gameState: Gameplay) => {
-            return gameState.waveIndexAllDead(0);
+            return gameState.allWavesDead();
         },
         cleanup: () => {
             // todo
         },
     },
+    {
+        init: (gameState: Gameplay) => {
+            gameState.displayText("Grab that [prince] - make sure you have space for it!", 400);
+        },
+        update: (gameState: Gameplay) => { /* empty */ },
+        isOver: (gameState: Gameplay) => {
+            return gameState.princeInInventory();
+        },
+        cleanup: (gameState: Gameplay) => { /* empty */ },
+    },
+    textLevel("Now, get back to base so that we can start to repair our defences!", 400),
+    {
+        init: (gameState: Gameplay) => {
+            gameState.displayText(
+                "Great work! Now go get the other [prince]s", 400);
+            gameState.generateBaseStation();
+        },
+        update: (gameState: Gameplay) => { /* empty */ },
+        isOver: (gameState: Gameplay) => {
+            return gameState.baseStationDone();
+        },
+        cleanup: (gameState: Gameplay) => { /* empty */ },
+    },
     // LEVEL TWO
     {
         init: (gameState: Gameplay) => {
             gameState.setUpcomingWaves([
-                new Wave(0, WAVE_TYPE.ROW_LEFT),
-                new Wave(120, WAVE_TYPE.ROW_STRAIGHT),
-                new Wave(120, WAVE_TYPE.ROW_RIGHT),
+                new Wave(0, WAVE_TYPE.ROW_STRAIGHT),
+                new Wave(60, WAVE_TYPE.ROW_STRAIGHT),
+                new Wave(240, WAVE_TYPE.BOMB),
             ]);
         },
         update: () => {
             // todo
         },
         isOver: (gameState: Gameplay) => {
-            return gameState.waveIndexAllDead(0);
+            return gameState.allWavesDead();
         },
         cleanup: () => {
             // todo

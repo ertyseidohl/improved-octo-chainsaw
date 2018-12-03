@@ -1,14 +1,24 @@
 import BaseEnemy from "../enemies/base_enemy";
 import BasicEnemy from "../enemies/basic_enemy";
+import BombEnemy from "../enemies/bomb_enemy";
 import BossEnemy from "../enemies/boss_enemy";
 import DummyDrone from "../enemies/dummy_drone";
+
+import BaseStation from "../player/base_station";
 
 import { COMPONENT_TYPES, ENEMY_TYPES, WAVE_TYPE } from "../constants";
 
 import Engineering, { ShipUpdateMessage } from "../engineering/engineering";
 import LevelManager from "../levels/level_manager";
 import Player from "../player/player";
-import { BasicGunPowerup, EnginePowerup, Powerup, PrincePowerup } from "../player/powerup";
+import {
+    BasicGunPowerup,
+    EnginePowerup,
+    Powerup,
+    PrincePowerup,
+    SpaceDiamondPowerup,
+    SpaceJunkPowerup,
+} from "../player/powerup";
 
 import Wave from "../levels/wave";
 
@@ -45,7 +55,7 @@ const WAVE_ROWS_ENEMY_COUNT_MAX = 5;
 const WAVE_ROWS_TIME_MAX = 90; // time between row spawns
 const WAVE_ROWS_ENEMY_TIME_MAX = 28; // time between enemy spawns in rows (only for right and left)
 const WAVE_BIGV_SPACER = 50;
-
+const BOMB_ENEMY_COUNT = 3;
 const WAVE_BIGV_XSPREAD = 20;
 const WAVE_SWOOP_MAX = 3; // this is the number of swoops we've have during a swoop wave
 const WAVE_SWOOP_OFFSET = 30;
@@ -76,8 +86,7 @@ export default class Gameplay extends Phaser.State {
 
     private levelManager: LevelManager;
 
-    // level stuff
-    private level: number;
+    private bulletsGroup: Phaser.Group;
 
     // groups
     private groupExplosions: Phaser.Group;
@@ -90,6 +99,7 @@ export default class Gameplay extends Phaser.State {
     private engineeringBounds: Phaser.Rectangle;
 
     private borderSprite: Phaser.Sprite;
+    private baseStation: BaseStation;
 
     // engineering section
     private engineering: Engineering;
@@ -106,9 +116,12 @@ export default class Gameplay extends Phaser.State {
         this.game.load.image("engine", "../assets/powerup.png");
         this.game.load.image("weight", "../assets/powerup.png");
 
+        this.game.load.image("base_station", "../assets/base_station.png");
+
         this.game.load.image("enemy", "../assets/enemy_1.png");
         this.game.load.spritesheet("boss_enemy", "../assets/boss_enemy.png", 128, 128, 3);
         this.game.load.spritesheet("dummy_drone", "../assets/dummy_drone.png", 64, 64, 3);
+        this.game.load.spritesheet("bomb_enemy", "../assets/enemy_2.png", 64, 64, 1);
 
         this.game.load.spritesheet("prince", "../assets/prince.png", 128, 128, 4);
         this.game.load.spritesheet("explosion", "../assets/explosion.png", 64, 64, 6);
@@ -125,6 +138,8 @@ export default class Gameplay extends Phaser.State {
 
         this.game.load.image("gun_1_powerup", "../assets/gun_1_powerup.png");
         this.game.load.image("engine_1_powerup", "../assets/engine_1_powerup.png");
+        this.game.load.image("space_junk", "../assets/space_junk.png");
+        this.game.load.image("space_diamond", "../assets/space_diamond.png");
 
         Engineering.preload(this.game);
     }
@@ -217,13 +232,17 @@ export default class Gameplay extends Phaser.State {
             "stars_3",
         ));
 
-        // setup engineering
-        this.engineering.create();
+        //  baseStation
+        this.baseStation = new BaseStation(this.game, 0, 0);
+        this.game.add.existing(this.baseStation);
+        this.baseStation.kill();
 
-        // sprites and physics
+        // the player
         this.player = new Player(this.game, this.game.width / 4, this.game.height - 50, "player");
         this.game.add.existing(this.player);
-        // groups
+
+        // setup engineering
+        this.engineering.create();
 
         // assign collision groups
         this.player.body.setCollisionGroup(this.playerCollisionGroup);
@@ -238,10 +257,20 @@ export default class Gameplay extends Phaser.State {
         // powerups
         this.groupPowerups = this.game.add.group();
 
+        // bullets
+        this.bulletsGroup = this.game.add.group();
+        this.bulletsGroup.createMultiple(64, "enemyBullet");
+        this.game.physics.p2.enable(this.bulletsGroup);
+        this.bulletsGroup.setAll("outOfBoundsKill", true);
+        this.bulletsGroup.setAll("checkWorldBounds", true);
+        this.bulletsGroup.setAll("body.collideWorldBounds", false);
+        this.bulletsGroup.setAll("body.fixedRotation", true);
+
         // basic enemies
         this.generateEnemyGroup(30, ENEMY_TYPES.BASIC);
         this.generateEnemyGroup(2, ENEMY_TYPES.BOSS);
         this.generateEnemyGroup(2, ENEMY_TYPES.DUMMY_DRONE);
+        this.generateEnemyGroup(20, ENEMY_TYPES.BOMB);
 
         this.groupExplosions = this.game.add.group();
         this.groupExplosions.createMultiple(60, "explosion");
@@ -284,6 +313,10 @@ export default class Gameplay extends Phaser.State {
             playerDeathExplosion.animations.getAnimation("explode").play(30, false, true);
         }
 
+        if (!this.player.alive && !this.playerDeathQueue.length) {
+            this.game.state.start("gameover");
+        }
+
         // update time variables
         this.gameMessageCenterTime--;
 
@@ -299,13 +332,40 @@ export default class Gameplay extends Phaser.State {
         return this.gameMessageCenterTime > 0;
     }
 
+    public generateBaseStation(): void {
+        this.baseStation.reset(this.shmupBounds.width / 4, -64);
+        this.player.dock(this.baseStation.getDockPoint());
+    }
+
+    public baseStationDone(): boolean {
+        if (this.baseStation.y > this.player.y - this.player.height) {
+            this.engineering.dropOffCargo();
+        }
+        if (this.baseStation.y > this.shmupBounds.height) {
+            console.log("BASE STATION DONE");
+            this.baseStation.kill();
+            this.player.undock();
+            return true;
+        }
+        return false;
+    }
+
     public setUpcomingWaves(waves: Wave[]) {
         this.currentLevelWaves = waves;
         this.currentWaveIndex = 0;
     }
 
-    public waveIndexAllDead(index: number) {
-        return this.currentLevelWaves[index].allSpawned && this.currentLevelWaves[index].allDead();
+    public allWavesDead() {
+        for (const wave of this.currentLevelWaves) {
+            if (!wave.allSpawned || !wave.allDead()) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public princeInInventory(): boolean {
+        return this.engineering.princeInInventory();
     }
 
     public testPowerupPickedUp() {
@@ -339,13 +399,16 @@ export default class Gameplay extends Phaser.State {
             let newEnemy: BaseEnemy;
             switch (enemyType) {
                 case ENEMY_TYPES.BASIC:
-                    newEnemy = new BasicEnemy(this.game, Math.random(), 0);
+                    newEnemy = new BasicEnemy(this.game, Math.random(), 0, this.bulletsGroup);
                     break;
                 case ENEMY_TYPES.BOSS:
-                    newEnemy = new BossEnemy(this.game, Math.random(), 0);
+                    newEnemy = new BossEnemy(this.game, Math.random(), 0, this.bulletsGroup);
                     break;
                 case ENEMY_TYPES.DUMMY_DRONE:
-                    newEnemy = new DummyDrone(this.game, Math.random(), 0);
+                    newEnemy = new DummyDrone(this.game, Math.random(), 0, this.bulletsGroup);
+                    break;
+                case ENEMY_TYPES.BOMB:
+                    newEnemy = new BombEnemy(this.game, Math.random(), 0, this.bulletsGroup);
                     break;
             }
             newEnemy.setBulletsCollisionGroup(this.bulletCollisionGroup);
@@ -363,15 +426,6 @@ export default class Gameplay extends Phaser.State {
         });
 
         return group;
-    }
-
-    private allWavesFinished(): boolean {
-        for (const wave of this.currentLevelWaves) {
-            if (!wave.allSpawned) {
-                return false;
-            }
-        }
-        return true;
     }
 
     private clearText() {
@@ -563,6 +617,17 @@ export default class Gameplay extends Phaser.State {
                 currentWave.allSpawned = true;
                 this.currentWaveIndex ++;
                 break;
+
+            case WAVE_TYPE.BOMB:
+                for (let i: number = 0; i < BOMB_ENEMY_COUNT; i++) {
+                    currentWave.addEnemy(
+                        this.createEnemy(WAVE_TYPE.BOMB, WAVE_ROW_XOFFSET + ENEMY_WIDTH * i, ENEMY_TYPES.BOMB),
+                    );
+                    currentWave.spawnEnemyNumber++;
+                }
+                currentWave.allSpawned = true;
+                this.currentWaveIndex ++;
+                break;
         }
     }
 
@@ -578,6 +643,12 @@ export default class Gameplay extends Phaser.State {
             case COMPONENT_TYPES.PRINCE:
                 powerup = new PrincePowerup(this.game, enemy.x, enemy.y);
                 break;
+            case COMPONENT_TYPES.SPACE_JUNK:
+                powerup = new SpaceJunkPowerup(this.game, enemy.x, enemy.y);
+                break;
+            case COMPONENT_TYPES.SPACE_DIAMOND:
+                powerup = new SpaceDiamondPowerup(this.game, enemy.x, enemy.y);
+                break;
         }
         if (!this.testPowerup) {
             this.testPowerup = powerup;
@@ -587,7 +658,7 @@ export default class Gameplay extends Phaser.State {
         this.game.physics.p2.enable(powerup);
         const powerupBody: Phaser.Physics.P2.Body = powerup.body;
         powerupBody.setCollisionGroup(this.powerupCollisionGroup);
-        powerupBody.velocity.y = Math.random() * 42;
+        powerupBody.velocity.y = Math.random() * 20;
         powerupBody.velocity.x = Math.random() * 42 - 84;
         powerupBody.fixedRotation = true;
         this.game.add.existing(powerup);
@@ -651,10 +722,10 @@ export default class Gameplay extends Phaser.State {
             explosion.play("explode", 30, false, true);
         }
 
-        player.sprite.damage(1);
+        this.engineering.damagePlayer(1);
 
-        if (player.sprite.health <= 0) {
-            this.playerIsDead(this.player);
+        if (this.engineering.getPlayerHealth() <= 0) {
+            this.explodePlayer(this.player);
             this.game.sound.play("dead");
         } else {
             this.game.sound.play("hurt");
@@ -663,8 +734,9 @@ export default class Gameplay extends Phaser.State {
         bullet.sprite.kill();
     }
 
-    private playerIsDead(player: Phaser.Sprite): void {
+    private explodePlayer(player: Phaser.Sprite): void {
         this.engineering.explode();
+        this.player.kill();
         for (let i: number = 0; i < 60; i++) {
             const deathExplosion: Phaser.Sprite = this.groupExplosions.getFirstExists(false);
             if (deathExplosion) {

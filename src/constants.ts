@@ -12,16 +12,24 @@ export enum WAVE_TYPE {
     ROW_RIGHT,
     ROW_STRAIGHT,
     BOSS,
+    BOMB,
 }
 
 export enum COMPONENT_TYPES {
     BASIC_GUN,
     ENGINE,
     PRINCE,
+    SPACE_JUNK,
+    SPACE_DIAMOND,
 }
 
 export enum ENEMY_TYPES {
     BASIC,
     BOSS,
     DUMMY_DRONE,
+    BOMB,
 }
+
+export const MAX_HEALTH: number = 4;
+export const MAX_ENGINE: number = 10;
+export const MAX_WEIGHT: number = 10;

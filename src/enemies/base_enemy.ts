@@ -1,5 +1,7 @@
 import { COMPONENT_TYPES, WAVE_TYPE } from "../constants";
 
+const SHOOT_LOWER_BOUND = 550;
+
 export default abstract class BaseEnemy extends Phaser.Sprite {
     protected enemyBody: Phaser.Physics.P2.Body;
     protected bulletsGroup: Phaser.Group;
@@ -22,7 +24,7 @@ export default abstract class BaseEnemy extends Phaser.Sprite {
 
     protected returningToTop: boolean;
 
-    public constructor(game: Phaser.Game, x: number, y: number, key: string) {
+    public constructor(game: Phaser.Game, x: number, y: number, key: string, bulletsGroup: Phaser.Group) {
         super(game, x, y, key);
 
         this.bound = new Phaser.Rectangle();
@@ -34,27 +36,20 @@ export default abstract class BaseEnemy extends Phaser.Sprite {
         this.game.physics.p2.enable(this);
         this.enemyBody = this.body;
         this.enemyBody.fixedRotation = true;
-        this.actionTime = this.game.time.now + this.game.rnd.integerInRange(0, this.actionTimeMax);
-        this.shootTime = this.game.time.now + this.game.rnd.integerInRange(0, this.shootTimeMax);
+        this.actionTime = this.game.time.now + this.game.rnd.integerInRange(this.actionTimeMin, this.actionTimeMax);
+        this.shootTime = this.game.time.now + this.game.rnd.integerInRange(this.shootTimeMin, this.shootTimeMax);
         this.waveType = WAVE_TYPE.NONE;
 
         this.maxHealth = this.healthMax;
 
-        // bullets
-        this.bulletsGroup = this.game.add.group();
-        this.bulletsGroup.createMultiple(30, "enemyBullet");
-        this.game.physics.p2.enable(this.bulletsGroup);
-        this.bulletsGroup.setAll("outOfBoundsKill", true);
-        this.bulletsGroup.setAll("checkWorldBounds", true);
-        this.bulletsGroup.setAll("body.collideWorldBounds", false);
-        this.bulletsGroup.setAll("body.fixedRotation", true);
+        this.bulletsGroup = bulletsGroup;
     }
 
     public abstract getPowerupToSpawn(): COMPONENT_TYPES;
 
     public randomizeTimes(): void {
-        this.actionTime = this.game.time.now + this.game.rnd.integerInRange(0, this.actionTimeMax);
-        this.shootTime = this.game.time.now + this.game.rnd.integerInRange(0, this.shootTimeMax);
+        this.actionTime = this.game.time.now + this.game.rnd.integerInRange(this.actionTimeMin, this.actionTimeMax);
+        this.shootTime = this.game.time.now + this.game.rnd.integerInRange(this.shootTimeMin, this.shootTimeMax);
     }
 
     public setBulletsCollisionGroup(bulletCollisionGroup: Phaser.Physics.P2.CollisionGroup): void {
@@ -130,21 +125,7 @@ export default abstract class BaseEnemy extends Phaser.Sprite {
                 break;
         }
 
-        // boundaries
-        if (this.enemyBody.y > this.bound.y) {
-            if (this.enemyBody.x < this.bound.x) {
-                this.enemyBody.x = this.bound.x;
-                this.enemyBody.velocity.x = -this.enemyBody.velocity.x;
-            }
-            if (this.enemyBody.x > this.bound.width) {
-                this.enemyBody.x = this.bound.width;
-                this.enemyBody.velocity.x = - this.enemyBody.velocity.x;
-            }
-        }
-        if (this.enemyBody.y > this.bound.height) {
-            this.enemyBody.y = this.bound.height;
-            this.enemyBody.velocity.y = -this.speedMax;
-        }
+        this.bounceOffWalls();
 
         // shoot (shooting is always random regardless of wave)
         if (this.game.time.now >= this.shootTime) {
@@ -161,6 +142,23 @@ export default abstract class BaseEnemy extends Phaser.Sprite {
         this.enemyBody.velocity.x = xVel;
     }
 
+    protected bounceOffWalls(): void {
+        if (this.enemyBody.y > this.bound.y) {
+            if (this.enemyBody.x < this.bound.x) {
+                this.enemyBody.x = this.bound.x;
+                this.enemyBody.velocity.x = -this.enemyBody.velocity.x;
+            }
+            if (this.enemyBody.x > this.bound.width) {
+                this.enemyBody.x = this.bound.width;
+                this.enemyBody.velocity.x = - this.enemyBody.velocity.x;
+            }
+        }
+        if (this.enemyBody.y > this.bound.height) {
+            this.enemyBody.y = this.bound.height;
+            this.enemyBody.velocity.y = -this.speedMax;
+        }
+    }
+
     protected returnToTop(): void {
         this.returningToTop = true;
         this.enemyBody.velocity.x = 0;
@@ -169,6 +167,9 @@ export default abstract class BaseEnemy extends Phaser.Sprite {
     }
 
     protected shoot(): void {
+        if (this.y >= SHOOT_LOWER_BOUND) {
+            return;
+        }
         const bullet = this.bulletsGroup.getFirstExists(false);
         if (bullet) {
             const bulletBody: Phaser.Physics.P2.Body = bullet.body;

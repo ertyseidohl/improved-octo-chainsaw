@@ -9,6 +9,8 @@ import { InputZ } from "./inventory/input_z";
 import { Prince } from "./inventory/prince";
 import { ShieldGenerator } from "./inventory/shield_generator";
 import { SmallGun } from "./inventory/small_gun";
+import { SpaceDiamond } from "./inventory/space_diamond";
+import { SpaceJunk } from "./inventory/space_junk";
 // import { MissileLauncher } from "./inventory/missile_launcher";
 
 import { HandlerMode } from "./inventory/drag_handler/base";
@@ -18,9 +20,7 @@ import { BasicShip, InventorySystem, NUM_TILE_SPRITES} from "./inventory/system"
 import { PowerSubSystem } from "./systems/power_subsystem";
 import { System } from "./systems/system";
 
-import { Point } from "phaser-ce";
-
-import { COMPONENT_TYPES } from "../constants";
+import { COMPONENT_TYPES, MAX_ENGINE, MAX_HEALTH, MAX_WEIGHT } from "../constants";
 
 import { StartPad } from "./wiring/start_pad";
 import { ConnectedWire } from "./wiring/wire";
@@ -28,7 +28,26 @@ import { ConnectedWire } from "./wiring/wire";
 export interface ShipUpdateMessage {
     topSpeed: number;
     guns: number;
+    weight: number;
 }
+
+// HUD
+const HEALTH_DISPLAY_Y: number = 20;
+const HEALTH_DISPLAY_X: number = 80;
+
+const ENGINE_DISPLAY_Y: number = 60;
+const ENGINE_DISPLAY_X: number = 85;
+
+const WEIGHT_DISPLAY_Y: number = 100;
+const WEIGHT_DISPLAY_X: number = 85;
+
+const POINTS_DISPLAY_Y: number = 768 - 24;
+
+const HUD_TEXT_STYLE: Phaser.PhaserTextStyle = {
+    fill: "white",
+    font: "pixelsix",
+    fontSize: 20,
+};
 
 // =================
 // class Engineering
@@ -52,8 +71,10 @@ export default class Engineering {
         game.load.spritesheet("wire", "../assets/wire.png", 4, 4, 2);
     }
 
-    // PUBLIC DATA
     public bounds: Phaser.Rectangle;
+
+    private points: number;
+    private pointsText: Phaser.Text;
 
     private componentGroup: Phaser.Group;
     private powerHandleGroup: Phaser.Group;
@@ -61,13 +82,21 @@ export default class Engineering {
 
     private mouseInBounds: boolean;
 
+    private playerHealth: number;
+
     private dragBitmap: Phaser.BitmapData;
     private dragHandler: MultiDragHandler;
     private inventorySystem: InventorySystem;
     private powerSystem: PowerSubSystem;
     private system: System;
 
+    private healthIcons: Phaser.Sprite[];
+    private engineIcons: Phaser.Sprite[];
+    private weightIcons: Phaser.Sprite[];
+
     private testComponent: BaseComponent;
+
+    private cargoHoldText: Phaser.Text;
 
     // CREATORS
     constructor(private state: Phaser.State) {
@@ -75,6 +104,8 @@ export default class Engineering {
 
     // PUBLIC METHODS
     public create(): void {
+
+        this.points = 0;
 
         this.inventorySystem = new InventorySystem(
             this.game,
@@ -84,6 +115,8 @@ export default class Engineering {
         );
 
         this.mouseInBounds = false;
+
+        this.playerHealth = MAX_HEALTH;
 
         this.powerSystem = new PowerSubSystem();
         this.system = new System(this.inventorySystem);
@@ -99,7 +132,9 @@ export default class Engineering {
         );
         this.inventorySystem.dragHandler = this.dragHandler;
 
-        this.createStartingComponents();
+        this.healthIcons = [];
+        this.engineIcons = [];
+        this.weightIcons = [];
 
         // button to switch drag modes
         const corner = this.bounds.topRight;
@@ -112,15 +147,126 @@ export default class Engineering {
         );
         dragSwitch.inputEnabled = true;
         dragSwitch.events.onInputDown.add(this.dragSwitchPressed, this);
+
+        this.game.add.text(
+            this.game.width / 2 + 10,
+            HEALTH_DISPLAY_Y,
+            "Health: ",
+            HUD_TEXT_STYLE,
+        );
+
+        for (let i = 0; i < MAX_HEALTH; i++) {
+            this.healthIcons[i] = this.game.add.sprite(
+                this.game.width / 2 + (5 * i) + HEALTH_DISPLAY_X,
+                HEALTH_DISPLAY_Y,
+                "health",
+            );
+        }
+
+        this.game.add.text(
+            this.game.width / 2 + 10,
+            ENGINE_DISPLAY_Y,
+            "Engine: ",
+            HUD_TEXT_STYLE,
+        );
+
+        for (let i = 0; i < MAX_ENGINE; i++) {
+            this.engineIcons[i] = this.game.add.sprite(
+                this.game.width / 2 + (5 * i) + ENGINE_DISPLAY_X,
+                ENGINE_DISPLAY_Y,
+                "engine",
+            );
+        }
+
+        this.game.add.text(
+            this.game.width / 2 + 10,
+            WEIGHT_DISPLAY_Y,
+            "Weight: ",
+            HUD_TEXT_STYLE,
+        );
+
+        for (let i = 0; i < MAX_ENGINE; i++) {
+            this.weightIcons[i] = this.game.add.sprite(
+                this.game.width / 2 + (5 * i) + WEIGHT_DISPLAY_X,
+                WEIGHT_DISPLAY_Y,
+                "weight",
+            );
+        }
+
+        this.cargoHoldText = this.game.add.text(
+            this.game.width / 2 + 195, // dOnT uSe mAgiC nUmBErS
+            440, // MAGIC NUMBER
+            "Cargo Hold",
+            {
+                ...HUD_TEXT_STYLE,
+                fill: "#555",
+            },
+        );
+
+        this.pointsText = this.game.add.text(
+            this.game.width / 2 + 10,
+            POINTS_DISPLAY_Y,
+            "Points: 0",
+            HUD_TEXT_STYLE,
+        );
+
+        // do this last so they go on top of the text
+        this.componentGroup = this.game.add.group();
+        this.createStartingComponents();
     }
 
     public update(): ShipUpdateMessage {
-        return this.system.update();
+        const updateMessage: ShipUpdateMessage = this.system.update();
+
+        for (let i: number = 0; i < MAX_ENGINE; i++)  {
+            this.engineIcons[i].visible = i < updateMessage.topSpeed;
+        }
+        for (let i = 0; i < MAX_HEALTH; i++) {
+            this.healthIcons[i].visible = i < this.playerHealth;
+        }
+        for (let i = 0; i < MAX_ENGINE; i++) {
+            this.weightIcons[i].visible = i < updateMessage.weight;
+        }
+
+        return updateMessage;
+    }
+
+    public damagePlayer(damage: number) {
+        this.playerHealth -= damage;
+    }
+
+    public getPlayerHealth(): number {
+        return this.playerHealth;
+    }
+
+    public dropOffCargo(): void {
+        this.componentGroup.forEach((c: BaseComponent) => {
+            if (c instanceof Prince) {
+                this.points += 100;
+                this.componentGroup.remove(c);
+                c.destroy();
+            }
+            if (c instanceof SpaceDiamond) {
+                this.points += 20;
+                this.componentGroup.remove(c);
+                c.destroy();
+            }
+        });
+        this.pointsText.setText(`Points: ${this.points}`);
     }
 
     public hasConnectedTestComponent(): boolean {
         // TODO
         return true;
+    }
+
+    public princeInInventory(): boolean {
+        for (const c of this.componentGroup.children) {
+            if (c instanceof Prince) {
+                return true;
+            }
+        }
+        return false;
     }
 
     // PUBLIC PROPERTIES
@@ -129,6 +275,7 @@ export default class Engineering {
     }
 
     public explode(): void {
+        this.cargoHoldText.visible = false;
         this.inventorySystem.explode();
         this.game.physics.enable(this.componentGroup);
         this.componentGroup.forEach((c: BaseComponent) => {
@@ -148,6 +295,12 @@ export default class Engineering {
                 break;
             case COMPONENT_TYPES.PRINCE:
                 newComponent = new Prince(this.game, this.inventorySystem);
+                break;
+            case COMPONENT_TYPES.SPACE_JUNK:
+                newComponent = new SpaceJunk(this.game, this.inventorySystem);
+                break;
+            case COMPONENT_TYPES.SPACE_DIAMOND:
+                newComponent = new SpaceDiamond(this.game, this.inventorySystem);
                 break;
             default:
                 throw new Error(`unknown component type for createComponentByname: ${componentType}`);

@@ -1,24 +1,6 @@
 import { COMPONENT_TYPES } from "../constants";
 
 export abstract class Powerup extends Phaser.Sprite {
-    public static createRandom(game: Phaser.Game, x: number, y: number): Powerup {
-        const possibilities = [
-            COMPONENT_TYPES.BASIC_GUN,
-            COMPONENT_TYPES.ENGINE,
-        ];
-
-        const chosen: COMPONENT_TYPES = possibilities[Math.floor(Math.random() * possibilities.length)];
-
-        switch (chosen) {
-            case COMPONENT_TYPES.BASIC_GUN:
-                return new BasicGunPowerup(game, x, y);
-            case COMPONENT_TYPES.ENGINE:
-                return new EnginePowerup(game, x, y);
-            default:
-            throw new Error(`Unknown component type for Powerup: ${chosen}`);
-        }
-    }
-
     // lifespan (builtin) is in ms, this is in frames
     private lifetime: number;
     private maxLifetime: number;
@@ -75,5 +57,25 @@ export class PrincePowerup extends Powerup {
 
     public getComponentName(): COMPONENT_TYPES {
         return COMPONENT_TYPES.PRINCE;
+    }
+}
+
+export class SpaceJunkPowerup extends Powerup {
+    constructor(game: Phaser.Game, x: number, y: number) {
+        super(game, x, y, "space_junk");
+    }
+
+    public getComponentName(): COMPONENT_TYPES {
+        return COMPONENT_TYPES.SPACE_JUNK;
+    }
+}
+
+export class SpaceDiamondPowerup extends Powerup {
+    constructor(game: Phaser.Game, x: number, y: number) {
+        super(game, x, y, "space_diamond");
+    }
+
+    public getComponentName(): COMPONENT_TYPES {
+        return COMPONENT_TYPES.SPACE_DIAMOND;
     }
 }
