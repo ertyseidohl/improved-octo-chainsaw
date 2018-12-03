@@ -1,3 +1,4 @@
+import { COMPONENT_TYPES } from "../constants";
 import BaseEnemy from "./base_enemy";
 
 const STOP_POINT = 300;
@@ -10,12 +11,8 @@ export default class DummyDrone extends BaseEnemy {
         glow.play(5, true);
     }
 
-    public shouldSpawnPowerup(): boolean {
-        return true;
-    }
-
-    public shouldSpawnPrince(): boolean {
-        return false;
+    public getPowerupToSpawn(): COMPONENT_TYPES {
+        return COMPONENT_TYPES.ENGINE;
     }
 
     public shoot(): void {

@@ -3,12 +3,12 @@ import BasicEnemy from "../enemies/basic_enemy";
 import BossEnemy from "../enemies/boss_enemy";
 import DummyDrone from "../enemies/dummy_drone";
 
-import { ENEMY_TYPES, WAVE_TYPE } from "../constants";
+import { COMPONENT_TYPES, ENEMY_TYPES, WAVE_TYPE } from "../constants";
 
 import Engineering, { ShipUpdateMessage } from "../engineering/engineering";
 import LevelManager from "../levels/level_manager";
 import Player from "../player/player";
-import { Powerup, PrincePowerup } from "../player/powerup";
+import { BasicGunPowerup, EnginePowerup, Powerup, PrincePowerup } from "../player/powerup";
 
 import Wave from "../levels/wave";
 
@@ -566,9 +566,18 @@ export default class Gameplay extends Phaser.State {
         }
     }
 
-    private spawnPowerup(enemy: Phaser.Physics.P2.Body, powerup?: Powerup): Powerup {
-        if (!powerup) {
-            powerup = Powerup.createRandom(this.game, enemy.x, enemy.y);
+    private spawnPowerup(enemy: Phaser.Physics.P2.Body, powerupType: COMPONENT_TYPES): Powerup {
+        let powerup;
+        switch (powerupType) {
+            case COMPONENT_TYPES.BASIC_GUN:
+                powerup = new BasicGunPowerup(this.game, enemy.x, enemy.y);
+                break;
+            case COMPONENT_TYPES.ENGINE:
+                powerup = new EnginePowerup(this.game, enemy.x, enemy.y);
+                break;
+            case COMPONENT_TYPES.PRINCE:
+                powerup = new PrincePowerup(this.game, enemy.x, enemy.y);
+                break;
         }
         if (!this.testPowerup) {
             this.testPowerup = powerup;
@@ -626,11 +635,9 @@ export default class Gameplay extends Phaser.State {
                 deathExplosion.play("explode", 15, false, true);
                 this.game.sound.play("explosion");
             }
-            if (enemySprite.shouldSpawnPowerup()) {
-                this.spawnPowerup(enemy);
-            }
-            if (enemySprite.shouldSpawnPrince()) {
-                this.spawnPowerup(enemy, new PrincePowerup(this.game, enemy.x, enemy.y));
+            const powerupType: COMPONENT_TYPES | null = enemySprite.getPowerupToSpawn();
+            if (powerupType) {
+                this.spawnPowerup(enemy, powerupType);
             }
         }
 

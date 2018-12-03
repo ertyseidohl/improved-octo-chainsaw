@@ -1,4 +1,4 @@
-import { WAVE_TYPE } from "../constants";
+import { COMPONENT_TYPES, WAVE_TYPE } from "../constants";
 
 export default abstract class BaseEnemy extends Phaser.Sprite {
     protected enemyBody: Phaser.Physics.P2.Body;
@@ -50,8 +50,7 @@ export default abstract class BaseEnemy extends Phaser.Sprite {
         this.bulletsGroup.setAll("body.fixedRotation", true);
     }
 
-    public abstract shouldSpawnPowerup(): boolean;
-    public abstract shouldSpawnPrince(): boolean;
+    public abstract getPowerupToSpawn(): COMPONENT_TYPES;
 
     public randomizeTimes(): void {
         this.actionTime = this.game.time.now + this.game.rnd.integerInRange(0, this.actionTimeMax);

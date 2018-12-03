@@ -1,3 +1,4 @@
+import { COMPONENT_TYPES } from "../constants";
 import BaseEnemy from "./base_enemy";
 
 export default class BasicEnemy extends BaseEnemy {
@@ -5,11 +6,16 @@ export default class BasicEnemy extends BaseEnemy {
         super(game, x, y, "enemy");
     }
 
-    public shouldSpawnPowerup(): boolean {
-        return Math.random() < 0.05;
-    }
+    public getPowerupToSpawn(): COMPONENT_TYPES | null {
+        const options = [
+            COMPONENT_TYPES.BASIC_GUN,
+            COMPONENT_TYPES.ENGINE,
+        ];
 
-    public shouldSpawnPrince(): boolean {
-        return false;
+        if (Math.random() < 0.5) {
+            return null;
+        }
+
+        return options[Math.floor(Math.random() * options.length)];
     }
 }

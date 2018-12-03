@@ -1,3 +1,5 @@
+import { COMPONENT_TYPES } from "../constants";
+import { Powerup } from "../player/powerup";
 import BaseEnemy from "./base_enemy";
 
 export default class BossEnemy extends BaseEnemy {
@@ -11,12 +13,8 @@ export default class BossEnemy extends BaseEnemy {
         glow.play(5, true);
     }
 
-    public shouldSpawnPowerup(): boolean {
-        return false;
-    }
-
-    public shouldSpawnPrince(): boolean {
-        return true;
+    public getPowerupToSpawn(): COMPONENT_TYPES {
+        return COMPONENT_TYPES.PRINCE;
     }
 
     public update(): void {
