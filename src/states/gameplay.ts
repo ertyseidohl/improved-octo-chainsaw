@@ -550,13 +550,19 @@ export default class Startup extends Phaser.State {
     }
 
     private bulletHitEnemy(bullet: Phaser.Physics.P2.Body, enemy: Phaser.Physics.P2.Body): void {
+        if (!enemy.sprite.alive) {
+            bullet.sprite.kill();
+            return;
+        }
+
         if (!bullet.sprite.alive) {
             return;
         }
+
         const explosion: Phaser.Sprite = this.groupExplosionsSmall.getFirstExists(false);
         if (explosion) {
             explosion.reset(bullet.x, bullet.y);
-            explosion.play("explode", 30, false, true);
+            explosion.play("explode", 15, false, true);
         }
 
         if (bullet.sprite.alive) {
@@ -564,11 +570,11 @@ export default class Startup extends Phaser.State {
             this.game.sound.play("hit");
         }
 
-        if (enemy.sprite.health <= 0) {
+        if (enemy.sprite.health <= 0 ) {
             const deathExplosion: Phaser.Sprite = this.groupExplosions.getFirstExists(false);
             if (deathExplosion) {
                 deathExplosion.reset(enemy.x, enemy.y);
-                deathExplosion.play("explode", 30, false, true);
+                deathExplosion.play("explode", 15, false, true);
                 this.game.sound.play("explosion");
             }
             this.spawnPowerup(enemy);

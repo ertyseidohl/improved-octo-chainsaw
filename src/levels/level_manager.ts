@@ -15,6 +15,11 @@ export default class LevelManager {
             LEVELS[this.currentLevelNum].cleanup(this.gameplayState);
             this.currentLevelNum ++;
 
+            if (this.currentLevelNum === LEVELS.length) {
+                this.gameplayState.game.state.start("youwin");
+                return;
+            }
+
             console.log(`Now on level ${this.currentLevelNum}`);
 
             LEVELS[this.currentLevelNum].init(this.gameplayState);

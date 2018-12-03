@@ -26,8 +26,8 @@ export const LEVELS: Level[] = [
     {
         init: (gameState: Gameplay) => {
             gameState.setUpcomingWaves([
-                new Wave(0, WAVE_TYPE.RANDOM),
-                // new Wave(0, WAVE_TYPE.ROW_LEFT),
+                // new Wave(0, WAVE_TYPE.RANDOM),
+                new Wave(0, WAVE_TYPE.ROW_LEFT),
                 // new Wave(120, WAVE_TYPE.ROW_STRAIGHT),
                 // new Wave(120, WAVE_TYPE.ROW_RIGHT),
                 // new Wave(120, WAVE_TYPE.BIGV),

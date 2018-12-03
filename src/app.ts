@@ -8,6 +8,7 @@ import "phaser";
 import Gameplay from "./states/gameplay";
 import Splash from "./states/splash";
 import Startup from "./states/startup";
+import YouWin from "./states/youwin";
 
 class App extends Phaser.Game {
     constructor(config: Phaser.IGameConfig) {
@@ -19,6 +20,7 @@ class App extends Phaser.Game {
         this.state.add("startup", Startup);
         this.state.add("splash", Splash);
         this.state.add("gameplay", Gameplay);
+        this.state.add("youwin", YouWin);
 
         this.state.start("startup");
     }

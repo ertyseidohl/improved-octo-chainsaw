@@ -14,16 +14,22 @@ const HEALTH_MAX: number = 3;
 export default class BaseEnemy extends Phaser.Sprite {
     private enemyBody: Phaser.Physics.P2.Body;
     private bulletsGroup: Phaser.Group;
-    private BOUND_X_MIN: number = 30;
-    private BOUND_X_MAX: number = this.game.width / 2 - 30;
-    private BOUND_Y_MIN: number = 0;
-    private BOUND_Y_MAX: number = this.game.height - this.height;
+    private bound: Phaser.Rectangle;
     private actionTime: number;
     private shootTime: number;
     private waveType: number;
 
+    private returningToTop: boolean;
+
     public constructor(game: Phaser.Game, x: number, y: number, key: string) {
         super(game, x, y, key);
+
+        this.bound = new Phaser.Rectangle();
+        this.bound.x = 30;
+        this.bound.width = this.game.width / 2 - 30;
+        this.bound.y = 0;
+        this.bound.height = this.game.height - this.height;
+
         this.game.physics.p2.enable(this);
         this.enemyBody = this.body;
         this.enemyBody.fixedRotation = true;
@@ -70,7 +76,13 @@ export default class BaseEnemy extends Phaser.Sprite {
 
         switch (this.waveType) {
             case WAVE_TYPE.NONE:
-            break;
+                if (this.returningToTop) {
+                    if (this.y < this.bound.y) {
+                        this.waveType = WAVE_TYPE.RANDOM;
+                        this.returningToTop = false;
+                    }
+                }
+                break;
             case WAVE_TYPE.RANDOM:
             if (!this.isInWindow()) {
                 this.enemyBody.velocity.y = ENEMY_SPEED_MAX;
@@ -95,31 +107,13 @@ export default class BaseEnemy extends Phaser.Sprite {
                     speed = this.game.rnd.integerInRange(ENEMY_SPEED_MIN, ENEMY_SPEED_MAX);
                     this.enemyBody.velocity.y = speed * direction;
                 }
-
-                // boundaries
-                if (this.enemyBody.x < this.BOUND_X_MIN) {
-                    this.enemyBody.x = this.BOUND_X_MIN;
-                    this.enemyBody.velocity.x = -this.enemyBody.velocity.x;
-                }
-                if (this.enemyBody.x > this.BOUND_X_MAX) {
-                    this.enemyBody.x = this.BOUND_X_MAX;
-                    this.enemyBody.velocity.x = - this.enemyBody.velocity.x;
-                }
-                if (this.enemyBody.y < this.BOUND_Y_MIN) {
-                    this.enemyBody.y = this.BOUND_Y_MIN;
-                    this.enemyBody.velocity.y = -this.enemyBody.velocity.y;
-                }
-                if (this.enemyBody.y > this.BOUND_Y_MAX) {
-                    this.enemyBody.y = this.BOUND_Y_MAX;
-                    this.enemyBody.velocity.y = - this.enemyBody.velocity.y;
-                }
             }
             break;
             case WAVE_TYPE.SWOOP_LEFT:
             case WAVE_TYPE.SWOOP_RIGHT:
                 this.enemyBody.velocity.y = ENEMY_SPEED_MAX * 2;
-                if (this.enemyBody.y > this.BOUND_Y_MAX + this.height * 2) {
-                    this.kill();
+                if (this.enemyBody.y > this.bound.height) {
+                    this.returnToTop();
                 }
                 break;
             case WAVE_TYPE.BIGV:
@@ -127,22 +121,26 @@ export default class BaseEnemy extends Phaser.Sprite {
             case WAVE_TYPE.ROW_RIGHT:
             case WAVE_TYPE.ROW_STRAIGHT:
                 this.enemyBody.velocity.y = ENEMY_SPEED_MAX;
-                if (this.enemyBody.y > this.BOUND_Y_MAX + this.height * 2) {
-                    this.kill();
+                if (this.enemyBody.y > this.bound.height) {
+                    this.returnToTop();
                 }
                 break;
         }
 
         // boundaries
-        if (this.enemyBody.y > this.BOUND_Y_MIN) {
-            if (this.enemyBody.x < this.BOUND_X_MIN) {
-                this.enemyBody.x = this.BOUND_X_MIN;
+        if (this.enemyBody.y > this.bound.y) {
+            if (this.enemyBody.x < this.bound.x) {
+                this.enemyBody.x = this.bound.x;
                 this.enemyBody.velocity.x = -this.enemyBody.velocity.x;
             }
-            if (this.enemyBody.x > this.BOUND_X_MAX) {
-                this.enemyBody.x = this.BOUND_X_MAX;
+            if (this.enemyBody.x > this.bound.width) {
+                this.enemyBody.x = this.bound.width;
                 this.enemyBody.velocity.x = - this.enemyBody.velocity.x;
             }
+        }
+        if (this.enemyBody.y > this.bound.height) {
+            this.enemyBody.y = this.bound.height;
+            this.enemyBody.velocity.y = -ENEMY_SPEED_MAX;
         }
 
         // shoot (shooting is always random regardless of wave)
@@ -160,6 +158,13 @@ export default class BaseEnemy extends Phaser.Sprite {
         this.enemyBody.velocity.x = xVel;
     }
 
+    private returnToTop(): void {
+        this.returningToTop = true;
+        this.enemyBody.velocity.x = 0;
+        this.enemyBody.velocity.y = -ENEMY_SPEED_MAX;
+        this.waveType = WAVE_TYPE.NONE;
+    }
+
     private shoot(): void {
         const bullet = this.bulletsGroup.getFirstExists(false);
         if (bullet) {
@@ -175,7 +180,7 @@ export default class BaseEnemy extends Phaser.Sprite {
     private isInWindow(): boolean {
         let result: boolean = false;
         const buffer: number = 40;
-        if (this.enemyBody.y > this.BOUND_Y_MIN + buffer) {
+        if (this.enemyBody.y > this.bound.y + buffer) {
             result = true;
         }
         return result;
