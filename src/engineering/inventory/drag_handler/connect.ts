@@ -130,6 +130,9 @@ export class ConnectDragHandler extends BaseDragHandler {
 
     // PUBLIC METHODS
     public dragStart(comp: BaseComponent): void {
+        if (!comp.onShip) {
+            return;
+        }
         // find sprite
         const p = this.game.input.mousePointer;
         this.pendingConnect = {
@@ -146,12 +149,12 @@ export class ConnectDragHandler extends BaseDragHandler {
     }
 
     public dragStop(comp: BaseComponent): void {
-        if (null === this.pendingConnect) {
+        if (!comp.onShip || null === this.pendingConnect) {
             return;
         }
         const { wire } = this.pendingConnect;
         const p = this.game.input.mousePointer;
-        const sink = this.inventorySystem.find(p);
+        const sink = this.inventorySystem.find(p.position);
         if (undefined === sink) {
             this.wires.remove(wire, true);
         } else if (comp === sink) {
@@ -173,13 +176,15 @@ export class ConnectDragHandler extends BaseDragHandler {
     }
 
     public dragUpdate(comp: BaseComponent): void {
-        const p = this.game.input.mousePointer;
-        if (this.pendingConnect) {
-            const { start, wire } = this.pendingConnect;
-            wire.sinkPoint = p.position;
-            comp.x = start.x;
-            comp.y = start.y;
+        if (!comp.onShip || null === this.pendingConnect) {
+            // TBD - if not on ship, need to move back to its original
+            // location.
+            return;
         }
+        const { start, wire } = this.pendingConnect;
+        wire.sinkPoint = this.game.input.mousePointer.position;
+        comp.x = start.x;
+        comp.y = start.y;
     }
 
     // PUBLIC PROPERTIES
