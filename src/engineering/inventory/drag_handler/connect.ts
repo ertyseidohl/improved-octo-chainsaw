@@ -1,6 +1,7 @@
 // DEPENDENCIES
 import { BaseComponent } from "../base_component";
 import { BaseDragHandler } from "./base";
+
 import { InventorySystem } from "../system";
 
 // TYPES
@@ -118,7 +119,7 @@ export class ConnectDragHandler extends BaseDragHandler {
         }
         const { wire } = this.pendingConnect;
         const p = this.game.input.mousePointer;
-        const sink = this.inventorySystem.find(p);
+        const sink = this.inventorySystem.find(p.position);
         if (undefined === sink) {
             this.wires.remove(wire, true);
         } else if (comp === sink) {

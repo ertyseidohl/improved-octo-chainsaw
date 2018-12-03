@@ -6,8 +6,8 @@ export class Engine extends BaseComponent {
 
     private animating: boolean = false;
 
-    constructor(game: Phaser.Game, inventorySystem: InventorySystem, x: number, y: number) {
-        super(game, inventorySystem, x, y, "engine_1", 1, 2);
+    constructor(game: Phaser.Game, inventorySystem: InventorySystem, position: Phaser.Point) {
+        super(game, inventorySystem, "engine_1", 1, 2, position);
     }
 
     public update(): void {

@@ -2,6 +2,7 @@
 import { BaseComponent } from "../base_component";
 import { BaseDragHandler } from "./base";
 import { ConnectDragHandler } from "./connect";
+
 import { InventorySystem } from "../system";
 import { MoveDragHandler } from "./move";
 

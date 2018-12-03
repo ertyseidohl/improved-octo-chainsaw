@@ -24,7 +24,7 @@ export default class Engineering {
     // PUBLIC DATA
     public bounds: Phaser.Rectangle;
 
-    private comps: Phaser.Group;
+    private componentGroup: Phaser.Group;
 
     private mouseInBounds: boolean = false;
 
@@ -51,7 +51,7 @@ export default class Engineering {
 
         this.powerSystem = new PowerSubSystem();
 
-        this.comps = this.game.add.group();
+        this.componentGroup = this.game.add.group();
         this.createStartingComponents();
 
         // button to switch drag modes
@@ -102,68 +102,36 @@ export default class Engineering {
     }
 
     // PRIVATE METHODS
-    private addComponent<C>(comp: C, name?: string): C {
-        this.comps.add(comp);
-        if (comp instanceof Phaser.Sprite) {
-            comp.inputEnabled = true;
-            if (name) {
-                comp.name = name;
+    private addComponent(
+        newComponent: BaseComponent, gridPos?: Phaser.Point, destroyOnFail: boolean = false,
+    ): BaseComponent {
+        const originalPosition: Phaser.Point = new Phaser.Point(newComponent.x, newComponent.y);
+        if (gridPos) {
+            const newPos = this.inventorySystem.gridIndexToPixels(gridPos.x, gridPos.y);
+            newComponent.x = newPos.x;
+            newComponent.y = newPos.y;
+            this.inventorySystem.place(newComponent);
+        } else {
+            if (!this.inventorySystem.placeInFirstAvailable(newComponent)) {
+                if (destroyOnFail) {
+                    newComponent.destroy();
+                } else {
+                    newComponent.x = originalPosition.x;
+                    newComponent.y = originalPosition.y;
+                }
+                return null;
             }
         }
-        return comp;
+        this.componentGroup.add(newComponent);
+        return newComponent;
     }
 
     private createStartingComponents(): void {
-        const gunCoord = this.inventorySystem.gridIndexToPixels(2, 4);
-        const basicGun = new BasicGun(this.game, this.inventorySystem, gunCoord.x, gunCoord.y);
-        this.inventorySystem.place(basicGun);
+        const firstGun = new BasicGun(this.game, this.inventorySystem, new Phaser.Point(0, 0));
+        this.addComponent(firstGun, null, true);
 
-        const cellCoord = this.inventorySystem.gridIndexToPixels(5, 3);
-        const cell = new EnergyCell(this.game, this.inventorySystem, cellCoord.x, cellCoord.y);
-        this.inventorySystem.place(cell);
-
-        this.powerSystem.attach(cell, basicGun);
-        this.powerSystem.attach(cell, basicGun);
-        this.powerSystem.updateAllComponents();
-
-        const smallGunCoord = this.inventorySystem.gridIndexToPixels(1, 5);
-        const smallGun = new SmallGun(this.game, this.inventorySystem, smallGunCoord.x, smallGunCoord.y);
-
-        // const cellHDCoord = this.inventorySystem.gridIndexToPixels(6, 3);
-        // this.inventorySystem.place(new EnergyCellHD(this.game, this.inventorySystem, cellHDCoord.x, cellHDCoord.y));
-
-        const engCoord1 = this.inventorySystem.gridIndexToPixels(3, 6);
-
-        const b: Engine = new Engine(this.game, this.inventorySystem, engCoord1.x, engCoord1.y);
-        this.inventorySystem.place(b);
-
-        const engCoord2 = this.inventorySystem.gridIndexToPixels(6, 6);
-        this.inventorySystem.place(new Engine(this.game, this.inventorySystem, engCoord2.x, engCoord2.y));
-
-        const inputZ = this.inventorySystem.gridIndexToPixels(7, 7);
-        this.inventorySystem.place(new InputZ(this.game, this.inventorySystem, inputZ.x, inputZ.y));
-
-        const inputX = this.inventorySystem.gridIndexToPixels(7, 6);
-        this.inventorySystem.place(new InputX(this.game, this.inventorySystem, inputX.x, inputX.y));
-
-        const inputC = this.inventorySystem.gridIndexToPixels(7, 5);
-        this.inventorySystem.place(new InputC(this.game, this.inventorySystem, inputC.x, inputC.y));
-
-        const shieldGenerator = this.inventorySystem.gridIndexToPixels(5, 5);
-        this.inventorySystem.place(
-            new ShieldGenerator(this.game, this.inventorySystem, shieldGenerator.x, shieldGenerator.y),
-        );
-
-        // const missileLauncher = this.inventorySystem.gridIndexToPixels(3, 2);
-        // this.inventorySystem.place(new MissileLauncher(
-        //     this.game,
-        //     this.inventorySystem,
-        //     missileLauncher.x,
-        //     missileLauncher.y,
-        // ));
-
-        // const prince = this.inventorySystem.gridIndexToPixels(3, 1);
-        // this.inventorySystem.place(new Prince(this.game, this.inventorySystem, prince.x, prince.y));
+        const secondGun = new BasicGun(this.game, this.inventorySystem, new Phaser.Point(0, 0));
+        this.addComponent(secondGun, null, true);
     }
 
     private onMouseDown() {

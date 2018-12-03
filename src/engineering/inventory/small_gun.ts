@@ -4,8 +4,8 @@ import { Constraints, InventorySystem } from "./system";
 
 export class SmallGun extends BaseComponent {
 
-    constructor(game: Phaser.Game, inventorySystem: InventorySystem, x: number, y: number) {
-        super(game, inventorySystem, x, y, "gun_small", 1, 2);
+    constructor(game: Phaser.Game, inventorySystem: InventorySystem, position: Phaser.Point) {
+        super(game, inventorySystem, "gun_small", 1, 2, position);
 
         const gunFireAnimation: Phaser.Animation = this.animations.add("fire", [1, 2, 3, 4]);
         gunFireAnimation.play(10, true);
