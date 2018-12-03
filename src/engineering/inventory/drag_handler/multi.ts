@@ -10,7 +10,7 @@ import { InventorySystem } from "../system";
 export class MultiDragHandler extends BaseDragHandler {
 
     // PRIVATE DATA
-    private current: HandlerMode;
+    private currentHandlerMode: HandlerMode;
     private handlers: BaseDragHandler[] = [];
 
     private globalDragState: GlobalDragState;
@@ -22,7 +22,7 @@ export class MultiDragHandler extends BaseDragHandler {
         powerSystem: PowerSubSystem,
     ) {
         super();
-        this.current = HandlerMode.MOVE;
+        this.currentHandlerMode = HandlerMode.MOVE;
 
         this.globalDragState = new GlobalDragState();
 
@@ -36,15 +36,15 @@ export class MultiDragHandler extends BaseDragHandler {
 
     // PUBLIC METHODS
     public dragStart(comp: BaseComponent): void {
-        this.handlers[this.current].dragStart(comp);
+        this.handlers[this.currentHandlerMode].dragStart(comp);
     }
 
     public dragStop(comp: BaseComponent): void {
-        this.handlers[this.current].dragStop(comp);
+        this.handlers[this.currentHandlerMode].dragStop(comp);
     }
 
     public dragUpdate(comp: BaseComponent): void {
-        this.handlers[this.current].dragUpdate(comp);
+        this.handlers[this.currentHandlerMode].dragUpdate(comp);
     }
 
     public setHandler(handler: HandlerMode): void {
@@ -55,11 +55,11 @@ export class MultiDragHandler extends BaseDragHandler {
 
     // PUBLIC PROPERTIES
     get handler(): HandlerMode {
-        return this.current;
+        return this.currentHandlerMode;
     }
 
     set handler(value: HandlerMode) {
-        this.current = value;
+        this.currentHandlerMode = value;
     }
 
 }

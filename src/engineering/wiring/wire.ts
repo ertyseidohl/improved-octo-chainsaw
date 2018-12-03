@@ -138,20 +138,50 @@ export class ConnectedWire extends Wire {
     private origin: BaseComponent;
     private terminal: BaseComponent;
 
-    constructor(game: Phaser.Game, originComponent: BaseComponent, terminalComponent: BaseComponent) {
+    private originPadIndex: number;
+    private terminalPadIndex: number;
+
+    constructor(game: Phaser.Game, originComponent: BaseComponent, originPadIndex: number,
+                terminalComponent: BaseComponent, terminalPadIndex: number) {
         super(game);
         this.origin = originComponent;
         this.terminal = terminalComponent;
+
+        this.originPadIndex = originPadIndex;
+        this.terminalPadIndex = terminalPadIndex;
     }
 
     public getOriginPoint(): Phaser.Point {
-        const pad = this.origin.getPowerPads();
-
+        const pad = this.origin.getPowerPads(this.originPadIndex);
         return pad;
     }
 
     public getTerminalPoint(): Phaser.Point {
-        const pad = this.terminal.getPowerPads();
+        const pad = this.terminal.getPowerPads(this.terminalPadIndex);
         return pad;
+    }
+}
+
+export class DraggingWire extends Wire {
+
+    private origin: BaseComponent;
+    private handle: Phaser.Sprite;
+
+    constructor(game: Phaser.Game, originComponet: BaseComponent, handle: Phaser.Sprite) {
+        super(game);
+        this.origin = originComponet;
+        this.handle = handle;
+    }
+
+    public getOriginPoint(): Phaser.Point {
+        const pad = this.origin.getPowerHandlePoint();
+        return pad;
+    }
+
+    public getTerminalPoint(): Phaser.Point {
+        return new Phaser.Point(
+            this.handle.x,
+            this.handle.y,
+        );
     }
 }

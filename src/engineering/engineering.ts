@@ -1,4 +1,4 @@
-import { BaseComponent } from "./inventory/base_component";
+import { BaseComponent, PowerType } from "./inventory/base_component";
 import { BasicGun } from "./inventory/basic_gun";
 import { EnergyCell } from "./inventory/energy_cell";
 import { EnergyCellHD } from "./inventory/energy_cell_hd";
@@ -22,6 +22,7 @@ import { Point } from "phaser-ce";
 
 import { COMPONENT_TYPES } from "../constants";
 
+import { StartPad } from "./wiring/start_pad";
 import { ConnectedWire } from "./wiring/wire";
 
 export interface ShipUpdateMessage {
@@ -55,6 +56,7 @@ export default class Engineering {
     public bounds: Phaser.Rectangle;
 
     private componentGroup: Phaser.Group;
+    private powerHandleGroup: Phaser.Group;
 
     private mouseInBounds: boolean;
 
@@ -86,6 +88,8 @@ export default class Engineering {
         this.system = new System(this.inventorySystem);
 
         this.componentGroup = this.game.add.group();
+        this.powerHandleGroup = this.game.add.group();
+
         this.dragHandler = new MultiDragHandler(
             this.game,
             this.inventorySystem,
@@ -195,8 +199,6 @@ export default class Engineering {
 
         const secondEngine = new Engine(this.game, this.inventorySystem);
         this.addComponent(secondEngine, new Phaser.Point(6, 6));
-
-        const myWire = new ConnectedWire(this.game, firstPowerSource, firstGun);
     }
 
     private dragSwitchPressed(_: any, p: Phaser.Pointer) {
@@ -204,10 +206,29 @@ export default class Engineering {
             case HandlerMode.MOVE: // transition to 'CONNECT'
                 this.dragBitmap.fill(0, 255, 0);
                 this.dragHandler.setHandler(HandlerMode.CONNECT);
+
+
+                for (const c of this.inventorySystem.getAllComponents()) {
+                    c.lockDrag();
+                    if (c.getPowerType() === PowerType.Source && c.getNextPowerPadIndex() >= 0) {
+                        const pad = new StartPad(this.game, c, this.inventorySystem);
+                        this.powerHandleGroup.add(pad);
+                    }
+                }
+
+
                 break;
             case HandlerMode.CONNECT: // transition to 'MOVE'
                 this.dragBitmap.fill(255, 0, 0);
                 this.dragHandler.setHandler(HandlerMode.MOVE);
+
+                this.powerHandleGroup = this.game.add.group();
+
+                for (const c of this.inventorySystem.getAllComponents()) {
+                    c.unlockDrag();
+                    this.powerHandleGroup.destroy();
+                }
+
                 break;
         }
     }

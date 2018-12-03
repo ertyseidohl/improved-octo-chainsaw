@@ -4,6 +4,8 @@ import { InventorySystem } from "./system";
 
 export class EnergyCell extends BaseComponent {
 
+    private powerPadsIndexes = [0, 1, 2, 3];
+
     constructor(game: Phaser.Game, inventorySystem: InventorySystem, position?: Phaser.Point) {
         super(game, inventorySystem, "energy_cell", 1, 1, position);
 
@@ -27,10 +29,28 @@ export class EnergyCell extends BaseComponent {
         ];
     }
 
-    public getPowerPads(): Phaser.Point {
+    public getNextPowerPadIndex(): number {
+        if (this.powerPadsIndexes.length > 0) {
+            return this.powerPadsIndexes[0];
+        } else {
+            return -1;
+        }
+    }
+
+    public getPowerPads(index: number): Phaser.Point {
+        if (this.powerPadsIndexes.length <= 0) {
+            return null;
+        }
         return new Phaser.Point(
-            this.x + 16,
-            this.y + 16,
+            this.x + this.powerPadsOffsets[index].x,
+            this.y + this.powerPadsOffsets[index].y,
+        );
+    }
+
+    public getPowerHandlePoint(): Phaser.Point {
+        return new Phaser.Point(
+            this.x + 15,
+            this.y + 4,
         );
     }
 
