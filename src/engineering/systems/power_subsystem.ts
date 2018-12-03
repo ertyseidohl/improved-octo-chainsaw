@@ -1,4 +1,4 @@
-import { BaseComponent } from "./base_component";
+import { BaseComponent } from "../inventory/base_component";
 
 abstract class SubSystem {
     public abstract detach(source: BaseComponent, sink: BaseComponent): void;

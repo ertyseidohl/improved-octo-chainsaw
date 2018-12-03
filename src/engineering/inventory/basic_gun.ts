@@ -4,7 +4,7 @@ import { Constraints, InventorySystem } from "./system";
 
 export class BasicGun extends BaseComponent {
 
-    constructor(game: Phaser.Game, inventorySystem: InventorySystem, position: Phaser.Point) {
+    constructor(game: Phaser.Game, inventorySystem: InventorySystem, position?: Phaser.Point) {
         super(game, inventorySystem, "gun_1", 1, 3, position);
 
         const gunFireAnimation: Phaser.Animation = this.animations.add("fire");
@@ -21,6 +21,8 @@ export class BasicGun extends BaseComponent {
                 powerLoad: 2,
                 minPowerDraw: 1,
             },
+            powerSource: null,
+            weight: 6,
         };
     }
 
@@ -28,6 +30,10 @@ export class BasicGun extends BaseComponent {
         return [
             "The GK-305 model is the hottest on the market! No seriously, you'll need, like, three heatsinks.",
         ];
+    }
+
+    public getGuns(): number {
+        return this.getPower();
     }
 
 }

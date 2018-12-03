@@ -1,6 +1,7 @@
 // DEPENDENCIES
 import { BaseComponent } from "../base_component";
-import { BaseDragHandler } from "./base";
+import { BaseDragHandler, GlobalDragState } from "./base";
+
 import { InventorySystem } from "../system";
 
 // CONSTANTS
@@ -45,7 +46,6 @@ export class MoveDragHandler extends BaseDragHandler {
 
     // PUBLIC METHODS
     public dragStart(comp: BaseComponent): void {
-        // TBD - prevent draggin by right click
         const state = this.getState(comp);
         state.state = "draggingOkay";
         comp.bringToTop();
@@ -92,7 +92,7 @@ export class MoveDragHandler extends BaseDragHandler {
             state = {
                 oldX: 0,
                 oldY: 0,
-                state: "locked"
+                state: "locked",
             };
             this.comps.set(comp, state);
         }

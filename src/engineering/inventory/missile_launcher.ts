@@ -23,10 +23,12 @@ export class MissileLauncher extends BaseComponent {
 
     public getStateConfig(): StateConfig {
         return {
-            powerSource: {
-                power: 4,
+            powerConsumer: {
+                powerLoad: 4,
+                minPowerDraw: 4,
             },
-            powerConsumer: null,
+            powerSource: null,
+            weight: 8,
         };
     }
 
