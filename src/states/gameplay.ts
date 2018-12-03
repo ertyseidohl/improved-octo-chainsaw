@@ -12,6 +12,19 @@ const ENEMY_SPAWN_TIME: number = 2000;
 const ENEMY_Y_SPAWN: number = -20;
 const ENEMY_WIDTH: number = 100; // spacing number for spawning enemies
 
+// gameplay states
+enum GAMEPLAY_STATE {
+    GETREADY,
+    WAVES,
+    BOSS,
+    VICTORY,
+}
+
+enum READY_STATES {
+    READY,
+    DRAMATIC_PAUSE,
+    GO,
+}
 const POWERUP_POOL_COUNT: number = 30;
 
 // wave constants
@@ -46,6 +59,13 @@ enum SWOOP_TYPE {
 }
 
 export default class Startup extends Phaser.State {
+    private gameplayState: number;
+    private startState: number;
+    private startStateTime: number;
+
+    private gameMessageCenter: Phaser.Text;
+    private gameMessageCenterTime: number; // set negative if infinite
+
     // game objects
     private player: Player;
     private playerCollisionGroup: Phaser.Physics.P2.CollisionGroup;
@@ -67,6 +87,9 @@ export default class Startup extends Phaser.State {
     private spawnSwoopFinished: boolean;
     private spawnSwoopTime: number;
     private spawnSwoopType: number;
+
+    // level stuff
+    private level: number;
 
     // Enemy vars
     private enemyRndmCreateCoolDwn = ENEMY_SPAWN_TIME;
@@ -114,7 +137,16 @@ export default class Startup extends Phaser.State {
     }
 
     public create(): void {
+
+        // NOOBIE NOTE: THINGS LIKE TEXT AND SPRITES MUST BE ADDED CORRECT ORDER
+        // i.e. adding text, then background, means the text will be behind
+        // the background, and therefore invisible.
+
         const { width, height } = this.game;
+
+        this.gameplayState = GAMEPLAY_STATE.GETREADY;
+        this.startState = 0; // this is janky forgive me!!!
+        this.startStateTime = this.game.time.now + 2000; // "Get Ready!" 2 seconds
 
         // collision groups
         this.playerCollisionGroup = this.game.physics.p2.createCollisionGroup();
@@ -235,6 +267,19 @@ export default class Startup extends Phaser.State {
         this.groupExplosionsSmall = this.game.add.group();
         this.groupExplosionsSmall.createMultiple(10, "explosion_small");
         this.groupExplosionsSmall.forEach((explosion: Phaser.Sprite) => explosion.animations.add("explode"));
+
+        this.gameMessageCenter = new Phaser.Text(
+            this.game,
+            0,
+            0,
+            "TEST",
+            {
+                font: "34px pixelsix", fill: "#fff",
+                boundsAlignH: "center", boundsAlignV: "middle",
+            },
+        );
+        this.gameMessageCenter.setTextBounds(0, 0, this.shmupBounds.width, this.shmupBounds.height);
+        this.game.add.existing(this.gameMessageCenter);
     }
 
     public update(): void {
@@ -252,6 +297,53 @@ export default class Startup extends Phaser.State {
     }
 
     private updateShmup(): void {
+        switch (this.gameplayState) {
+            case GAMEPLAY_STATE.GETREADY:
+            switch (this.startState) {
+                case READY_STATES.READY:
+                this.gameMessageCenterTime = -1; // remember must be negative to be permenant
+                this.gameMessageCenter.setText("Get Ready...");
+                if (this.game.time.now >= this.startStateTime) {
+                    this.startStateTime = this.game.time.now + 1000; // one second dramatic pause
+                    this.startState = READY_STATES.DRAMATIC_PAUSE;
+                }
+                break;
+                case READY_STATES.DRAMATIC_PAUSE:
+                this.gameMessageCenter.setText("");
+                if (this.game.time.now >= this.startStateTime) {
+                    this.gameMessageCenter.setText("GO!!!");
+                    this.startState = READY_STATES.GO;
+                }
+                break;
+                case READY_STATES.GO:
+                this.gameMessageCenter.setText("GO!!!");
+                this.gameMessageCenterTime = this.game.time.now + 2000;
+                this.gameplayState = GAMEPLAY_STATE.WAVES;
+                break;
+            }
+            break;
+            case GAMEPLAY_STATE.WAVES:
+            this.createWaves();
+            break;
+            case GAMEPLAY_STATE.BOSS:
+            break;
+            case GAMEPLAY_STATE.VICTORY:
+            break;
+        }
+        this.displayGameMessages();
+    }
+
+    private displayGameMessages(): void {
+        // center message
+        // style = { font: "bold 32px Arial", fill: "#fff", boundsAlignH: "center", boundsAlignV: "middle" };
+        if (this.gameMessageCenterTime > 0) {
+            if (this.game.time.now >= this.gameMessageCenterTime) {
+                this.gameMessageCenter.setText("");
+            }
+        }
+    }
+
+    private createWaves(): void {
         // if time to spawn wave, and wave is finished, generate enemies
         // we don't need a "wave finished" variable, we just set spawnWaveType to NONE and check for that
         if (this.game.time.now >= this.spawnWaveTime && this.spawnWaveType === ENEMY_WAVE.NONE) {
