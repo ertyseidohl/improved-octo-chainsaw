@@ -37,6 +37,10 @@ export class Engine extends BaseComponent {
         };
     }
 
+    public getSpeed(): number {
+        return 2;
+    }
+
     public getDescription(): string[] {
         return [
             "This engine can burn kerosene, oil, antimatter, and three kinds of aliens for fuel.",

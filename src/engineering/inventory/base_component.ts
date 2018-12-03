@@ -86,6 +86,10 @@ export abstract class BaseComponent extends Phaser.Sprite {
         return 0;
     }
 
+    public getGuns(): number {
+        return 0;
+    }
+
     private onDragStart(): void {
         this.inventorySystem.dragHandler.dragStart(this);
     }

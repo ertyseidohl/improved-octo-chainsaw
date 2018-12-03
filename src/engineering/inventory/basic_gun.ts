@@ -32,4 +32,8 @@ export class BasicGun extends BaseComponent {
         ];
     }
 
+    public getGuns(): number {
+        return 2;
+    }
+
 }

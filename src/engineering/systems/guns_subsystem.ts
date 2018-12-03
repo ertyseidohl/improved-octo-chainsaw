@@ -1,6 +1,6 @@
 import { InventorySystem } from "../inventory/system";
 
-export class EngineSubSystem {
+export class GunSubSystem {
 
     private inventorySystem: InventorySystem;
 
@@ -8,10 +8,10 @@ export class EngineSubSystem {
         this.inventorySystem = componentGroup;
     }
 
-    public getSpeed(): number {
+    public getGuns(): number {
         let speed = 0;
         for (const component of this.inventorySystem.getAllComponents()) {
-            speed += component.getSpeed();
+            speed += component.getGuns();
         }
         return speed;
     }

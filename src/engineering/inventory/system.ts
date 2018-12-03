@@ -82,6 +82,7 @@ export class InventorySystem {
     private tileWidth: number;
 
     private grid: BaseComponentOrEmpty[][];
+    private components: BaseComponent[];
 
     private displayText: Phaser.Text;
 
@@ -102,6 +103,7 @@ export class InventorySystem {
         this.tileWidth = tileWidth;
 
         this.grid = ship.map;
+        this.components = [];
 
         this.displayText = new Phaser.Text(
             this.game,
@@ -133,11 +135,19 @@ export class InventorySystem {
 
     }
 
+    public getAllComponents(): BaseComponent[] {
+        return this.components;
+    }
+
     public release(component: BaseComponent): void {
         const index = this.pixelToGridIndex(component.x, component.y, true);
         const indexes = this.generate_indexes(index, component.tileWidth, component.tileHeight);
         component.onShip = false;
         indexes.map((i) => this.grid[i.y][i.x] = null);
+
+        const idx = this.components.indexOf(component);
+        this.components.splice(idx, 1);
+        console.log(this.components);
     }
 
     public explode(): void {
@@ -177,6 +187,7 @@ export class InventorySystem {
             component.onShip = true;
         }
 
+        this.components.push(component);
         return this.gridIndexToPixels(index.x, index.y);
     }
 
