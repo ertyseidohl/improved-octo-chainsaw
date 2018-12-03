@@ -71,8 +71,6 @@ export default class Engineering {
     // PUBLIC METHODS
     public create(): void {
 
-        const myWire = new ConnectedWire(this.game);
-
         this.inventorySystem = new InventorySystem(
             this.game,
             600, 100,
@@ -184,6 +182,8 @@ export default class Engineering {
 
         const secondEngine = new Engine(this.game, this.inventorySystem);
         this.addComponent(secondEngine, new Phaser.Point(6, 6));
+
+        const myWire = new ConnectedWire(this.game, firstPowerSource, firstGun);
     }
 
     private dragSwitchPressed(_: any, p: Phaser.Pointer) {
