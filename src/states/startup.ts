@@ -7,6 +7,10 @@ export default class Startup extends Phaser.State {
         this.game.load.audio("hurt", "../assets/Hit_Hurt14.wav");
         this.game.load.audio("dead", "../assets/Explosion45.wav");
         this.game.load.audio("powerup", "../assets/Powerup.wav");
+
+        this.game.load.audio("visager_final", "../assets/visager_final.mp3");
+        this.game.load.audio("visager_game", "../assets/visager_game.mp3");
+        this.game.load.audio("visager_boss", "../assets/visager_boss.mp3");
     }
 
     public create(): void {
@@ -28,13 +32,20 @@ export default class Startup extends Phaser.State {
 
         this.game.canvas.oncontextmenu = (e) => e.preventDefault();
 
-        const blaster: Phaser.Sound = this.game.add.audio("blaster", 0.1);
+        const visagerGame: Phaser.Sound = this.game.add.audio("visager_game");
+        const visagerFinal: Phaser.Sound = this.game.add.audio("visager_final");
+        const visagerBoss: Phaser.Sound = this.game.add.audio("visager_boss");
+
+        const blaster: Phaser.Sound = this.game.add.audio("blaster");
         const hit: Phaser.Sound = this.game.add.audio("hit");
         const explosion: Phaser.Sound = this.game.add.audio("explosion");
         const hurt: Phaser.Sound = this.game.add.audio("hurt");
         const dead: Phaser.Sound = this.game.add.audio("dead");
         const powerup: Phaser.Sound = this.game.add.audio("powerup");
-        this.game.sound.setDecodedCallback([blaster, hit, explosion, hurt, dead, powerup], this.startGame, this);
+        this.game.sound.setDecodedCallback(
+            [blaster, hit, explosion, hurt, dead, powerup, visagerBoss, visagerFinal, visagerGame],
+            this.startGame,
+            this);
     }
 
     private startGame(): void {
