@@ -4,7 +4,7 @@ import { InventorySystem } from "./system";
 
 export class Prince extends BaseComponent {
 
-    constructor(game: Phaser.Game, inventorySystem: InventorySystem, position: Phaser.Point) {
+    constructor(game: Phaser.Game, inventorySystem: InventorySystem, position?: Phaser.Point) {
         super(game, inventorySystem, "prince", 4, 4, position);
 
         const princeAnimation: Phaser.Animation = this.animations.add("glow", [1, 2, 3, 4]);
