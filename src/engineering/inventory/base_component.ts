@@ -80,6 +80,22 @@ export abstract class BaseComponent extends Phaser.Sprite {
         return this.componentState.updatePower(power);
     }
 
+    public getPower() {
+        return this.componentState.getPower();
+    }
+
+    public getWeight(): number {
+        return this.componentState.getWeight();
+    }
+
+    public getSpeed(): number {
+        return 0;
+    }
+
+    public getGuns(): number {
+        return 0;
+    }
+
     private onDragStart(game: any, pointer: Phaser.Pointer): void {
         this.inventorySystem.dragHandler.dragStart(this);
     }

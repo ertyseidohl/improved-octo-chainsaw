@@ -21,6 +21,8 @@ export class BasicGun extends BaseComponent {
                 powerLoad: 2,
                 minPowerDraw: 1,
             },
+            powerSource: null,
+            weight: 6,
         };
     }
 
@@ -28,6 +30,10 @@ export class BasicGun extends BaseComponent {
         return [
             "The GK-305 model is the hottest on the market! No seriously, you'll need, like, three heatsinks.",
         ];
+    }
+
+    public getGuns(): number {
+        return this.getPower();
     }
 
 }

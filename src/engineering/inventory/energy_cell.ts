@@ -16,6 +16,8 @@ export class EnergyCell extends BaseComponent {
             powerSource: {
                 power: 4,
             },
+            powerConsumer: null,
+            weight: 2,
         };
     }
 

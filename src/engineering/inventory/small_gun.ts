@@ -22,6 +22,7 @@ export class SmallGun extends BaseComponent {
                 minPowerDraw: 0.5,
             },
             powerSource: null,
+            weight: 4,
         };
     }
 
@@ -29,6 +30,10 @@ export class SmallGun extends BaseComponent {
         return [
             "This gun is actually just four smaller guns taped together.",
         ];
+    }
+
+    public getGuns(): number {
+        return this.getPower();
     }
 
 }

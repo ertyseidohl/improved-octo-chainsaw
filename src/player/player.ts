@@ -16,8 +16,9 @@ export default class Player extends Phaser.Sprite {
     private keyShoot: Phaser.Key;
 
     // game variables
-    private shotCooldown: number = 200; // computer time, not frames
+    private shotCooldown: number = 12; // using frames
     private fireTime: number = 0;
+    private healthIcons: Phaser.Sprite[] = [];
 
     public constructor(game: Phaser.Game, x: number, y: number, key: string) {
         super(game, x, y, key);
@@ -44,6 +45,11 @@ export default class Player extends Phaser.Sprite {
         this.bulletsGroup.setAll("checkWorldBounds", true);
         this.bulletsGroup.setAll("body.collideWorldBounds", false);
         this.bulletsGroup.setAll("body.fixedRotation", true);
+
+        for (let i = 0; i < MAX_HEALTH; i++) {
+            this.healthIcons[i] =
+            this.game.add.sprite(this.game.width / 2 + 5, this.game.height - 7 * i - 30, "health");
+        }
     }
 
     public setBulletsCollisionGroup(bulletCollisionGroup: Phaser.Physics.P2.CollisionGroup): void {
@@ -88,11 +94,21 @@ export default class Player extends Phaser.Sprite {
                 this.shoot();
             }
         }
+
+        this.fireTime--;
+
+        for (let i = 0; i < MAX_HEALTH; i++) {
+            if (this.health > i) {
+                this.healthIcons[i].alive = true;
+            } else {
+                this.healthIcons[i].kill();
+            }
+        }
     }
 
     private shoot(): void {
-        if (this.game.time.now >= this.fireTime) {
-            this.fireTime = this.game.time.now + this.shotCooldown;
+        if (this.fireTime <= 0) {
+            this.fireTime = this.shotCooldown;
             const bullet = this.bulletsGroup.getFirstExists(false);
             if (bullet) {
                 const bulletBody: Phaser.Physics.P2.Body = bullet.body;

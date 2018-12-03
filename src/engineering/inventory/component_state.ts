@@ -1,6 +1,7 @@
 export interface StateConfig {
     powerConsumer?: PowerConsumerStateConfig;
     powerSource?: PowerSourceStateConfig;
+    weight: number;
 }
 
 export interface PowerSourceStateConfig {
@@ -21,10 +22,13 @@ export class ComponentState {
     private powerConsumer: PowerConsumerStateConfig;
     private powerSource: PowerSourceStateConfig;
 
+    private weight: number;
+
     constructor(config: StateConfig) {
         this.powerConsumer = config.powerConsumer;
         this.powerSource = config.powerSource;
         this.health = 100;
+        this.weight = config.weight;
     }
 
     public isOnline(): boolean {
@@ -33,6 +37,10 @@ export class ComponentState {
 
     public isAlive(): boolean {
         return this.health > 0;
+    }
+
+    public getWeight(): number {
+        return this.weight;
     }
 
     public getPowerLoad(): number {

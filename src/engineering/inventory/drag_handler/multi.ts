@@ -2,11 +2,10 @@
 import { BaseComponent } from "../base_component";
 import { BaseDragHandler, GlobalDragState, HandlerMode } from "./base";
 import { ConnectDragHandler } from "./connect";
-
-import { InventorySystem } from "../system";
 import { MoveDragHandler } from "./move";
 
-import { PowerSubSystem } from "../power_subsystem";
+import { PowerSubSystem } from "../../systems/power_subsystem";
+import { InventorySystem } from "../system";
 
 export class MultiDragHandler extends BaseDragHandler {
 
