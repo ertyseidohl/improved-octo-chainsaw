@@ -541,6 +541,7 @@ export default class Startup extends Phaser.State {
         if (player !== this.player.body) {
             return;
         }
+        this.game.sound.play("powerup");
         const powerupSprite: Powerup = powerup.sprite as Powerup;
         if (this.engineering.createComponentByName(powerupSprite.getComponentName())) {
             powerupSprite.destroy();
@@ -559,6 +560,7 @@ export default class Startup extends Phaser.State {
 
         if (bullet.sprite.alive) {
             enemy.sprite.damage(1);
+            this.game.sound.play("hit");
         }
 
         if (enemy.sprite.health <= 0) {
@@ -566,6 +568,7 @@ export default class Startup extends Phaser.State {
             if (deathExplosion) {
                 deathExplosion.reset(enemy.x, enemy.y);
                 deathExplosion.play("explode", 30, false, true);
+                this.game.sound.play("explosion");
             }
             this.spawnPowerup(enemy);
         }
@@ -584,6 +587,9 @@ export default class Startup extends Phaser.State {
 
         if (player.sprite.health <= 0) {
             this.playerIsDead(this.player);
+            this.game.sound.play("dead");
+        } else {
+            this.game.sound.play("hurt");
         }
 
         bullet.sprite.kill();
