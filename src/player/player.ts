@@ -1,4 +1,6 @@
-const PLAYER_SPEED: number = 400; // EVAN wanted this faster
+import { ShipUpdateMessage } from "../engineering/engineering";
+
+const PLAYER_SPEED: number = 200; // EVAN wanted this faster
 const PLAYER_SCALE: number = 2;
 
 const BULLET_SPEED: number = 700;
@@ -19,6 +21,10 @@ export default class Player extends Phaser.Sprite {
     private shotCooldown: number = 12; // using frames
     private fireTime: number = 0;
     private healthIcons: Phaser.Sprite[] = [];
+
+    // from engineering
+    private speedModifier: number = 0;
+    private gunCount: number = 0;
 
     public constructor(game: Phaser.Game, x: number, y: number, key: string) {
         super(game, x, y, key);
@@ -52,6 +58,11 @@ export default class Player extends Phaser.Sprite {
         }
     }
 
+    public getUpdateMessage(updateMessage: ShipUpdateMessage): void {
+        this.speedModifier = updateMessage.topSpeed;
+        this.gunCount = updateMessage.guns;
+    }
+
     public setBulletsCollisionGroup(bulletCollisionGroup: Phaser.Physics.P2.CollisionGroup): void {
         this.bulletsGroup.forEach((bullet: Phaser.Sprite) => bullet.body.setCollisionGroup(bulletCollisionGroup));
     }
@@ -78,16 +89,16 @@ export default class Player extends Phaser.Sprite {
 
         // controls
         if (this.keyUp.isDown) {
-            this.playerBody.velocity.y = -PLAYER_SPEED;
+            this.playerBody.velocity.y = -PLAYER_SPEED * this.speedModifier;
         }
         if (this.keyDown.isDown) {
-            this.playerBody.velocity.y = PLAYER_SPEED;
+            this.playerBody.velocity.y = PLAYER_SPEED * this.speedModifier;
         }
         if (this.keyLeft.isDown) {
-            this.playerBody.velocity.x = -PLAYER_SPEED;
+            this.playerBody.velocity.x = -PLAYER_SPEED * this.speedModifier;
         }
         if (this.keyRight.isDown) {
-            this.playerBody.velocity.x = PLAYER_SPEED;
+            this.playerBody.velocity.x = PLAYER_SPEED * this.speedModifier;
         }
         if (this.keyShoot.isDown) {
             if (this.alive) {
@@ -107,12 +118,15 @@ export default class Player extends Phaser.Sprite {
     }
 
     private shoot(): void {
-        if (this.fireTime <= 0) {
-            this.fireTime = this.shotCooldown;
+        if (this.fireTime > 0) {
+            return;
+        }
+        this.fireTime = this.shotCooldown;
+        for (let i: number = 0; i < this.gunCount; i++) {
             const bullet = this.bulletsGroup.getFirstExists(false);
             if (bullet) {
                 const bulletBody: Phaser.Physics.P2.Body = bullet.body;
-                bullet.reset(this.x, this.y - 20);
+                bullet.reset(this.x + i * 5, this.y - 20);
                 bulletBody.velocity.y = -BULLET_SPEED;
             }
         }

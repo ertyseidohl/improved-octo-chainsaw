@@ -68,5 +68,4 @@ export class ComponentState {
 
         return 0;
     }
-
 }
