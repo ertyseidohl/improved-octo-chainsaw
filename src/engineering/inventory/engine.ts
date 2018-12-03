@@ -28,11 +28,12 @@ export class Engine extends BaseComponent {
 
     public getStateConfig(): StateConfig {
         return {
-            powerSource: null,
             powerConsumer: {
                 powerLoad: 2,
                 minPowerDraw: 0,
             },
+            powerSource: null,
+            weight: 4,
         };
     }
 

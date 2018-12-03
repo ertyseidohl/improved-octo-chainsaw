@@ -77,6 +77,14 @@ export abstract class BaseComponent extends Phaser.Sprite {
         return this.componentState.updatePower(power);
     }
 
+    public getWeight(): number {
+        return this.componentState.getWeight();
+    }
+
+    public getSpeed(): number {
+        return 0;
+    }
+
     private onDragStart(): void {
         this.inventorySystem.dragHandler.dragStart(this);
     }

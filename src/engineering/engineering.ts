@@ -12,8 +12,8 @@ import { SmallGun } from "./inventory/small_gun";
 // import { MissileLauncher } from "./inventory/missile_launcher";
 
 import { HandlerType, MultiDragHandler } from "./inventory/drag_handler/multi";
-import { PowerSubSystem } from "./inventory/power_subsystem";
 import { BasicShip, InventorySystem, NUM_TILE_SPRITES} from "./inventory/system";
+import { PowerSubSystem } from "./systems/power_subsystem";
 
 import { Point } from "phaser-ce";
 

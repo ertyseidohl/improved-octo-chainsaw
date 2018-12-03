@@ -21,6 +21,8 @@ export class BasicGun extends BaseComponent {
                 powerLoad: 2,
                 minPowerDraw: 1,
             },
+            powerSource: null,
+            weight: 6,
         };
     }
 

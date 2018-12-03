@@ -22,6 +22,7 @@ export class SmallGun extends BaseComponent {
                 minPowerDraw: 0.5,
             },
             powerSource: null,
+            weight: 4,
         };
     }
 

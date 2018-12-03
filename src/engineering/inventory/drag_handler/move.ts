@@ -1,7 +1,7 @@
 // DEPENDENCIES
 import { BaseComponent } from "../base_component";
-import { BaseDragHandler } from "./base";
 import { InventorySystem } from "../system";
+import { BaseDragHandler } from "./base";
 
 // CONSTANTS
 const STATE_MODIFIERS: { [s: string]: DragStateConfig} = {
@@ -91,7 +91,7 @@ export class MoveDragHandler extends BaseDragHandler {
             state = {
                 oldX: 0,
                 oldY: 0,
-                state: "locked"
+                state: "locked",
             };
             this.comps.set(comp, state);
         }

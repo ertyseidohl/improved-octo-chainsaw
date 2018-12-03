@@ -1,8 +1,9 @@
 // DEPENDENCIES
 import { BaseComponent } from "../base_component";
 import { BaseDragHandler } from "./base";
+
+import { PowerSubSystem } from "../../systems/power_subsystem";
 import { InventorySystem } from "../system";
-import { PowerSubSystem } from "../power_subsystem";
 
 // TYPES
 class RopeWire extends Phaser.Group {
