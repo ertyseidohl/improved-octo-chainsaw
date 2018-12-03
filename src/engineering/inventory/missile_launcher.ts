@@ -4,8 +4,8 @@ import { Constraints, InventorySystem } from "./system";
 
 export class MissileLauncher extends BaseComponent {
 
-    constructor(game: Phaser.Game, inventorySystem: InventorySystem, x: number, y: number) {
-        super(game, inventorySystem, x, y, "missile_launcher", 2, 2);
+    constructor(game: Phaser.Game, inventorySystem: InventorySystem, position: Phaser.Point) {
+        super(game, inventorySystem, "missile_launcher", 2, 2, position);
 
         const missileFireAnimation: Phaser.Animation = this.animations.add("fire", [1, 2, 3, 4, 5, 6, 7]);
         missileFireAnimation.play(5, true);

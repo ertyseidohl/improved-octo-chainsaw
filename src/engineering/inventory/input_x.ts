@@ -3,8 +3,8 @@ import { Constraints, InventorySystem } from "./system";
 
 export class InputX extends BaseInput {
 
-    constructor(game: Phaser.Game, inventorySystem: InventorySystem, x: number, y: number) {
-        super(game, inventorySystem, x, y, "button_x");
+    constructor(game: Phaser.Game, inventorySystem: InventorySystem, position: Phaser.Point) {
+        super(game, inventorySystem, "button_x", position);
     }
 
     public getDescription(): string[] {

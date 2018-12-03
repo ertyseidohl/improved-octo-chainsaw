@@ -61,11 +61,6 @@ class Index {
     }
 }
 
-export interface Coordinate {
-    x: number;
-    y: number;
-}
-
 export class InventorySystem {
 
     public dragHandler: BaseDragHandler;
@@ -171,7 +166,7 @@ export class InventorySystem {
         return this.allNone(testIndexes);
     }
 
-    public place(component: BaseComponent): Coordinate {
+    public place(component: BaseComponent): Phaser.Point {
         const index = this.pixelToGridIndex(component.x, component.y, true);
         const indexes = this.generate_indexes(index, component.tileWidth, component.tileHeight);
         indexes.map((i) => this.grid[i.y][i.x] = component);
@@ -185,7 +180,7 @@ export class InventorySystem {
         return this.gridIndexToPixels(index.x, index.y);
     }
 
-    public find(point: Coordinate): BaseComponent | undefined {
+    public find(point: Phaser.Point): BaseComponent | undefined {
         const i = this.pixelToGridIndex(point.x, point.y, false);
         const col = this.grid[i.y];
         if (col) {
@@ -197,10 +192,25 @@ export class InventorySystem {
         return undefined;
     }
 
-    public gridIndexToPixels(xIndex: number, yIndex: number): Coordinate {
+    public gridIndexToPixels(xIndex: number, yIndex: number): Phaser.Point {
         const x = this.x + (xIndex * this.tileWidth);
         const y = this.y + (yIndex * this.tileHeight);
-        return {x, y};
+        return new Phaser.Point(x, y);
+    }
+
+    public placeInFirstAvailable(component: BaseComponent): boolean {
+        for (let i: number = 0; i < this.width; i++) {
+            for (let j: number = 0; j < this.width; j++) {
+                const newCoords = this.gridIndexToPixels(j, i);
+                component.x = newCoords.x;
+                component.y = newCoords.y;
+                if (this.test(component)) {
+                    this.place(component);
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     public setDisplayText(text: string[]): void {

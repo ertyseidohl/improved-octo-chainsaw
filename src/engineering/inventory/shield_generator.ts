@@ -4,8 +4,8 @@ import { Constraints, InventorySystem } from "./system";
 
 export class ShieldGenerator extends BaseComponent {
 
-    constructor(game: Phaser.Game, inventorySystem: InventorySystem, x: number, y: number) {
-        super(game, inventorySystem, x, y, "shield_generator", 2, 1);
+    constructor(game: Phaser.Game, inventorySystem: InventorySystem, position: Phaser.Point) {
+        super(game, inventorySystem, "shield_generator", 2, 1, position);
 
         const gunFireAnimation: Phaser.Animation = this.animations.add("shield", [1, 2, 3, 4]);
         gunFireAnimation.play(10, true);

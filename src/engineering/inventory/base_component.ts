@@ -1,6 +1,12 @@
 import { ComponentState, StateConfig } from "./component_state";
 import { Constraints, InventorySystem } from "./system";
 
+export enum PowerType {
+    None,
+    Source,
+    Sink,
+}
+
 export abstract class BaseComponent extends Phaser.Sprite {
 
     public tileWidth: number;
@@ -16,9 +22,11 @@ export abstract class BaseComponent extends Phaser.Sprite {
     private oldY: number;
 
     constructor(game: Phaser.Game, inventorySystem: InventorySystem,
-                x: number, y: number, key: string,
-                tileWidth: number, tileHeight: number) {
-        super(game, x, y, key, 0);
+                key: string,
+                tileWidth: number, tileHeight: number,
+                position: Phaser.Point,
+    ) {
+        super(game, position.x, position.y, key, 0);
 
         this.inventorySystem = inventorySystem;
         this.tileWidth = tileWidth;
@@ -44,6 +52,15 @@ export abstract class BaseComponent extends Phaser.Sprite {
 
     public abstract getDescription(): string[];
     public abstract getStateConfig(): StateConfig;
+
+    public getPowerType(): PowerType {
+        if (this.getStateConfig().powerConsumer) {
+            return PowerType.Sink;
+        } else if (this.getStateConfig().powerSource) {
+            return PowerType.Source;
+        }
+        return PowerType.None;
+    }
 
     public getTileWidth(): number {
         return this.tileWidth;

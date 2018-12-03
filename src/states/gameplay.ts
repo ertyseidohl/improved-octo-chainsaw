@@ -24,6 +24,7 @@ enum READY_STATES {
     DRAMATIC_PAUSE,
     GO,
 }
+const POWERUP_POOL_COUNT: number = 30;
 
 // wave constants
 const WAVE_TIME_MAX: number = 2000;
@@ -113,7 +114,7 @@ export default class Startup extends Phaser.State {
         this.game.load.image("border", "../assets/border.png");
         this.game.load.image("bullet", "../assets/laser.png");
         this.game.load.image("enemyBullet", "../assets/enemy-bullet.png");
-        this.game.load.image("powerup", "../assets/dude.png");
+        this.game.load.image("powerup", "../assets/powerup.png");
 
         this.game.load.spritesheet("prince", "../assets/prince.png", 128, 128, 4);
         this.game.load.spritesheet("explosion", "../assets/explosion.png", 64, 64, 6);
@@ -127,6 +128,9 @@ export default class Startup extends Phaser.State {
         this.game.load.spritesheet("button_z", "../assets/button_z.png", 32, 32, 2);
         this.game.load.spritesheet("button_x", "../assets/button_x.png", 32, 32, 2);
         this.game.load.spritesheet("button_c", "../assets/button_c.png", 32, 32, 2);
+
+        this.game.load.image("gun_1_powerup", "../assets/gun_1_powerup.png");
+        this.game.load.image("engine_1_powerup", "../assets/engine_1_powerup.png");
 
         this.engineering.preload();
     }
@@ -213,9 +217,6 @@ export default class Startup extends Phaser.State {
         // sprites and physics
         this.player = new Player(this.game, this.game.width / 4, this.game.height - 50, "player");
         this.game.add.existing(this.player);
-
-        this.groupPowerups = this.game.add.group();
-        this.groupPowerups.createMultiple(30, "powerup");
         // groups
 
         // assign collision groups
@@ -328,81 +329,6 @@ export default class Startup extends Phaser.State {
             if (this.game.time.now >= this.gameMessageCenterTime) {
                 this.gameMessageCenter.setText("");
             }
-        }
-    }
-
-    private bulletHitEnemy(bullet: Phaser.Physics.P2.Body, enemy: Phaser.Physics.P2.Body): void {
-        const explosion: Phaser.Sprite = this.groupExplosionsSmall.getFirstExists(false);
-        if (explosion) {
-            explosion.reset(bullet.x, bullet.y);
-            explosion.play("explode", 30, false, true);
-        }
-
-        if (bullet.sprite.alive) {
-            enemy.sprite.damage(1);
-        }
-
-        if (enemy.sprite.health <= 0) {
-            const deathExplosion: Phaser.Sprite = this.groupExplosions.getFirstExists(false);
-            if (deathExplosion) {
-                deathExplosion.reset(enemy.x, enemy.y);
-                deathExplosion.play("explode", 30, false, true);
-            }
-        }
-
-        bullet.sprite.kill();
-    }
-
-    private bulletHitPlayer(bullet: Phaser.Physics.P2.Body, player: Phaser.Physics.P2.Body): void {
-        const explosion: Phaser.Sprite = this.groupExplosionsSmall.getFirstExists(false);
-        if (explosion) {
-            explosion.reset(bullet.x, bullet.y);
-            explosion.play("explode", 30, false, true);
-        }
-
-        player.sprite.damage(1);
-
-        if (player.sprite.health <= 0) {
-            this.playerIsDead(this.player);
-        }
-
-        bullet.sprite.kill();
-    }
-
-    private playerIsDead(player: Phaser.Sprite): void {
-        this.engineering.explode();
-        for (let i: number = 0; i < 60; i++) {
-            const deathExplosion: Phaser.Sprite = this.groupExplosions.getFirstExists(false);
-            if (deathExplosion) {
-                if (Math.random() < 0.5) {
-                    deathExplosion.reset(
-                        player.x + ((Math.random() * 200) - 100),
-                        player.y + ((Math.random() * 200) - 100),
-                    );
-                } else {
-                    deathExplosion.reset(
-                        this.engineeringBounds.x + (Math.random() * this.engineeringBounds.width),
-                        this.engineeringBounds.y + (Math.random() * this.engineeringBounds.height),
-                    );
-                }
-                deathExplosion.visible = false;
-                this.playerDeathQueue.push(deathExplosion);
-            }
-        }
-    }
-
-    private powerUpHitPlayer(): void {
-        // not implemented
-    }
-
-    private createEnemy(waveType: number, xSpawn: number) {
-        const currEnemy: BaseEnemy = this.groupEnemies.getFirstExists(false);
-        if (currEnemy) {
-            if (waveType === ENEMY_WAVE.RANDOM) {
-                currEnemy.randomizeTimes();
-            }
-            currEnemy.setWaveType(waveType);
-            currEnemy.reset(xSpawn, ENEMY_Y_SPAWN, currEnemy.maxHealth);
         }
     }
 
@@ -676,6 +602,96 @@ export default class Startup extends Phaser.State {
                 this.resetWave();
             }
             break;
+        }
+    }
+
+    private spawnPowerup(enemy: Phaser.Physics.P2.Body) {
+        // const powerup = this.groupPowerups.getFirstExists(false);
+        // if (powerup) {
+        //     powerup.reset(enemy.sprite.x, enemy.sprite.y);
+        //     const powerupBody: Phaser.Physics.P2.Body = powerup.body;
+        //     powerupBody.velocity.y = Math.random() * 42;
+        //     powerupBody.velocity.x = Math.random() * 42 - 84;
+        //     powerupBody.fixedRotation = true;
+        // }
+    }
+
+    private bulletHitEnemy(bullet: Phaser.Physics.P2.Body, enemy: Phaser.Physics.P2.Body): void {
+        if (!bullet.sprite.alive) {
+            return;
+        }
+        const explosion: Phaser.Sprite = this.groupExplosionsSmall.getFirstExists(false);
+        if (explosion) {
+            explosion.reset(bullet.x, bullet.y);
+            explosion.play("explode", 30, false, true);
+        }
+
+        if (bullet.sprite.alive) {
+            enemy.sprite.damage(1);
+        }
+
+        if (enemy.sprite.health <= 0) {
+            const deathExplosion: Phaser.Sprite = this.groupExplosions.getFirstExists(false);
+            if (deathExplosion) {
+                deathExplosion.reset(enemy.x, enemy.y);
+                deathExplosion.play("explode", 30, false, true);
+            }
+            this.spawnPowerup(enemy);
+        }
+
+        bullet.sprite.kill();
+    }
+
+    private bulletHitPlayer(bullet: Phaser.Physics.P2.Body, player: Phaser.Physics.P2.Body): void {
+        const explosion: Phaser.Sprite = this.groupExplosionsSmall.getFirstExists(false);
+        if (explosion) {
+            explosion.reset(bullet.x, bullet.y);
+            explosion.play("explode", 30, false, true);
+        }
+
+        player.sprite.damage(1);
+
+        if (player.sprite.health <= 0) {
+            this.playerIsDead(this.player);
+        }
+
+        bullet.sprite.kill();
+    }
+
+    private playerIsDead(player: Phaser.Sprite): void {
+        this.engineering.explode();
+        for (let i: number = 0; i < 60; i++) {
+            const deathExplosion: Phaser.Sprite = this.groupExplosions.getFirstExists(false);
+            if (deathExplosion) {
+                if (Math.random() < 0.5) {
+                    deathExplosion.reset(
+                        player.x + ((Math.random() * 200) - 100),
+                        player.y + ((Math.random() * 200) - 100),
+                    );
+                } else {
+                    deathExplosion.reset(
+                        this.engineeringBounds.x + (Math.random() * this.engineeringBounds.width),
+                        this.engineeringBounds.y + (Math.random() * this.engineeringBounds.height),
+                    );
+                }
+                deathExplosion.visible = false;
+                this.playerDeathQueue.push(deathExplosion);
+            }
+        }
+    }
+
+    private powerUpHitPlayer(): void {
+        // not implemented
+    }
+
+    private createEnemy(waveType: number, xSpawn: number) {
+        const currEnemy: BaseEnemy = this.groupEnemies.getFirstExists(false);
+        if (currEnemy) {
+            if (waveType === ENEMY_WAVE.RANDOM) {
+                currEnemy.randomizeTimes();
+            }
+            currEnemy.setWaveType(waveType);
+            currEnemy.reset(xSpawn, ENEMY_Y_SPAWN, currEnemy.maxHealth);
         }
     }
 

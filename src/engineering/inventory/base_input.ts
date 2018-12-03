@@ -4,8 +4,8 @@ import { Constraints, InventorySystem } from "./system";
 
 export abstract class BaseInput extends BaseComponent {
 
-    constructor(game: Phaser.Game, inventorySystem: InventorySystem, x: number, y: number, key: string) {
-        super(game, inventorySystem, x, y, key, 1, 1);
+    constructor(game: Phaser.Game, inventorySystem: InventorySystem, key: string, position: Phaser.Point) {
+        super(game, inventorySystem, key, 1, 1, position);
     }
 
     public getPower(): number {
