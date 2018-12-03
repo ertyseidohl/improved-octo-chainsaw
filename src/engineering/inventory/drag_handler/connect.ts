@@ -159,11 +159,12 @@ export class ConnectDragHandler extends BaseDragHandler {
         } else if (!this.connections.tryConnect(comp, sink, wire)) {
             this.wires.remove(wire, true);
         } else {
+            wire.sinkPad.data = { wire };
             wire.sinkPad.inputEnabled = true;
             wire.sinkPad.input.enableDrag();
-            wire.sinkPad.events.onDragStart.add(this.wireDragStart, this, null, wire);
-            wire.sinkPad.events.onDragStop.add(this.wireDragStop, this, null, wire);
-            wire.sinkPad.events.onDragUpdate.add(this.wireDragUpdate, this, null, wire);
+            wire.sinkPad.events.onDragStart.add(this.wireDragStart, this);
+            wire.sinkPad.events.onDragStop.add(this.wireDragStop, this);
+            wire.sinkPad.events.onDragUpdate.add(this.wireDragUpdate, this);
             this.connectedWires.set(wire, { source: comp, sink });
             this.powerSystem.attach(comp, sink);
             this.powerSystem.updateAllComponents();
@@ -187,14 +188,8 @@ export class ConnectDragHandler extends BaseDragHandler {
     }
 
     // PRIVATE METHODS
-    private wireDragStart(
-        obj: any,
-        pointer: Phaser.Pointer,
-        x: number,
-        y: number,
-        wire: Wire
-    ) {
-        console.log("drag start", arguments);
+    private wireDragStart(pad: Phaser.Sprite, pointer: Phaser.Pointer) {
+        const wire = pad.data.wire as Wire;
         const p = this.game.input.mousePointer;
         const { source, sink } = this.connectedWires.get(wire);
         this.connectedWires.delete(wire);
@@ -207,24 +202,14 @@ export class ConnectDragHandler extends BaseDragHandler {
         };
     }
 
-    private wireDragStop(obj: any, p: Phaser.Pointer, wire: Wire) {
-        console.log("drag sop", arguments);
+    private wireDragStop(pad: Phaser.Sprite, p: Phaser.Pointer) {
         if (this.pendingConnect) {
             this.dragStop(this.pendingConnect.source);
         }
     }
 
-    private wireDragUpdate(
-        obj: any,
-        p: Phaser.Pointer,
-        newX: number,
-        newY: number,
-        snappedTo: any,
-        fromStart: boolean,
-        dX: number,
-        dY: number,
-        wire: Wire,
-    ) {
+    private wireDragUpdate(pad: Phaser.Sprite, p: Phaser.Pointer) {
+        const wire = pad.data.wire as Wire;
         wire.sinkPoint = p.position;
     }
 
