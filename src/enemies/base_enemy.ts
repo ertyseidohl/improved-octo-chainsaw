@@ -1,25 +1,26 @@
 import { WAVE_TYPE } from "../constants";
 
-const ENEMY_SPEED_MIN: number = 100;
-const ENEMY_SPEED_MAX: number = 200;
-const DIR_MIN: number = 0;
-const DIR_MAX: number = 1;
-const ACTION_TIME_MIN: number = 3000;
-const ACTION_TIME_MAX: number = 3000;
-const SHOOT_TIME_MIN: number = 4000;
-const SHOOT_TIME_MAX: number = 6000;
-const BULLET_SPEED: number = 500;
-const HEALTH_MAX: number = 3;
-
 export default abstract class BaseEnemy extends Phaser.Sprite {
-    private enemyBody: Phaser.Physics.P2.Body;
-    private bulletsGroup: Phaser.Group;
-    private bound: Phaser.Rectangle;
-    private actionTime: number;
-    private shootTime: number;
-    private waveType: number;
+    protected enemyBody: Phaser.Physics.P2.Body;
+    protected bulletsGroup: Phaser.Group;
+    protected bound: Phaser.Rectangle;
+    protected actionTime: number;
+    protected shootTime: number;
+    protected waveType: number;
 
-    private returningToTop: boolean;
+    protected dirMin: number = 0;
+    protected dirMax: number = 1;
+    protected actionTimeMin: number = 3000;
+    protected actionTimeMax: number = 3000;
+    protected shootTimeMin: number = 4000;
+    protected shootTimeMax: number = 6000;
+    protected bulletSpeed: number = 500;
+    protected healthMax: number = 3;
+
+    protected speedMin: number = 200;
+    protected speedMax: number = 400;
+
+    protected returningToTop: boolean;
 
     public constructor(game: Phaser.Game, x: number, y: number, key: string) {
         super(game, x, y, key);
@@ -33,11 +34,11 @@ export default abstract class BaseEnemy extends Phaser.Sprite {
         this.game.physics.p2.enable(this);
         this.enemyBody = this.body;
         this.enemyBody.fixedRotation = true;
-        this.actionTime = this.game.time.now + this.game.rnd.integerInRange(0, ACTION_TIME_MAX);
-        this.shootTime = this.game.time.now + this.game.rnd.integerInRange(0, SHOOT_TIME_MAX);
+        this.actionTime = this.game.time.now + this.game.rnd.integerInRange(0, this.actionTimeMax);
+        this.shootTime = this.game.time.now + this.game.rnd.integerInRange(0, this.shootTimeMax);
         this.waveType = WAVE_TYPE.NONE;
 
-        this.maxHealth = HEALTH_MAX;
+        this.maxHealth = this.healthMax;
 
         // bullets
         this.bulletsGroup = this.game.add.group();
@@ -50,10 +51,11 @@ export default abstract class BaseEnemy extends Phaser.Sprite {
     }
 
     public abstract shouldSpawnPowerup(): boolean;
+    public abstract shouldSpawnPrince(): boolean;
 
     public randomizeTimes(): void {
-        this.actionTime = this.game.time.now + this.game.rnd.integerInRange(0, ACTION_TIME_MAX);
-        this.shootTime = this.game.time.now + this.game.rnd.integerInRange(0, SHOOT_TIME_MAX);
+        this.actionTime = this.game.time.now + this.game.rnd.integerInRange(0, this.actionTimeMax);
+        this.shootTime = this.game.time.now + this.game.rnd.integerInRange(0, this.shootTimeMax);
     }
 
     public setBulletsCollisionGroup(bulletCollisionGroup: Phaser.Physics.P2.CollisionGroup): void {
@@ -86,34 +88,34 @@ export default abstract class BaseEnemy extends Phaser.Sprite {
                 }
                 break;
             case WAVE_TYPE.RANDOM:
-            if (!this.isInWindow()) {
-                this.enemyBody.velocity.y = ENEMY_SPEED_MAX;
-            } else {
-                if (this.game.time.now >= this.actionTime) {
-                    // re-assign action time
-                    this.actionTime = this.game.time.now +
-                        this.game.rnd.integerInRange(ACTION_TIME_MIN, ACTION_TIME_MAX);
+                if (!this.isInWindow()) {
+                    this.enemyBody.velocity.y = this.speedMax;
+                } else {
+                    if (this.game.time.now >= this.actionTime) {
+                        // re-assign action time
+                        this.actionTime = this.game.time.now +
+                            this.game.rnd.integerInRange(this.actionTimeMin, this.actionTimeMax);
 
-                    // randomize velocities
-                    let direction: number = this.game.rnd.integerInRange(DIR_MIN, DIR_MAX); // get either 0, or 1;
-                    if (direction === 0) {
-                        direction = -1;
-                    }
-                    let speed: number = this.game.rnd.integerInRange(ENEMY_SPEED_MIN, ENEMY_SPEED_MAX);
-                    this.enemyBody.velocity.x = speed * direction;
+                        // randomize velocities
+                        let direction: number = this.game.rnd.integerInRange(this.dirMin, this.dirMax);
+                        if (direction === 0) {
+                            direction = -1;
+                        }
+                        let speed: number = this.game.rnd.integerInRange(this.speedMin, this.speedMax);
+                        this.enemyBody.velocity.x = speed * direction;
 
-                    direction = this.game.rnd.integerInRange(DIR_MIN, DIR_MAX); // get either -1, 0, or 1;
-                    if (direction === 0) {
-                        direction = -1;
+                        direction = this.game.rnd.integerInRange(this.dirMin, this.dirMax); // get either -1, 0, or 1;
+                        if (direction === 0) {
+                            direction = -1;
+                        }
+                        speed = this.game.rnd.integerInRange(this.speedMin, this.speedMax);
+                        this.enemyBody.velocity.y = speed * direction;
                     }
-                    speed = this.game.rnd.integerInRange(ENEMY_SPEED_MIN, ENEMY_SPEED_MAX);
-                    this.enemyBody.velocity.y = speed * direction;
                 }
-            }
-            break;
+                break;
             case WAVE_TYPE.SWOOP_LEFT:
             case WAVE_TYPE.SWOOP_RIGHT:
-                this.enemyBody.velocity.y = ENEMY_SPEED_MAX * 2;
+                this.enemyBody.velocity.y = this.speedMax * 2;
                 if (this.enemyBody.y > this.bound.height) {
                     this.returnToTop();
                 }
@@ -122,7 +124,7 @@ export default abstract class BaseEnemy extends Phaser.Sprite {
             case WAVE_TYPE.ROW_LEFT:
             case WAVE_TYPE.ROW_RIGHT:
             case WAVE_TYPE.ROW_STRAIGHT:
-                this.enemyBody.velocity.y = ENEMY_SPEED_MAX;
+                this.enemyBody.velocity.y = this.speedMax;
                 if (this.enemyBody.y > this.bound.height) {
                     this.returnToTop();
                 }
@@ -142,12 +144,12 @@ export default abstract class BaseEnemy extends Phaser.Sprite {
         }
         if (this.enemyBody.y > this.bound.height) {
             this.enemyBody.y = this.bound.height;
-            this.enemyBody.velocity.y = -ENEMY_SPEED_MAX;
+            this.enemyBody.velocity.y = -this.speedMax;
         }
 
         // shoot (shooting is always random regardless of wave)
         if (this.game.time.now >= this.shootTime) {
-            this.shootTime = this.game.time.now + this.game.rnd.integerInRange(SHOOT_TIME_MIN, SHOOT_TIME_MAX);
+            this.shootTime = this.game.time.now + this.game.rnd.integerInRange(this.shootTimeMin, this.shootTimeMax);
             this.shoot();
         }
     }
@@ -160,26 +162,26 @@ export default abstract class BaseEnemy extends Phaser.Sprite {
         this.enemyBody.velocity.x = xVel;
     }
 
-    private returnToTop(): void {
+    protected returnToTop(): void {
         this.returningToTop = true;
         this.enemyBody.velocity.x = 0;
-        this.enemyBody.velocity.y = -ENEMY_SPEED_MAX;
+        this.enemyBody.velocity.y = -this.speedMax;
         this.waveType = WAVE_TYPE.NONE;
     }
 
-    private shoot(): void {
+    protected shoot(): void {
         const bullet = this.bulletsGroup.getFirstExists(false);
         if (bullet) {
             const bulletBody: Phaser.Physics.P2.Body = bullet.body;
             bullet.reset(this.x, this.y + 20);
-            bulletBody.velocity.y = BULLET_SPEED;
+            bulletBody.velocity.y = this.bulletSpeed;
             if (this.waveType === WAVE_TYPE.SWOOP_LEFT || this.waveType === WAVE_TYPE.SWOOP_RIGHT) {
                 bulletBody.velocity.x = this.enemyBody.velocity.x;
             }
         }
     }
 
-    private isInWindow(): boolean {
+    protected isInWindow(): boolean {
         let result: boolean = false;
         const buffer: number = 40;
         if (this.enemyBody.y > this.bound.y + buffer) {

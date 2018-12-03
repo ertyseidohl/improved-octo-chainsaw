@@ -62,6 +62,8 @@ export default class Engineering {
     private powerSystem: PowerSubSystem;
     private system: System;
 
+    private testComponent: BaseComponent;
+
     // CREATORS
     constructor(private state: Phaser.State) {
     }
@@ -108,6 +110,11 @@ export default class Engineering {
         return this.system.update();
     }
 
+    public hasConnectedTestComponent(): boolean {
+        // TODO
+        return true;
+    }
+
     // PUBLIC PROPERTIES
     public get game(): Phaser.Game {
         return this.state.game;
@@ -131,6 +138,9 @@ export default class Engineering {
             case COMPONENT_TYPES.ENGINE:
                 newComponent = new Engine(this.game, this.inventorySystem);
                 break;
+            case COMPONENT_TYPES.PRINCE:
+                newComponent = new Prince(this.game, this.inventorySystem);
+                break;
             default:
                 throw new Error(`unknown component type for createComponentByname: ${componentType}`);
         }
@@ -141,6 +151,9 @@ export default class Engineering {
     private addComponent(
         newComponent: BaseComponent, gridPos?: Phaser.Point, destroyOnFail: boolean = false,
     ): BaseComponent {
+        if (!this.testComponent) {
+            this.testComponent = newComponent;
+        }
         const originalPosition: Phaser.Point = new Phaser.Point(newComponent.x, newComponent.y);
         if (gridPos) {
             const newPos = this.inventorySystem.gridIndexToPixels(gridPos.x, gridPos.y);
