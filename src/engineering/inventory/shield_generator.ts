@@ -22,6 +22,10 @@ export class ShieldGenerator extends BaseComponent {
         };
     }
 
+    public getShielding(): number {
+        return 5;
+    }
+
     public getDescription(): string[] {
         return [
             "Shield your ship from enemies, friends, frenemies, and strangers!",

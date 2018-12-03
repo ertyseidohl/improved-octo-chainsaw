@@ -29,6 +29,7 @@ export class ComponentState {
         this.powerSource = config.powerSource;
         this.health = 100;
         this.weight = config.weight;
+        this.power = 0;
     }
 
     public isOnline(): boolean {
@@ -65,7 +66,6 @@ export class ComponentState {
         if (this.isAlive() && this.isOnline) {
             return this.power;
         }
-
         return 0;
     }
 }

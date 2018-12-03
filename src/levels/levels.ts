@@ -41,7 +41,7 @@ export const LEVELS: Level[] = [
     {
         init: (gameState: Gameplay) => {
             gameState.displayText(
-                "You should learn! Here's a dummy drone. Shoot it down.", 400);
+                "Here's a dummy drone. Use wire mode to connect two wires to a gun, then press space to shoot.", 600);
             gameState.setUpcomingWaves([
                 new Wave(0, WAVE_TYPE.DUMMY_DRONE),
             ]);
@@ -60,7 +60,7 @@ export const LEVELS: Level[] = [
     },
     {
         init: (gameState: Gameplay) => {
-            gameState.displayText("There was something inside! Helm, pick it up, quick!", 400);
+            gameState.displayText("There was something inside! Helm, use the arrow keys to pick it up, quick!", 400);
         },
         update: (gameState: Gameplay) => { /* empty */ },
         isOver: (gameState: Gameplay) => {
@@ -70,7 +70,7 @@ export const LEVELS: Level[] = [
     },
     {
         init: (gameState: Gameplay) => {
-            gameState.displayText("Looks useful! Engineering, switch to power mode and connect it up!", 400);
+            gameState.displayText("Looks useful! Engineering, use wire mode and connect it up!", 400);
         },
         update: (gameState: Gameplay) => { /* empty */ },
         isOver: (gameState: Gameplay) => {
@@ -78,6 +78,7 @@ export const LEVELS: Level[] = [
         },
         cleanup: (gameState: Gameplay) => { /* empty */ },
     },
+    textLevel("Great! Now go retrieve those [prince]s and save our planet!", 400),
     // LEVEL ONE
     {
         init: (gameState: Gameplay) => {
@@ -130,7 +131,7 @@ export const LEVELS: Level[] = [
             gameState.stopAllMusic();
             gameState.playSafeMusic();
             gameState.displayText(
-                "Great work! Now go get the other [prince]s", 400);
+                "Great work! Now go get the other 8 [prince]s", 400);
             gameState.generateBaseStation();
         },
         update: (gameState: Gameplay) => { /* empty */ },
@@ -159,5 +160,93 @@ export const LEVELS: Level[] = [
         cleanup: () => {
             // todo
         },
+    },
+    // BOSS TWO
+    {
+        init: (gameState: Gameplay) => {
+            gameState.stopAllMusic();
+            gameState.playBossMusic();
+            gameState.setUpcomingWaves([
+                new Wave(0, WAVE_TYPE.BOSS),
+            ]);
+        },
+        update: () => {
+            // todo
+        },
+        isOver: (gameState: Gameplay) => {
+            return gameState.allWavesDead();
+        },
+        cleanup: () => {
+            // todo
+        },
+    },
+    {
+        init: (gameState: Gameplay) => {
+            gameState.stopAllMusic();
+            gameState.playSafeMusic();
+            gameState.displayText(
+                "Another [prince] safe and sound - seven to go!", 400);
+            gameState.generateBaseStation();
+        },
+        update: (gameState: Gameplay) => { /* empty */ },
+        isOver: (gameState: Gameplay) => {
+            return gameState.baseStationDone();
+        },
+        cleanup: (gameState: Gameplay) => { /* empty */ },
+    },
+    // LEVEL THREE
+    {
+        init: (gameState: Gameplay) => {
+            gameState.stopAllMusic();
+            gameState.playFightMusic();
+            gameState.setUpcomingWaves([
+                new Wave(0, WAVE_TYPE.SWOOP_LEFT),
+                new Wave(60, WAVE_TYPE.SWOOP_RIGHT),
+                new Wave(240, WAVE_TYPE.BIGV),
+                new Wave(60, WAVE_TYPE.BOMB),
+            ]);
+        },
+        update: () => {
+            // todo
+        },
+        isOver: (gameState: Gameplay) => {
+            return gameState.allWavesDead();
+        },
+        cleanup: () => {
+            // todo
+        },
+    },
+    // BOSS TWO
+    {
+        init: (gameState: Gameplay) => {
+            gameState.stopAllMusic();
+            gameState.playBossMusic();
+            gameState.setUpcomingWaves([
+                new Wave(0, WAVE_TYPE.BOSS),
+            ]);
+        },
+        update: () => {
+            // todo
+        },
+        isOver: (gameState: Gameplay) => {
+            return gameState.allWavesDead();
+        },
+        cleanup: () => {
+            // todo
+        },
+    },
+    {
+        init: (gameState: Gameplay) => {
+            gameState.stopAllMusic();
+            gameState.playSafeMusic();
+            gameState.displayText(
+                "Thanks! Six more [prince]s left!", 400);
+            gameState.generateBaseStation();
+        },
+        update: (gameState: Gameplay) => { /* empty */ },
+        isOver: (gameState: Gameplay) => {
+            return gameState.baseStationDone();
+        },
+        cleanup: (gameState: Gameplay) => { /* empty */ },
     },
 ];

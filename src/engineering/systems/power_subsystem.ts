@@ -39,6 +39,8 @@ export class PowerSubSystem extends SubSystem {
 
         source.plugIn(plugIndex);
         sink.plugIn(plugIndex);
+
+        sink.updatePower(sink.getPower() + 1);
     }
 
     public detach(source: BaseComponent, sink: BaseComponent, n?: number): void {
@@ -55,6 +57,8 @@ export class PowerSubSystem extends SubSystem {
             const sourceSet = this.sinkToSourceMap.get(sink);
             sourceSet.delete(source);
         }
+
+        sink.updatePower(sink.getPower() - n);
     }
 
     public updateAllComponents(): void {

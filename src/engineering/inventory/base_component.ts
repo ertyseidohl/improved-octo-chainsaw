@@ -99,6 +99,10 @@ export abstract class BaseComponent extends Phaser.Sprite {
         return this.componentState.getPower();
     }
 
+    public isOnline() {
+        return this.componentState.isOnline();
+    }
+
     public getWeight(): number {
         return this.componentState.getWeight();
     }
@@ -108,6 +112,10 @@ export abstract class BaseComponent extends Phaser.Sprite {
     }
 
     public getGuns(): number {
+        return 0;
+    }
+
+    public getShielding(): number {
         return 0;
     }
 
