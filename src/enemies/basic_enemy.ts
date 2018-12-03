@@ -12,7 +12,7 @@ export default class BasicEnemy extends BaseEnemy {
             COMPONENT_TYPES.ENGINE,
         ];
 
-        if (Math.random() < 0.5) {
+        if (Math.random() < 0.95) {
             return null;
         }
 
