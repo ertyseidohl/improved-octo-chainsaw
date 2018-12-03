@@ -184,15 +184,6 @@ export default class Startup extends Phaser.State {
         // sprites and physics
         this.player = new Player(this.game, this.game.width / 4, this.game.height - 50, "player");
         this.game.add.existing(this.player);
-
-        this.game.physics.p2.enable(this.groupEnemies);
-        this.groupEnemies.setAll("body.collideWorldBounds", false);
-        this.groupEnemies.forEach((enemy: Phaser.Sprite) => {
-            const enemyBody: Phaser.Physics.P2.Body = enemy.body;
-            enemyBody.setCollisionGroup(this.enemyCollisionGroup);
-            enemyBody.collides([this.playerCollisionGroup, this.bulletCollisionGroup]);
-            enemyBody.fixedRotation = true;
-        });
         // groups
 
         // assign collision groups
