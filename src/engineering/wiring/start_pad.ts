@@ -66,6 +66,13 @@ export class StartPad extends Phaser.Sprite {
         this.resetPosition();
     }
 
+    private destroy(): void {
+        if (this.wire) {
+            this.wire.destroy();
+        }
+        super.destroy();
+    }
+
     private onDragUpdate(): void {
         // NOOP?
     }
