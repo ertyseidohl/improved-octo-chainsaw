@@ -132,11 +132,13 @@ export default class Player extends Phaser.Sprite {
             return;
         }
         this.fireTime = this.shotCooldown;
+        const width = 5;
+        const start = this.x - width * this.gunCount / 2 + width / 2;
         for (let i: number = 0; i < this.gunCount; i++) {
             const bullet = this.bulletsGroup.getFirstExists(false);
             if (bullet) {
                 const bulletBody: Phaser.Physics.P2.Body = bullet.body;
-                bullet.reset(this.x + i * 5, this.y - 20);
+                bullet.reset(start + i * width, this.y - 20);
                 bulletBody.velocity.y = -BULLET_SPEED;
                 this.game.sound.play("blaster", 0.1);
             }
