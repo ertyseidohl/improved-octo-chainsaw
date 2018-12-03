@@ -29,6 +29,7 @@ export interface ShipUpdateMessage {
     topSpeed: number;
     guns: number;
     weight: number;
+    shielding: number;
 }
 
 // HUD
@@ -42,6 +43,8 @@ const WEIGHT_DISPLAY_Y: number = 100;
 const WEIGHT_DISPLAY_X: number = 85;
 
 const POINTS_DISPLAY_Y: number = 768 - 24;
+
+const HEALTH_RECHARGE_RATE: number = 120;  // frames to increment health by 1
 
 const HUD_TEXT_STYLE: Phaser.PhaserTextStyle = {
     fill: "white",
@@ -85,6 +88,7 @@ export default class Engineering {
     private mouseInBounds: boolean;
 
     private playerHealth: number;
+    private healthRechargeFrames: number = 0;
 
     private dragHandler: MultiDragHandler;
     private inventorySystem: InventorySystem;
@@ -217,6 +221,14 @@ export default class Engineering {
 
     public update(): ShipUpdateMessage {
         const updateMessage: ShipUpdateMessage = this.system.update();
+
+        const rechargeRate = Math.max(0, HEALTH_RECHARGE_RATE - updateMessage.shielding);
+        if (rechargeRate <= ++this.healthRechargeFrames
+            && this.playerHealth < MAX_HEALTH
+            && 0 < this.playerHealth) {
+            this.playerHealth++;
+            this.healthRechargeFrames = 0;
+        }
 
         for (let i: number = 0; i < MAX_ENGINE; i++)  {
             this.engineIcons[i].visible = i < updateMessage.topSpeed;
