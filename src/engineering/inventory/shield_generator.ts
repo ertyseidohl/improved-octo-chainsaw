@@ -17,6 +17,8 @@ export class ShieldGenerator extends BaseComponent {
                 powerLoad: 4,
                 minPowerDraw: 2,
             },
+            powerSource: null,
+            weight: 4,
         };
     }
 

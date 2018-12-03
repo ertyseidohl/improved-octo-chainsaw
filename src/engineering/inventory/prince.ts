@@ -1,6 +1,6 @@
 import { BaseComponent } from "./base_component";
 import { StateConfig } from "./component_state";
-import {  Constraints, InventorySystem } from "./system";
+import { InventorySystem } from "./system";
 
 export class Prince extends BaseComponent {
 
@@ -23,6 +23,7 @@ export class Prince extends BaseComponent {
                 power: 4,
             },
             powerConsumer: null,
+            weight: 8,
         };
     }
 

@@ -13,12 +13,19 @@ import { SmallGun } from "./inventory/small_gun";
 
 import { HandlerMode } from "./inventory/drag_handler/base";
 import { MultiDragHandler } from "./inventory/drag_handler/multi";
-import { PowerSubSystem } from "./inventory/power_subsystem";
 import { BasicShip, InventorySystem, NUM_TILE_SPRITES} from "./inventory/system";
+
+import { PowerSubSystem } from "./systems/power_subsystem";
+import { System } from "./systems/system";
 
 import { Point } from "phaser-ce";
 
 import { COMPONENT_TYPES } from "../constants";
+
+export interface ShipUpdateMessage {
+    topSpeed: number;
+    guns: number;
+}
 
 // =================
 // class Engineering
@@ -37,6 +44,7 @@ export default class Engineering {
     private dragHandler: MultiDragHandler;
     private inventorySystem: InventorySystem;
     private powerSystem: PowerSubSystem;
+    private system: System;
 
     // CREATORS
     constructor(private state: Phaser.State) {
@@ -53,6 +61,7 @@ export default class Engineering {
         );
 
         this.powerSystem = new PowerSubSystem();
+        this.system = new System(this.inventorySystem);
 
         this.componentGroup = this.game.add.group();
         this.dragHandler = new MultiDragHandler(
@@ -98,8 +107,8 @@ export default class Engineering {
         this.game.load.spritesheet("wire", "../assets/wire.png", 4, 4, 2);
     }
 
-    public update(): void {
-        // TBD
+    public update(): ShipUpdateMessage {
+        return this.system.update();
     }
 
     // PUBLIC PROPERTIES

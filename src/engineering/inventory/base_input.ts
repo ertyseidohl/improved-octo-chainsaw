@@ -17,6 +17,7 @@ export abstract class BaseInput extends BaseComponent {
             powerSource: {
                 power: 0,
             },
+            weight: 2,
             powerConsumer: null,
         };
     }
