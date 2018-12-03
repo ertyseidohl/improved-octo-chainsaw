@@ -1,5 +1,6 @@
 import BaseEnemy from "../enemies/base_enemy";
 import BasicEnemy from "../enemies/basic_enemy";
+import BombEnemy from "../enemies/bomb_enemy";
 import BossEnemy from "../enemies/boss_enemy";
 import DummyDrone from "../enemies/dummy_drone";
 
@@ -47,7 +48,7 @@ const WAVE_ROWS_ENEMY_COUNT_MAX = 5;
 const WAVE_ROWS_TIME_MAX = 90; // time between row spawns
 const WAVE_ROWS_ENEMY_TIME_MAX = 28; // time between enemy spawns in rows (only for right and left)
 const WAVE_BIGV_SPACER = 50;
-
+const BOMB_ENEMY_COUNT = 3;
 const WAVE_BIGV_XSPREAD = 20;
 const WAVE_SWOOP_MAX = 3; // this is the number of swoops we've have during a swoop wave
 const WAVE_SWOOP_OFFSET = 30;
@@ -114,6 +115,7 @@ export default class Gameplay extends Phaser.State {
         this.game.load.image("enemy", "../assets/enemy_1.png");
         this.game.load.spritesheet("boss_enemy", "../assets/boss_enemy.png", 128, 128, 3);
         this.game.load.spritesheet("dummy_drone", "../assets/dummy_drone.png", 64, 64, 3);
+        this.game.load.spritesheet("bomb_enemy", "../assets/enemy_2.png", 64, 64, 1);
 
         this.game.load.spritesheet("prince", "../assets/prince.png", 128, 128, 4);
         this.game.load.spritesheet("explosion", "../assets/explosion.png", 64, 64, 6);
@@ -251,6 +253,7 @@ export default class Gameplay extends Phaser.State {
         this.generateEnemyGroup(30, ENEMY_TYPES.BASIC);
         this.generateEnemyGroup(2, ENEMY_TYPES.BOSS);
         this.generateEnemyGroup(2, ENEMY_TYPES.DUMMY_DRONE);
+        this.generateEnemyGroup(20, ENEMY_TYPES.BOMB);
 
         this.groupExplosions = this.game.add.group();
         this.groupExplosions.createMultiple(60, "explosion");
@@ -386,6 +389,9 @@ export default class Gameplay extends Phaser.State {
                     break;
                 case ENEMY_TYPES.DUMMY_DRONE:
                     newEnemy = new DummyDrone(this.game, Math.random(), 0);
+                    break;
+                case ENEMY_TYPES.BOMB:
+                    newEnemy = new BombEnemy(this.game, Math.random(), 0);
                     break;
             }
             newEnemy.setBulletsCollisionGroup(this.bulletCollisionGroup);
@@ -588,6 +594,17 @@ export default class Gameplay extends Phaser.State {
                 for (let i: number = 0; i < WAVE_ROWS_ENEMY_COUNT_MAX; i++) {
                     currentWave.addEnemy(
                         this.createEnemy(WAVE_TYPE.ROW_STRAIGHT, WAVE_ROW_XOFFSET + ENEMY_WIDTH * i, ENEMY_TYPES.BASIC),
+                    );
+                    currentWave.spawnEnemyNumber++;
+                }
+                currentWave.allSpawned = true;
+                this.currentWaveIndex ++;
+                break;
+
+            case WAVE_TYPE.BOMB:
+                for (let i: number = 0; i < BOMB_ENEMY_COUNT; i++) {
+                    currentWave.addEnemy(
+                        this.createEnemy(WAVE_TYPE.BOMB, WAVE_ROW_XOFFSET + ENEMY_WIDTH * i, ENEMY_TYPES.BOMB),
                     );
                     currentWave.spawnEnemyNumber++;
                 }

@@ -217,6 +217,7 @@ export default class Engineering {
     public clearAllPrinces(): void {
         this.componentGroup.forEach((c: BaseComponent) => {
             if (c instanceof Prince) {
+                this.componentGroup.remove(c);
                 c.destroy();
             }
         });

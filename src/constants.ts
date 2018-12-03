@@ -12,6 +12,7 @@ export enum WAVE_TYPE {
     ROW_RIGHT,
     ROW_STRAIGHT,
     BOSS,
+    BOMB,
 }
 
 export enum COMPONENT_TYPES {
@@ -24,6 +25,7 @@ export enum ENEMY_TYPES {
     BASIC,
     BOSS,
     DUMMY_DRONE,
+    BOMB,
 }
 
 export const MAX_HEALTH: number = 4;

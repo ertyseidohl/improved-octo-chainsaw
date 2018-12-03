@@ -122,25 +122,6 @@ export const LEVELS: Level[] = [
         cleanup: (gameState: Gameplay) => { /* empty */ },
     },
     textLevel("Now, get back to base so that we can start to repair our defences!", 400),
-    // LEVEL TWO
-    {
-        init: (gameState: Gameplay) => {
-            gameState.setUpcomingWaves([
-                new Wave(0, WAVE_TYPE.ROW_LEFT),
-                new Wave(120, WAVE_TYPE.ROW_STRAIGHT),
-                new Wave(120, WAVE_TYPE.ROW_RIGHT),
-            ]);
-        },
-        update: () => {
-            // todo
-        },
-        isOver: (gameState: Gameplay) => {
-            return gameState.allWavesDead();
-        },
-        cleanup: () => {
-            // todo
-        },
-    },
     {
         init: (gameState: Gameplay) => {
             gameState.displayText(
@@ -152,5 +133,24 @@ export const LEVELS: Level[] = [
             return gameState.baseStationDone();
         },
         cleanup: (gameState: Gameplay) => { /* empty */ },
+    },
+    // LEVEL TWO
+    {
+        init: (gameState: Gameplay) => {
+            gameState.setUpcomingWaves([
+                new Wave(0, WAVE_TYPE.ROW_STRAIGHT),
+                new Wave(60, WAVE_TYPE.ROW_STRAIGHT),
+                new Wave(240, WAVE_TYPE.BOMB),
+            ]);
+        },
+        update: () => {
+            // todo
+        },
+        isOver: (gameState: Gameplay) => {
+            return gameState.allWavesDead();
+        },
+        cleanup: () => {
+            // todo
+        },
     },
 ];
