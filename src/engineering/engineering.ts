@@ -15,6 +15,10 @@ import { HandlerType, MultiDragHandler } from "./inventory/drag_handler/multi";
 import { PowerSubSystem } from "./inventory/power_subsystem";
 import { BasicShip, InventorySystem, NUM_TILE_SPRITES} from "./inventory/system";
 
+import { Point } from "phaser-ce";
+
+import { COMPONENT_TYPES } from "../constants";
+
 // =================
 // class Engineering
 // =================
@@ -104,6 +108,19 @@ export default class Engineering {
 
     public explode(): void {
         this.inventorySystem.explode();
+    }
+
+    public createComponentByName(componentType: COMPONENT_TYPES) {
+        let newComponent: BaseComponent;
+        switch (name) {
+            case COMPONENT_TYPES.BASIC_GUN:
+                newComponent = new BasicGun(this.game, this.inventorySystem, new Point(0, 0));
+                break;
+            case COMPONENT_TYPES.ENGINE:
+                newComponent = new Engine(this.game, this.inventorySystem, new Point(0, 0));
+                break;
+        }
+        return this.addComponent(newComponent);
     }
 
     // PRIVATE METHODS

@@ -11,6 +11,8 @@ const ENEMY_SPAWN_TIME: number = 2000;
 const ENEMY_Y_SPAWN: number = -20;
 const ENEMY_WIDTH: number = 100; // spacing number for spawning enemies
 
+const POWERUP_POOL_COUNT: number = 30;
+
 // wave constants
 const WAVE_TIME_MAX: number = 2000;
 const WAVE_RANDOM_ENEMY_MAX: number = 6;
@@ -89,7 +91,7 @@ export default class Startup extends Phaser.State {
         this.game.load.image("border", "../assets/border.png");
         this.game.load.image("bullet", "../assets/laser.png");
         this.game.load.image("enemyBullet", "../assets/enemy-bullet.png");
-        this.game.load.image("powerup", "../assets/dude.png");
+        this.game.load.image("powerup", "../assets/powerup.png");
 
         this.game.load.spritesheet("prince", "../assets/prince.png", 128, 128, 4);
         this.game.load.spritesheet("explosion", "../assets/explosion.png", 64, 64, 6);
@@ -103,6 +105,8 @@ export default class Startup extends Phaser.State {
         this.game.load.spritesheet("button_z", "../assets/button_z.png", 32, 32, 2);
         this.game.load.spritesheet("button_x", "../assets/button_x.png", 32, 32, 2);
         this.game.load.spritesheet("button_c", "../assets/button_c.png", 32, 32, 2);
+
+        this.game.load.image("gun_1_powerup", "../assets/gun_1_powerup.png");
 
         this.engineering.preload();
     }
@@ -181,8 +185,14 @@ export default class Startup extends Phaser.State {
         this.player = new Player(this.game, this.game.width / 4, this.game.height - 50, "player");
         this.game.add.existing(this.player);
 
-        this.groupPowerups = this.game.add.group();
-        this.groupPowerups.createMultiple(30, "powerup");
+        this.game.physics.p2.enable(this.groupEnemies);
+        this.groupEnemies.setAll("body.collideWorldBounds", false);
+        this.groupEnemies.forEach((enemy: Phaser.Sprite) => {
+            const enemyBody: Phaser.Physics.P2.Body = enemy.body;
+            enemyBody.setCollisionGroup(this.enemyCollisionGroup);
+            enemyBody.collides([this.playerCollisionGroup, this.bulletCollisionGroup]);
+            enemyBody.fixedRotation = true;
+        });
         // groups
 
         // assign collision groups
@@ -511,7 +521,21 @@ export default class Startup extends Phaser.State {
         }
     }
 
+    private spawnPowerup(enemy: Phaser.Physics.P2.Body) {
+        // const powerup = this.groupPowerups.getFirstExists(false);
+        // if (powerup) {
+        //     powerup.reset(enemy.sprite.x, enemy.sprite.y);
+        //     const powerupBody: Phaser.Physics.P2.Body = powerup.body;
+        //     powerupBody.velocity.y = Math.random() * 42;
+        //     powerupBody.velocity.x = Math.random() * 42 - 84;
+        //     powerupBody.fixedRotation = true;
+        // }
+    }
+
     private bulletHitEnemy(bullet: Phaser.Physics.P2.Body, enemy: Phaser.Physics.P2.Body): void {
+        if (!bullet.sprite.alive) {
+            return;
+        }
         const explosion: Phaser.Sprite = this.groupExplosionsSmall.getFirstExists(false);
         if (explosion) {
             explosion.reset(bullet.x, bullet.y);
@@ -528,6 +552,7 @@ export default class Startup extends Phaser.State {
                 deathExplosion.reset(enemy.x, enemy.y);
                 deathExplosion.play("explode", 30, false, true);
             }
+            this.spawnPowerup(enemy);
         }
 
         bullet.sprite.kill();
