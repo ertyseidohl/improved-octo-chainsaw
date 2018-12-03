@@ -15,7 +15,7 @@ import { SpaceJunk } from "./inventory/space_junk";
 
 import { HandlerMode } from "./inventory/drag_handler/base";
 import { MultiDragHandler } from "./inventory/drag_handler/multi";
-import { BasicShip, InventorySystem, NUM_TILE_SPRITES} from "./inventory/system";
+import { BasicShip, InventorySystem, NUM_TILE_SPRITES, INCINERATOR_BOUNDS} from "./inventory/system";
 
 import { PowerSubSystem } from "./systems/power_subsystem";
 import { System } from "./systems/system";
@@ -24,6 +24,7 @@ import { COMPONENT_TYPES, MAX_ENGINE, MAX_HEALTH, MAX_WEIGHT } from "../constant
 
 import { StartPad } from "./wiring/start_pad";
 import { ConnectedWire } from "./wiring/wire";
+import { Rectangle } from "phaser-ce";
 
 export interface ShipUpdateMessage {
     topSpeed: number;
@@ -66,6 +67,8 @@ export default class Engineering {
         game.load.spritesheet("energy_cell", "../assets/energy_cell.png", 32, 32, 5);
         game.load.spritesheet("energy_cell_2", "../assets/energy_cell_2.png", 32, 32, 5);
         game.load.spritesheet("shield_generator", "../assets/shield_generator.png", 64, 32, 5);
+
+        game.load.image("incinerator", "../assets/incinerator.png");
 
         for (let i: number = 1; i <= NUM_TILE_SPRITES; i++) {
             game.load.image(`floor_tile_${i}`, `../assets/floor_tile_${i}.png`);
@@ -213,6 +216,8 @@ export default class Engineering {
             "Points: 0",
             HUD_TEXT_STYLE,
         );
+
+        this.game.add.sprite(INCINERATOR_BOUNDS.x, INCINERATOR_BOUNDS.y, "incinerator");
 
         // do this last so they go on top of the text
         this.componentGroup = this.game.add.group();

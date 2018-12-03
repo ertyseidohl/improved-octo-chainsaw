@@ -16,6 +16,10 @@ export class Prince extends BaseComponent {
         ];
     }
 
+    public isIncineratable(): boolean {
+        return false;
+    }
+
     public getStateConfig(): StateConfig {
         return {
             powerSource: {
