@@ -27,4 +27,11 @@ export class EnergyCell extends BaseComponent {
         ];
     }
 
+    public getPowerPads(): Phaser.Point {
+        return new Phaser.Point(
+            this.x + 16,
+            this.y + 16,
+        );
+    }
+
 }

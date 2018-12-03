@@ -22,6 +22,8 @@ import { Point } from "phaser-ce";
 
 import { COMPONENT_TYPES } from "../constants";
 
+import { ConnectedWire } from "./wiring/wire";
+
 export interface ShipUpdateMessage {
     topSpeed: number;
     guns: number;
@@ -193,6 +195,8 @@ export default class Engineering {
 
         const secondEngine = new Engine(this.game, this.inventorySystem);
         this.addComponent(secondEngine, new Phaser.Point(6, 6));
+
+        const myWire = new ConnectedWire(this.game, firstPowerSource, firstGun);
     }
 
     private dragSwitchPressed(_: any, p: Phaser.Pointer) {

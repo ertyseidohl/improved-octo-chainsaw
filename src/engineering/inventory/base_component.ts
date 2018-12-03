@@ -96,6 +96,10 @@ export abstract class BaseComponent extends Phaser.Sprite {
         return 0;
     }
 
+    public getPowerPads(): Phaser.Point {
+        return null;
+    }
+
     private onDragStart(game: any, pointer: Phaser.Pointer): void {
         this.inventorySystem.dragHandler.dragStart(this);
     }
