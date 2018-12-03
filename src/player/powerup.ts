@@ -24,7 +24,7 @@ export abstract class Powerup extends Phaser.Sprite {
 
 export class BasicGunPowerup extends Powerup {
     constructor(game: Phaser.Game, x: number, y: number) {
-        super(game, x, y, "basic_gun_powerup");
+        super(game, x, y, "gun_1_powerup");
     }
 
     public getComponentName(): COMPONENT_TYPES {
