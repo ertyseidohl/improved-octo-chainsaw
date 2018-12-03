@@ -1,4 +1,4 @@
-import { ENEMY_WAVE } from "../constants";
+import { WAVE_TYPE } from "../constants";
 
 const ENEMY_SPEED_MIN: number = 100;
 const ENEMY_SPEED_MAX: number = 200;
@@ -29,7 +29,7 @@ export default class BaseEnemy extends Phaser.Sprite {
         this.enemyBody.fixedRotation = true;
         this.actionTime = this.game.time.now + this.game.rnd.integerInRange(0, ACTION_TIME_MAX);
         this.shootTime = this.game.time.now + this.game.rnd.integerInRange(0, SHOOT_TIME_MAX);
-        this.waveType = ENEMY_WAVE.NONE;
+        this.waveType = WAVE_TYPE.NONE;
 
         this.maxHealth = HEALTH_MAX;
 
@@ -69,9 +69,9 @@ export default class BaseEnemy extends Phaser.Sprite {
         super.update();
 
         switch (this.waveType) {
-            case ENEMY_WAVE.NONE:
+            case WAVE_TYPE.NONE:
             break;
-            case ENEMY_WAVE.RANDOM:
+            case WAVE_TYPE.RANDOM:
             if (!this.isInWindow()) {
                 this.enemyBody.velocity.y = ENEMY_SPEED_MAX;
             } else {
@@ -115,24 +115,22 @@ export default class BaseEnemy extends Phaser.Sprite {
                 }
             }
             break;
-            case ENEMY_WAVE.SWOOP:
-            this.enemyBody.velocity.y = ENEMY_SPEED_MAX * 2;
-            if (this.enemyBody.y > this.BOUND_Y_MAX + this.height * 2) {
-                this.kill();
-            }
-            break;
-            case ENEMY_WAVE.BIGV:
-            this.enemyBody.velocity.y = ENEMY_SPEED_MAX;
-            if (this.enemyBody.y > this.BOUND_Y_MAX + this.height * 2) {
-                this.kill();
-            }
-            break;
-            case ENEMY_WAVE.ROWS:
-            this.enemyBody.velocity.y = ENEMY_SPEED_MAX;
-            if (this.enemyBody.y > this.BOUND_Y_MAX + this.height * 2) {
-                this.kill();
-            }
-            break;
+            case WAVE_TYPE.SWOOP_LEFT:
+            case WAVE_TYPE.SWOOP_RIGHT:
+                this.enemyBody.velocity.y = ENEMY_SPEED_MAX * 2;
+                if (this.enemyBody.y > this.BOUND_Y_MAX + this.height * 2) {
+                    this.kill();
+                }
+                break;
+            case WAVE_TYPE.BIGV:
+            case WAVE_TYPE.ROW_LEFT:
+            case WAVE_TYPE.ROW_RIGHT:
+            case WAVE_TYPE.ROW_STRAIGHT:
+                this.enemyBody.velocity.y = ENEMY_SPEED_MAX;
+                if (this.enemyBody.y > this.BOUND_Y_MAX + this.height * 2) {
+                    this.kill();
+                }
+                break;
         }
 
         // boundaries
@@ -168,7 +166,7 @@ export default class BaseEnemy extends Phaser.Sprite {
             const bulletBody: Phaser.Physics.P2.Body = bullet.body;
             bullet.reset(this.x, this.y + 20);
             bulletBody.velocity.y = BULLET_SPEED;
-            if (this.waveType === ENEMY_WAVE.SWOOP) {
+            if (this.waveType === WAVE_TYPE.SWOOP_LEFT || this.waveType === WAVE_TYPE.SWOOP_RIGHT) {
                 bulletBody.velocity.x = this.enemyBody.velocity.x;
             }
         }

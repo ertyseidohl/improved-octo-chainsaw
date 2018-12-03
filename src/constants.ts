@@ -1,13 +1,15 @@
 // enums
 
 // spawn wave enum
-export enum ENEMY_WAVE {
+export enum WAVE_TYPE {
     NONE,
     RANDOM,
-    SWOOP,
+    SWOOP_LEFT,
+    SWOOP_RIGHT,
     BIGV,
-    ROWS,
-    LAST, // this is only to know max of enumerator
+    ROW_LEFT,
+    ROW_RIGHT,
+    ROW_STRAIGHT,
 }
 
 export enum COMPONENT_TYPES {

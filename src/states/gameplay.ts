@@ -1,10 +1,13 @@
 import BaseEnemy from "../enemies/base_enemy";
 
-import { ENEMY_WAVE } from "../constants";
+import { WAVE_TYPE } from "../constants";
 
 import Engineering from "../engineering/engineering";
+import LevelManager from "../levels/level_manager";
 import Player from "../player/player";
 import { Powerup } from "../player/powerup";
+
+import Wave from "../levels/wave";
 
 // NOTE: ALL TIMES ARE IN FRAMES AT 60FPS
 
@@ -47,19 +50,6 @@ const WAVE_SWOOP_TIME_MAX = 30;
 const WAVE_SWOOP_ENEMY_TIME_MAX = 24;
 const WAVE_SWOOP_XVEL = 210;
 
-enum ROW_TYPE {
-    LEFT,
-    RIGHT,
-    STRAIGHT,
-    LAST,
-}
-
-enum SWOOP_TYPE {
-    LEFT,
-    RIGHT,
-    LAST,
-}
-
 export default class Startup extends Phaser.State {
     private gameplayState: number;
     private startState: number;
@@ -78,24 +68,14 @@ export default class Startup extends Phaser.State {
 
     private backgrounds: Phaser.TileSprite[] = [];
     private playerDeathQueue: Phaser.Sprite[] = [];
-    private spawnEnmyNumber: number; // we'll use this variable for all wave types
-    private spawnWaveTime: number;
-    private spawnWaveType: number;
-    private spawnRowNum: number;
-    private spawnRowFinished: boolean;
-    private spawnRowTime: number;
-    private spawnRowType: number;
-    private spawnSwoopNum: number;
-    private spawnSwoopFinished: boolean;
-    private spawnSwoopTime: number;
-    private spawnSwoopType: number;
+
+    private currentLevelWaves: Wave[];
+    private currentWaveIndex: number;
+
+    private levelManager: LevelManager;
 
     // level stuff
     private level: number;
-
-    // Enemy vars
-    private enemyRndmCreateCoolDwn = ENEMY_SPAWN_TIME;
-    private enemyCreateTime = 0;
 
     // groups
     private groupEnemies: Phaser.Group;
@@ -243,9 +223,6 @@ export default class Startup extends Phaser.State {
         this.groupPowerups = this.game.add.group();
 
         // enemies
-        this.spawnWaveTime = WAVE_TIME_MAX;
-        this.spawnWaveType = ENEMY_WAVE.NONE;
-
         this.groupEnemies = this.game.add.group();
         for (let i: number = 0; i < ENEMY_POOL_COUNT; i++) {
             const newEnemy: BaseEnemy = new BaseEnemy(this.game, Math.random(), 0, "enemy");
@@ -284,8 +261,7 @@ export default class Startup extends Phaser.State {
         this.gameMessageCenter.setTextBounds(0, 0, this.shmupBounds.width, this.shmupBounds.height);
         this.game.add.existing(this.gameMessageCenter);
 
-        this.gameMessageCenter.setText("Get Ready...");
-        this.gameMessageCenterTime = 120;
+        this.levelManager = new LevelManager(this);
     }
 
     public update(): void {
@@ -302,12 +278,28 @@ export default class Startup extends Phaser.State {
         }
 
         // update time variables
-        this.enemyCreateTime--;
         this.gameMessageCenterTime--;
-        this.spawnRowTime--;
-        this.spawnSwoopTime--;
-        this.spawnWaveTime--;
         this.startStateTime--;
+
+        this.levelManager.update();
+    }
+
+    public displayText(text: string, time: number) {
+        this.gameMessageCenter.setText(text, true);
+        this.gameMessageCenterTime = time;
+    }
+
+    public isDisplayingText(): boolean {
+        return this.gameMessageCenterTime > 0;
+    }
+
+    public setUpcomingWaves(waves: Wave[]) {
+        this.currentLevelWaves = waves;
+        this.currentWaveIndex = 0;
+    }
+
+    public waveIndexAllDead(index: number) {
+        return this.currentLevelWaves[index].allSpawned && this.currentLevelWaves[index].allDead();
     }
 
     private updateShmup(): void {
@@ -323,8 +315,7 @@ export default class Startup extends Phaser.State {
                 break;
                 case READY_STATES.DRAMATIC_PAUSE:
                 if (this.startStateTime <= 0) {
-                    this.gameMessageCenter.setText("GO!!!");
-                    this.gameMessageCenterTime = 60;
+                    this.displayText("GO!", 60);
                     this.startState = READY_STATES.GO;
                 }
                 break;
@@ -351,276 +342,185 @@ export default class Startup extends Phaser.State {
         }
     }
 
-    private createWaves(): void {
-        // if time to spawn wave, and wave is finished, generate enemies
-        // we don't need a "wave finished" variable, we just set spawnWaveType to NONE and check for that
-        if (this.spawnWaveTime <= 0 && this.spawnWaveType === ENEMY_WAVE.NONE) {
-            // use 1 because 0 is "NONE"
-            this.spawnWaveType = this.game.rnd.integerInRange(1, ENEMY_WAVE.LAST - 1);
-            // this.spawnWaveType = ENEMY_WAVE.SWOOP;
-            this.enemyCreateTime = 0;
-            this.spawnEnmyNumber = 0;
-            this.spawnRowTime = 0;
-            this.spawnRowNum = 0;
-            this.spawnRowFinished = true;
-            this.spawnSwoopTime = 0;
-            this.spawnSwoopNum = 0;
-            this.spawnSwoopFinished = true;
-
-            // console debug messages
-            switch (this.spawnWaveType) {
-                case ENEMY_WAVE.RANDOM:
-                console.log("Wave: Random");
-                break;
-                case ENEMY_WAVE.SWOOP:
-                console.log("Wave: Swoop");
-                break;
-                case ENEMY_WAVE.BIGV:
-                console.log("Wave: Big V");
-                break;
-                case ENEMY_WAVE.ROWS:
-                console.log("Wave: Rows");
-                break;
-                default:
-                console.log("Error: No wave chosen!");
-                this.resetWave();
-                break;
+    private allWavesFinished(): boolean {
+        for (const wave of this.currentLevelWaves) {
+            if (!wave.allSpawned) {
+                return false;
             }
         }
+        return true;
+    }
 
-        switch (this.spawnWaveType) {
-            case ENEMY_WAVE.NONE:
-            // do nothing
-            break;
-            case ENEMY_WAVE.RANDOM:
-            if (this.enemyCreateTime <= 0) {
-                this.enemyCreateTime = WAVE_RANDOM_ENEMY_TIME;
-                this.spawnEnmyNumber++;
-                const minX: number = ENEMY_WIDTH;
-                const maxX: number = this.shmupBounds.width - this.borderSprite.width / 2 - ENEMY_WIDTH;
-                this.createEnemy(this.spawnWaveType, this.game.rnd.integerInRange(minX, maxX));
-            }
-            // check for end of wave
-            if (this.spawnEnmyNumber >= WAVE_RANDOM_ENEMY_MAX) {
-                this.resetWave();
-            }
-            break;
-            case ENEMY_WAVE.SWOOP:
-            // choose new swoop if swoop is finished
-            if (this.spawnSwoopFinished) {
-                this.spawnSwoopFinished = false;
-                this.spawnEnmyNumber = 0;
-                this.enemyCreateTime = 0;
-                this.spawnSwoopType = this.game.rnd.integerInRange(0, SWOOP_TYPE.LAST - 1);
-                switch (this.spawnSwoopType) {
-                    case SWOOP_TYPE.LEFT:
-                    console.log("Swoop chosen: Left");
-                    break;
-                    case SWOOP_TYPE.RIGHT:
-                    console.log("Swoop chosen: Right");
-                    break;
+    private createWaves(): void {
+        if (this.currentWaveIndex === this.currentLevelWaves.length) {
+            return;
+        }
+
+        const currentWave: Wave = this.currentLevelWaves[this.currentWaveIndex];
+
+        currentWave.spawnDelay--;
+        currentWave.enemyCreateTime--;
+
+        if (currentWave.spawnDelay > 0) {
+            return;
+        }
+
+        switch (currentWave.waveType) {
+            case WAVE_TYPE.RANDOM:
+                if (currentWave.enemyCreateTime <= 0) {
+                    currentWave.enemyCreateTime = WAVE_RANDOM_ENEMY_TIME;
+                    currentWave.spawnEnemyNumber++;
+                    const minX: number = ENEMY_WIDTH;
+                    const maxX: number = this.shmupBounds.width - this.borderSprite.width / 2 - ENEMY_WIDTH;
+                    currentWave.addEnemy(
+                        this.createEnemy(WAVE_TYPE.RANDOM, this.game.rnd.integerInRange(minX, maxX)),
+                    );
                 }
-            } else {
-                // otherwise, execute swoop
-                // debugger;
-                switch (this.spawnSwoopType) {
-                    /* spawn enemies until the number of
-                    enemies spawned matches WAVE_SWOOP_ENEMY_COUNT_MAX, then set
-                    the swoop time to WAVE_SWOOP_TIME_MAX. Once the game time reaches that,
-                    we set spawnSwoopFinished to true;
-                    */
-                    case SWOOP_TYPE.LEFT:
-                    if (this.spawnEnmyNumber < WAVE_SWOOP_ENEMY_COUNT_MAX) {
-                        if (this.enemyCreateTime <= 0) {
-                            this.enemyCreateTime = WAVE_SWOOP_ENEMY_TIME_MAX;
-                            const currEnemy: BaseEnemy = this.groupEnemies.getFirstExists(false);
-                            if (currEnemy) {
+                if (currentWave.spawnEnemyNumber >= WAVE_RANDOM_ENEMY_MAX) {
+                    currentWave.allSpawned = true;
+                    this.currentWaveIndex ++;
+                }
+                break;
+            case WAVE_TYPE.SWOOP_LEFT:
+            case WAVE_TYPE.SWOOP_RIGHT:
+                if (currentWave.spawnEnemyNumber < WAVE_SWOOP_ENEMY_COUNT_MAX) {
+                    if (currentWave.enemyCreateTime <= 0) {
+                        currentWave.enemyCreateTime = WAVE_SWOOP_ENEMY_TIME_MAX;
+                        const currEnemy: BaseEnemy = this.groupEnemies.getFirstExists(false);
+                        if (currEnemy) {
+                            currentWave.addEnemy(currEnemy);
+                            if (currentWave.waveType === WAVE_TYPE.SWOOP_LEFT) {
                                 currEnemy.reset(0 + WAVE_SWOOP_OFFSET, ENEMY_Y_SPAWN, currEnemy.maxHealth);
-                                currEnemy.randomizeTimes();
-                                currEnemy.setWaveType(this.spawnWaveType);
-                                currEnemy.setXVel(WAVE_SWOOP_XVEL);
+                            } else {
+                                currEnemy.reset(
+                                    this.game.width / 2 - WAVE_SWOOP_OFFSET, ENEMY_Y_SPAWN, currEnemy.maxHealth);
                             }
-                            this.spawnEnmyNumber++;
+                            currEnemy.randomizeTimes();
+                            currEnemy.setWaveType(WAVE_TYPE.SWOOP_LEFT);
+                            currEnemy.setXVel(
+                                currentWave.waveType === WAVE_TYPE.SWOOP_LEFT ? WAVE_SWOOP_XVEL : -WAVE_SWOOP_XVEL);
                         }
-                        if (this.spawnEnmyNumber >= WAVE_SWOOP_ENEMY_COUNT_MAX) {
-                            this.spawnSwoopTime = WAVE_SWOOP_TIME_MAX;
-                            console.log("Swoop Finished, waiting to setup new swoop...");
-                            this.spawnSwoopNum++;
-                        }
+                        currentWave.spawnEnemyNumber++;
                     }
-                    break;
-                    case SWOOP_TYPE.RIGHT:
-                    if (this.spawnEnmyNumber < WAVE_SWOOP_ENEMY_COUNT_MAX) {
-                        if (this.enemyCreateTime <= 0) {
-                            this.enemyCreateTime = WAVE_SWOOP_ENEMY_TIME_MAX;
-                            const currEnemy: BaseEnemy = this.groupEnemies.getFirstExists(false);
-                            if (currEnemy) {
-                                currEnemy.reset(this.game.width / 2 - WAVE_SWOOP_OFFSET,
-                                    ENEMY_Y_SPAWN, currEnemy.maxHealth);
-                                currEnemy.randomizeTimes();
-                                currEnemy.setWaveType(this.spawnWaveType);
-                                currEnemy.setXVel(-WAVE_SWOOP_XVEL);
-                            }
-                            this.spawnEnmyNumber++;
-                        }
-                        if (this.spawnEnmyNumber >= WAVE_SWOOP_ENEMY_COUNT_MAX) {
-                            this.spawnSwoopTime = WAVE_SWOOP_TIME_MAX;
-                            console.log("Swoop Finished, waiting to setup new swoop...");
-                            this.spawnSwoopNum++;
-                        }
+                } else {
+                    currentWave.allSpawned = true;
+                    this.currentWaveIndex ++;
+                }
+                break;
+            case WAVE_TYPE.BIGV:
+                const xSpawn: number = this.game.width / 4;
+                let bigVEnemy: BaseEnemy = this.groupEnemies.getFirstExists(false);
+                if (bigVEnemy) {
+                    bigVEnemy.reset(xSpawn, ENEMY_Y_SPAWN, bigVEnemy.maxHealth);
+                    bigVEnemy.setWaveType(WAVE_TYPE.BIGV);
+                    bigVEnemy.setXVel(0);
+                    bigVEnemy.randomizeTimes();
+                    currentWave.addEnemy(bigVEnemy);
+                }
+                bigVEnemy = this.groupEnemies.getFirstExists(false);
+                if (bigVEnemy) {
+                    bigVEnemy.reset(xSpawn, ENEMY_Y_SPAWN - WAVE_BIGV_SPACER, bigVEnemy.maxHealth);
+                    bigVEnemy.setWaveType(WAVE_TYPE.BIGV);
+                    bigVEnemy.setXVel(-WAVE_BIGV_XSPREAD);
+                    bigVEnemy.randomizeTimes();
+                    currentWave.addEnemy(bigVEnemy);
+                }
+                bigVEnemy = this.groupEnemies.getFirstExists(false);
+                if (bigVEnemy) {
+                    bigVEnemy.reset(xSpawn, ENEMY_Y_SPAWN - WAVE_BIGV_SPACER, bigVEnemy.maxHealth);
+                    bigVEnemy.setWaveType(WAVE_TYPE.BIGV);
+                    bigVEnemy.setXVel(WAVE_BIGV_XSPREAD);
+                    bigVEnemy.randomizeTimes();
+                    currentWave.addEnemy(bigVEnemy);
+                }
+                bigVEnemy = this.groupEnemies.getFirstExists(false);
+                if (bigVEnemy) {
+                    bigVEnemy.reset(xSpawn, ENEMY_Y_SPAWN - WAVE_BIGV_SPACER * 2, bigVEnemy.maxHealth);
+                    bigVEnemy.setWaveType(WAVE_TYPE.BIGV);
+                    bigVEnemy.setXVel(-2 * WAVE_BIGV_XSPREAD);
+                    bigVEnemy.randomizeTimes();
+                    currentWave.addEnemy(bigVEnemy);
+                }
+                bigVEnemy = this.groupEnemies.getFirstExists(false);
+                if (bigVEnemy) {
+                    bigVEnemy.reset(xSpawn, ENEMY_Y_SPAWN - WAVE_BIGV_SPACER * 2, bigVEnemy.maxHealth);
+                    bigVEnemy.setWaveType(WAVE_TYPE.BIGV);
+                    bigVEnemy.setXVel(2 * WAVE_BIGV_XSPREAD);
+                    bigVEnemy.randomizeTimes();
+                    currentWave.addEnemy(bigVEnemy);
+                }
+                bigVEnemy = this.groupEnemies.getFirstExists(false);
+                if (bigVEnemy) {
+                    bigVEnemy.reset(xSpawn, ENEMY_Y_SPAWN - WAVE_BIGV_SPACER * 3, bigVEnemy.maxHealth);
+                    bigVEnemy.setWaveType(WAVE_TYPE.BIGV);
+                    bigVEnemy.setXVel(-3 * WAVE_BIGV_XSPREAD);
+                    bigVEnemy.randomizeTimes();
+                    currentWave.addEnemy(bigVEnemy);
+                }
+                bigVEnemy = this.groupEnemies.getFirstExists(false);
+                if (bigVEnemy) {
+                    bigVEnemy.reset(xSpawn, ENEMY_Y_SPAWN - WAVE_BIGV_SPACER * 3, bigVEnemy.maxHealth);
+                    bigVEnemy.setWaveType(WAVE_TYPE.BIGV);
+                    bigVEnemy.setXVel(3 * WAVE_BIGV_XSPREAD);
+                    bigVEnemy.randomizeTimes();
+                    currentWave.addEnemy(bigVEnemy);
+                }
+                bigVEnemy = this.groupEnemies.getFirstExists(false);
+                if (bigVEnemy) {
+                    bigVEnemy.reset(xSpawn, ENEMY_Y_SPAWN - WAVE_BIGV_SPACER * 4, bigVEnemy.maxHealth);
+                    bigVEnemy.setWaveType(WAVE_TYPE.BIGV);
+                    bigVEnemy.setXVel(-4 * WAVE_BIGV_XSPREAD);
+                    bigVEnemy.randomizeTimes();
+                    currentWave.addEnemy(bigVEnemy);
+                }
+                bigVEnemy = this.groupEnemies.getFirstExists(false);
+                if (bigVEnemy) {
+                    bigVEnemy.reset(xSpawn, ENEMY_Y_SPAWN - WAVE_BIGV_SPACER * 4, bigVEnemy.maxHealth);
+                    bigVEnemy.setWaveType(WAVE_TYPE.BIGV);
+                    bigVEnemy.setXVel(4 * WAVE_BIGV_XSPREAD);
+                    bigVEnemy.randomizeTimes();
+                    currentWave.addEnemy(bigVEnemy);
+                }
+                currentWave.allSpawned = true;
+                this.currentWaveIndex ++;
+                break;
+            case WAVE_TYPE.ROW_LEFT:
+                if (currentWave.spawnEnemyNumber < WAVE_ROWS_ENEMY_COUNT_MAX) {
+                    if (currentWave.enemyCreateTime <= 0) {
+                        currentWave.enemyCreateTime = WAVE_ROWS_ENEMY_TIME_MAX;
+                        currentWave.addEnemy(this.createEnemy(
+                            WAVE_TYPE.ROW_LEFT, WAVE_ROW_XOFFSET + ENEMY_WIDTH * currentWave.spawnEnemyNumber));
+                        currentWave.spawnEnemyNumber++;
                     }
-                    break;
+                } else {
+                    currentWave.allSpawned = true;
+                    this.currentWaveIndex ++;
                 }
-                // If we've spawned all the necessary enemies, and the spawn time has been reached, we're done
-                // spawning the swoop
-                if (this.spawnSwoopTime <= 0 && this.spawnEnmyNumber >= WAVE_SWOOP_ENEMY_COUNT_MAX) {
-                    this.spawnSwoopFinished = true;
-                }
-            }
-            // spawnSwoopNum is incremented when new wave is chosen
-            // greater than necessary to spawn actual number in WAVE_ROW_MAX
-            if (this.spawnSwoopNum >= WAVE_SWOOP_MAX) {
-                this.resetWave();
-            }
-            break;
-            case ENEMY_WAVE.BIGV:
-            // I think it makes sense to just hardcode these guys in
-            // 5 enemies with different starty Y positions and x velocities
-            const xSpawn: number = this.game.width / 4;
-            let bigVEnemy: BaseEnemy = this.groupEnemies.getFirstExists(false);
-            if (bigVEnemy) {
-                bigVEnemy.reset(xSpawn, ENEMY_Y_SPAWN, bigVEnemy.maxHealth);
-                bigVEnemy.setWaveType(this.spawnWaveType);
-                bigVEnemy.setXVel(0);
-            }
-            bigVEnemy = this.groupEnemies.getFirstExists(false);
-            if (bigVEnemy) {
-                bigVEnemy.reset(xSpawn, ENEMY_Y_SPAWN - WAVE_BIGV_SPACER, bigVEnemy.maxHealth);
-                bigVEnemy.setWaveType(this.spawnWaveType);
-                bigVEnemy.setXVel(-WAVE_BIGV_XSPREAD);
-            }
-            bigVEnemy = this.groupEnemies.getFirstExists(false);
-            if (bigVEnemy) {
-                bigVEnemy.reset(xSpawn, ENEMY_Y_SPAWN - WAVE_BIGV_SPACER, bigVEnemy.maxHealth);
-                bigVEnemy.setWaveType(this.spawnWaveType);
-                bigVEnemy.setXVel(WAVE_BIGV_XSPREAD);
-            }
-            bigVEnemy = this.groupEnemies.getFirstExists(false);
-            if (bigVEnemy) {
-                bigVEnemy.reset(xSpawn, ENEMY_Y_SPAWN - WAVE_BIGV_SPACER * 2, bigVEnemy.maxHealth);
-                bigVEnemy.setWaveType(this.spawnWaveType);
-                bigVEnemy.setXVel(-2 * WAVE_BIGV_XSPREAD);
-            }
-            bigVEnemy = this.groupEnemies.getFirstExists(false);
-            if (bigVEnemy) {
-                bigVEnemy.reset(xSpawn, ENEMY_Y_SPAWN - WAVE_BIGV_SPACER * 2, bigVEnemy.maxHealth);
-                bigVEnemy.setWaveType(this.spawnWaveType);
-                bigVEnemy.setXVel(2 * WAVE_BIGV_XSPREAD);
-            }
-            bigVEnemy = this.groupEnemies.getFirstExists(false);
-            if (bigVEnemy) {
-                bigVEnemy.reset(xSpawn, ENEMY_Y_SPAWN - WAVE_BIGV_SPACER * 3, bigVEnemy.maxHealth);
-                bigVEnemy.setWaveType(this.spawnWaveType);
-                bigVEnemy.setXVel(-3 * WAVE_BIGV_XSPREAD);
-            }
-            bigVEnemy = this.groupEnemies.getFirstExists(false);
-            if (bigVEnemy) {
-                bigVEnemy.reset(xSpawn, ENEMY_Y_SPAWN - WAVE_BIGV_SPACER * 3, bigVEnemy.maxHealth);
-                bigVEnemy.setWaveType(this.spawnWaveType);
-                bigVEnemy.setXVel(3 * WAVE_BIGV_XSPREAD);
-            }
-            bigVEnemy = this.groupEnemies.getFirstExists(false);
-            if (bigVEnemy) {
-                bigVEnemy.reset(xSpawn, ENEMY_Y_SPAWN - WAVE_BIGV_SPACER * 4, bigVEnemy.maxHealth);
-                bigVEnemy.setWaveType(this.spawnWaveType);
-                bigVEnemy.setXVel(-4 * WAVE_BIGV_XSPREAD);
-            }
-            bigVEnemy = this.groupEnemies.getFirstExists(false);
-            if (bigVEnemy) {
-                bigVEnemy.reset(xSpawn, ENEMY_Y_SPAWN - WAVE_BIGV_SPACER * 4, bigVEnemy.maxHealth);
-                bigVEnemy.setWaveType(this.spawnWaveType);
-                bigVEnemy.setXVel(4 * WAVE_BIGV_XSPREAD);
-            }
-            this.resetWave();
-            break;
-            case ENEMY_WAVE.ROWS:
-            if (this.spawnRowFinished) {
-                this.spawnRowFinished = false;
-                this.spawnEnmyNumber = 0;
-                this.spawnRowType = this.game.rnd.integerInRange(0, ROW_TYPE.LAST - 1);
-                // debug row chosen
-                switch (this.spawnRowType) {
-                    case ROW_TYPE.LEFT:
-                    console.log("Row chosen: Left");
-                    break;
-                    case ROW_TYPE.RIGHT:
-                    console.log("Row chosen: Right");
-                    break;
-                    case ROW_TYPE.STRAIGHT:
-                    console.log("Row chosen: Straight");
-                    break;
-                }
-            } else {
-                // execute row type
-                switch (this.spawnRowType) {
-                    /* all rows work the same way, spawn enemies until the number of
-                    enemies spawned matches WAVE_ROWS_ENEMY_COUNT_MAX, then set
-                    the row time to WAVE_ROWS_TIME_MAX. Once the game time reaches that,
-                    we set spawnRowFinished to true;
-                    */
-                    case ROW_TYPE.LEFT:
-                    if (this.spawnEnmyNumber < WAVE_ROWS_ENEMY_COUNT_MAX) {
-                        if (this.enemyCreateTime <= 0) {
-                            this.enemyCreateTime = WAVE_ROWS_ENEMY_TIME_MAX;
-                            this.createEnemy(this.spawnWaveType, WAVE_ROW_XOFFSET + ENEMY_WIDTH * this.spawnEnmyNumber);
-                            this.spawnEnmyNumber++;
-                        }
-                        if (this.spawnEnmyNumber >= WAVE_ROWS_ENEMY_COUNT_MAX) {
-                            this.spawnRowTime = WAVE_ROWS_TIME_MAX;
-                            console.log("Row Finished, waiting to setup new row...");
-                            this.spawnRowNum++;
-                        }
+                break;
+            case WAVE_TYPE.ROW_RIGHT:
+                if (currentWave.spawnEnemyNumber < WAVE_ROWS_ENEMY_COUNT_MAX) {
+                    if (currentWave.enemyCreateTime <= 0) {
+                        currentWave.enemyCreateTime = WAVE_ROWS_ENEMY_TIME_MAX;
+                        currentWave.addEnemy(this.createEnemy(
+                            WAVE_TYPE.ROW_RIGHT,
+                            this.game.width / 2 - (WAVE_ROW_XOFFSET + ENEMY_WIDTH * currentWave.spawnEnemyNumber)));
+                        currentWave.spawnEnemyNumber++;
                     }
-                    break;
-                    case ROW_TYPE.RIGHT:
-                    if (this.spawnEnmyNumber < WAVE_ROWS_ENEMY_COUNT_MAX) {
-                        if (this.enemyCreateTime <= 0) {
-                            this.enemyCreateTime = WAVE_ROWS_ENEMY_TIME_MAX;
-                            this.createEnemy(this.spawnWaveType,
-                                this.game.width / 2 - (WAVE_ROW_XOFFSET + ENEMY_WIDTH * this.spawnEnmyNumber));
-                            this.spawnEnmyNumber++;
-                        }
-                        if (this.spawnEnmyNumber >= WAVE_ROWS_ENEMY_COUNT_MAX) {
-                            this.spawnRowTime = WAVE_ROWS_TIME_MAX;
-                            console.log("Row Finished, waiting to setup new row...");
-                            this.spawnRowNum++;
-                        }
-                    }
-                    break;
-                    case ROW_TYPE.STRAIGHT:
-                    if (this.spawnEnmyNumber < WAVE_ROWS_ENEMY_COUNT_MAX) {
-                        for (let i: number = 0; i < WAVE_ROWS_ENEMY_COUNT_MAX; i++) {
-                            this.createEnemy(this.spawnWaveType, WAVE_ROW_XOFFSET + ENEMY_WIDTH * i);
-                            this.spawnEnmyNumber++;
-                        }
-                        this.spawnRowTime = WAVE_ROWS_TIME_MAX;
-                        console.log("Row Finished, waiting to setup new row...");
-                        this.spawnRowNum++;
-                    }
-                    break;
+                } else {
+                    currentWave.allSpawned = true;
+                    this.currentWaveIndex ++;
                 }
-                // If we've spawned all the necessary enemies, and the spawn time has been reached, we're done
-                // spawning the row
-                if (this.spawnRowTime <= 0 && this.spawnEnmyNumber >= WAVE_ROWS_ENEMY_COUNT_MAX) {
-                    this.spawnRowFinished = true;
+                break;
+            case WAVE_TYPE.ROW_STRAIGHT:
+                for (let i: number = 0; i < WAVE_ROWS_ENEMY_COUNT_MAX; i++) {
+                    currentWave.addEnemy(
+                        this.createEnemy(WAVE_TYPE.ROW_STRAIGHT, WAVE_ROW_XOFFSET + ENEMY_WIDTH * i),
+                    );
+                    currentWave.spawnEnemyNumber++;
                 }
-            }
-            // spawnRowNum is incremented when new wave is chosen
-            // greater than necessary to spawn actual number in WAVE_ROW_MAX
-            if (this.spawnRowNum >= WAVE_ROWS_MAX) {
-                this.resetWave();
-            }
-            break;
+                currentWave.allSpawned = true;
+                this.currentWaveIndex ++;
+                break;
         }
     }
 
@@ -711,20 +611,13 @@ export default class Startup extends Phaser.State {
         }
     }
 
-    private createEnemy(waveType: number, xSpawn: number) {
+    private createEnemy(waveType: number, xSpawn: number): BaseEnemy {
         const currEnemy: BaseEnemy = this.groupEnemies.getFirstExists(false);
         if (currEnemy) {
-            if (waveType === ENEMY_WAVE.RANDOM) {
-                currEnemy.randomizeTimes();
-            }
+            currEnemy.randomizeTimes();
             currEnemy.setWaveType(waveType);
             currEnemy.reset(xSpawn, ENEMY_Y_SPAWN, currEnemy.maxHealth);
         }
-    }
-
-    private resetWave(): void {
-        console.log("Wave Reset");
-        this.spawnWaveTime = WAVE_TIME_MAX;
-        this.spawnWaveType = ENEMY_WAVE.NONE;
+        return currEnemy;
     }
 }

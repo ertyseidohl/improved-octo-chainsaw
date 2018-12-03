@@ -1,0 +1,25 @@
+import { LEVELS } from "./levels";
+
+import Gameplay from "../states/gameplay";
+
+export default class LevelManager {
+    private currentLevelNum: number;
+
+    constructor(private gameplayState: Gameplay) {
+        this.currentLevelNum = 0;
+        LEVELS[this.currentLevelNum].init(this.gameplayState);
+    }
+
+    public update() {
+        if (LEVELS[this.currentLevelNum].isOver(this.gameplayState)) {
+            LEVELS[this.currentLevelNum].cleanup(this.gameplayState);
+            this.currentLevelNum ++;
+
+            console.log(`Now on level ${this.currentLevelNum}`);
+
+            LEVELS[this.currentLevelNum].init(this.gameplayState);
+        } else {
+            LEVELS[this.currentLevelNum].update(this.gameplayState);
+        }
+    }
+}
