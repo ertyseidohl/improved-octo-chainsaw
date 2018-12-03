@@ -341,6 +341,15 @@ export default class Gameplay extends Phaser.State {
         this.gameMessageCenterTime--;
 
         this.levelManager.update();
+
+        // check of bullets have gone out of bounds to engineering
+        for (const bullet of this.bulletsGroup.children) {
+            if (bullet instanceof Phaser.Sprite) {
+                if (!this.shmupBounds.contains(bullet.x, bullet.y)) {
+                    bullet.kill();
+                }
+            }
+        }
     }
 
     public displayText(text: string, time: number) {
