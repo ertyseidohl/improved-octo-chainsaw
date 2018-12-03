@@ -22,6 +22,8 @@ import { Point } from "phaser-ce";
 
 import { COMPONENT_TYPES } from "../constants";
 
+import { ConnectedWire } from "./wiring/wire";
+
 export interface ShipUpdateMessage {
     topSpeed: number;
     guns: number;
@@ -68,6 +70,8 @@ export default class Engineering {
 
     // PUBLIC METHODS
     public create(): void {
+
+        const myWire = new ConnectedWire(this.game);
 
         this.inventorySystem = new InventorySystem(
             this.game,
