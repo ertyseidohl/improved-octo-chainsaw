@@ -115,6 +115,11 @@ export default class Engineering {
 
     public explode(): void {
         this.inventorySystem.explode();
+        this.game.physics.enable(this.componentGroup);
+        this.componentGroup.forEach((c: BaseComponent) => {
+            c.body.velocity.x = (Math.random() * 128) - 64;
+            c.body.velocity.y = (Math.random() * 128) - 64;
+        });
     }
 
     public createComponentByName(componentType: COMPONENT_TYPES) {

@@ -5,7 +5,6 @@ const PLAYER_SCALE: number = 2;
 
 const BULLET_SPEED: number = 700;
 
-
 // HUD
 const HEALTH_DISPLAY_Y: number = 20;
 const HEALTH_DISPLAY_X: number = 80;

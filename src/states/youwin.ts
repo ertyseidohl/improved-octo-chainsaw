@@ -1,4 +1,4 @@
-export default class Startup extends Phaser.State {
+export default class YouWin extends Phaser.State {
     public create(): void {
         this.game.add.text(
             this.game.width / 2,

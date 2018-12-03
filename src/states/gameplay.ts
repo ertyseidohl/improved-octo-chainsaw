@@ -1,4 +1,5 @@
 import BaseEnemy from "../enemies/base_enemy";
+import BasicEnemy from "../enemies/basic_enemy";
 
 import { WAVE_TYPE } from "../constants";
 
@@ -50,7 +51,7 @@ const WAVE_SWOOP_TIME_MAX = 30;
 const WAVE_SWOOP_ENEMY_TIME_MAX = 24;
 const WAVE_SWOOP_XVEL = 210;
 
-export default class Startup extends Phaser.State {
+export default class Gameplay extends Phaser.State {
     private gameplayState: number;
     private startState: number;
     private startStateTime: number;
@@ -231,7 +232,7 @@ export default class Startup extends Phaser.State {
         // enemies
         this.groupEnemies = this.game.add.group();
         for (let i: number = 0; i < ENEMY_POOL_COUNT; i++) {
-            const newEnemy: BaseEnemy = new BaseEnemy(this.game, Math.random(), 0, "enemy");
+            const newEnemy: BaseEnemy = new BasicEnemy(this.game, Math.random(), 0, "enemy");
             newEnemy.setBulletsCollisionGroup(this.bulletCollisionGroup);
             newEnemy.setBulletsCollides(this.playerCollisionGroup, this.bulletHitPlayer, this);
             this.groupEnemies.add(newEnemy);
@@ -556,7 +557,8 @@ export default class Startup extends Phaser.State {
     }
 
     private bulletHitEnemy(bullet: Phaser.Physics.P2.Body, enemy: Phaser.Physics.P2.Body): void {
-        if (!enemy.sprite.alive) {
+        const enemySprite = enemy.sprite as BaseEnemy;
+        if (!enemySprite.alive) {
             bullet.sprite.kill();
             return;
         }
@@ -572,18 +574,20 @@ export default class Startup extends Phaser.State {
         }
 
         if (bullet.sprite.alive) {
-            enemy.sprite.damage(1);
+            enemySprite.damage(1);
             this.game.sound.play("hit");
         }
 
-        if (enemy.sprite.health <= 0 ) {
+        if (enemySprite.health <= 0 ) {
             const deathExplosion: Phaser.Sprite = this.groupExplosions.getFirstExists(false);
             if (deathExplosion) {
                 deathExplosion.reset(enemy.x, enemy.y);
                 deathExplosion.play("explode", 15, false, true);
                 this.game.sound.play("explosion");
             }
-            this.spawnPowerup(enemy);
+            if (enemySprite.shouldSpawnPowerup()) {
+                this.spawnPowerup(enemy);
+            }
         }
 
         bullet.sprite.kill();

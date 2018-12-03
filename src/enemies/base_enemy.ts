@@ -11,7 +11,7 @@ const SHOOT_TIME_MAX: number = 6000;
 const BULLET_SPEED: number = 500;
 const HEALTH_MAX: number = 3;
 
-export default class BaseEnemy extends Phaser.Sprite {
+export default abstract class BaseEnemy extends Phaser.Sprite {
     private enemyBody: Phaser.Physics.P2.Body;
     private bulletsGroup: Phaser.Group;
     private bound: Phaser.Rectangle;
@@ -48,6 +48,8 @@ export default class BaseEnemy extends Phaser.Sprite {
         this.bulletsGroup.setAll("body.collideWorldBounds", false);
         this.bulletsGroup.setAll("body.fixedRotation", true);
     }
+
+    public abstract shouldSpawnPowerup(): boolean;
 
     public randomizeTimes(): void {
         this.actionTime = this.game.time.now + this.game.rnd.integerInRange(0, ACTION_TIME_MAX);
