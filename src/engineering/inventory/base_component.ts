@@ -115,6 +115,10 @@ export abstract class BaseComponent extends Phaser.Sprite {
         return 0;
     }
 
+    public getShielding(): number {
+        return 0;
+    }
+
     public getPowerHandlePoint(): Phaser.Point {
         return null;
     }
