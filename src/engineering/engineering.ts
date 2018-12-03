@@ -313,6 +313,9 @@ export default class Engineering {
             case COMPONENT_TYPES.SPACE_DIAMOND:
                 newComponent = new SpaceDiamond(this.game, this.inventorySystem);
                 break;
+            case COMPONENT_TYPES.SHIELD:
+                newComponent = new ShieldGenerator(this.game, this.inventorySystem);
+                break;
             default:
                 throw new Error(`unknown component type for createComponentByname: ${componentType}`);
         }

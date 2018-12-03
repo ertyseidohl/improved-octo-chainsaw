@@ -17,6 +17,7 @@ export default class BombEnemy extends BaseEnemy {
         const options = [
             COMPONENT_TYPES.BASIC_GUN,
             COMPONENT_TYPES.ENGINE,
+            COMPONENT_TYPES.SHIELD,
         ];
 
         if (Math.random() < 0.7) {

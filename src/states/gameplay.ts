@@ -16,6 +16,7 @@ import {
     EnginePowerup,
     Powerup,
     PrincePowerup,
+    ShieldPowerup,
     SpaceDiamondPowerup,
     SpaceJunkPowerup,
 } from "../player/powerup";
@@ -140,6 +141,7 @@ export default class Gameplay extends Phaser.State {
 
         this.game.load.image("gun_1_powerup", "../assets/gun_1_powerup.png");
         this.game.load.image("engine_1_powerup", "../assets/engine_1_powerup.png");
+        this.game.load.image("shield_powerup", "../assets/shield_powerup.png");
         this.game.load.image("space_junk", "../assets/space_junk.png");
         this.game.load.image("space_diamond", "../assets/space_diamond.png");
 
@@ -657,6 +659,9 @@ export default class Gameplay extends Phaser.State {
                 break;
             case COMPONENT_TYPES.ENGINE:
                 powerup = new EnginePowerup(this.game, enemy.x, enemy.y);
+                break;
+            case COMPONENT_TYPES.SHIELD:
+                powerup = new ShieldPowerup(this.game, enemy.x, enemy.y);
                 break;
             case COMPONENT_TYPES.PRINCE:
                 powerup = new PrincePowerup(this.game, enemy.x, enemy.y);

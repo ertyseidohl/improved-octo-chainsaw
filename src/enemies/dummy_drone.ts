@@ -12,7 +12,7 @@ export default class DummyDrone extends BaseEnemy {
     }
 
     public getPowerupToSpawn(): COMPONENT_TYPES {
-        return COMPONENT_TYPES.ENGINE;
+        return COMPONENT_TYPES.SHIELD;
     }
 
     public shoot(): void {

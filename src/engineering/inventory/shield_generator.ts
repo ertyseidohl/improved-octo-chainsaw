@@ -4,11 +4,22 @@ import { Constraints, InventorySystem } from "./system";
 
 export class ShieldGenerator extends BaseComponent {
 
-    constructor(game: Phaser.Game, inventorySystem: InventorySystem, position: Phaser.Point) {
-        super(game, inventorySystem, "shield_generator", 2, 1, position);
+    private animation: Phaser.Animation;
 
-        const gunFireAnimation: Phaser.Animation = this.animations.add("shield", [1, 2, 3, 4]);
-        gunFireAnimation.play(10, true);
+    constructor(game: Phaser.Game, inventorySystem: InventorySystem, position?: Phaser.Point) {
+        super(game, inventorySystem, "shield_generator", 1, 2, position);
+        this.animation = this.animations.add("shield", [1, 2, 3, 4]);
+    }
+
+    public update(): void {
+        super.update();
+
+        if (this.onShip && this.isOnline() && !this.animation.isPlaying) {
+            this.animation.play(20, true);
+        } else if (!this.onShip || !this.isOnline()) {
+            this.animation.stop();
+            this.frame = 0;
+        }
     }
 
     public getStateConfig(): StateConfig {
@@ -30,6 +41,13 @@ export class ShieldGenerator extends BaseComponent {
         return [
             "Shield your ship from enemies, friends, frenemies, and strangers!",
         ];
+    }
+
+    public getPowerPads(index: number): Phaser.Point {
+        return new Phaser.Point(
+            this.x + this.powerPadsOffsets[index].x,
+            this.y + this.powerPadsOffsets[index].y,
+        );
     }
 
 }

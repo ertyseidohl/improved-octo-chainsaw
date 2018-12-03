@@ -21,6 +21,7 @@ export enum COMPONENT_TYPES {
     PRINCE,
     SPACE_JUNK,
     SPACE_DIAMOND,
+    SHIELD,
 }
 
 export enum ENEMY_TYPES {

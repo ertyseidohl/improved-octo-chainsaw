@@ -79,3 +79,13 @@ export class SpaceDiamondPowerup extends Powerup {
         return COMPONENT_TYPES.SPACE_DIAMOND;
     }
 }
+
+export class ShieldPowerup extends Powerup {
+    constructor(game: Phaser.Game, x: number, y: number) {
+        super(game, x, y, "shield_powerup");
+    }
+
+    public getComponentName(): COMPONENT_TYPES {
+        return COMPONENT_TYPES.SHIELD;
+    }
+}
