@@ -18,16 +18,31 @@ import { BasicShip, InventorySystem, NUM_TILE_SPRITES} from "./inventory/system"
 import { PowerSubSystem } from "./systems/power_subsystem";
 import { System } from "./systems/system";
 
-import { Point } from "phaser-ce";
-
-import { COMPONENT_TYPES } from "../constants";
+import { COMPONENT_TYPES, MAX_ENGINE, MAX_HEALTH, MAX_WEIGHT } from "../constants";
 
 import { ConnectedWire } from "./wiring/wire";
 
 export interface ShipUpdateMessage {
     topSpeed: number;
     guns: number;
+    weight: number;
 }
+
+// HUD
+const HEALTH_DISPLAY_Y: number = 20;
+const HEALTH_DISPLAY_X: number = 80;
+
+const ENGINE_DISPLAY_Y: number = 60;
+const ENGINE_DISPLAY_X: number = 85;
+
+const WEIGHT_DISPLAY_Y: number = 100;
+const WEIGHT_DISPLAY_X: number = 85;
+
+const HUD_TEXT_STYLE: Phaser.PhaserTextStyle = {
+    fill: "white",
+    font: "pixelsix",
+    fontSize: 20,
+};
 
 // =================
 // class Engineering
@@ -58,11 +73,17 @@ export default class Engineering {
 
     private mouseInBounds: boolean;
 
+    private playerHealth: number;
+
     private dragBitmap: Phaser.BitmapData;
     private dragHandler: MultiDragHandler;
     private inventorySystem: InventorySystem;
     private powerSystem: PowerSubSystem;
     private system: System;
+
+    private healthIcons: Phaser.Sprite[];
+    private engineIcons: Phaser.Sprite[];
+    private weightIcons: Phaser.Sprite[];
 
     private testComponent: BaseComponent;
 
@@ -82,10 +103,10 @@ export default class Engineering {
 
         this.mouseInBounds = false;
 
+        this.playerHealth = MAX_HEALTH;
+
         this.powerSystem = new PowerSubSystem();
         this.system = new System(this.inventorySystem);
-
-        this.componentGroup = this.game.add.group();
         this.dragHandler = new MultiDragHandler(
             this.game,
             this.inventorySystem,
@@ -93,7 +114,9 @@ export default class Engineering {
         );
         this.inventorySystem.dragHandler = this.dragHandler;
 
-        this.createStartingComponents();
+        this.healthIcons = [];
+        this.engineIcons = [];
+        this.weightIcons = [];
 
         // button to switch drag modes
         const corner = this.bounds.topRight;
@@ -106,15 +129,111 @@ export default class Engineering {
         );
         dragSwitch.inputEnabled = true;
         dragSwitch.events.onInputDown.add(this.dragSwitchPressed, this);
+
+        this.game.add.text(
+            this.game.width / 2 + 10,
+            HEALTH_DISPLAY_Y,
+            "Health: ",
+            HUD_TEXT_STYLE,
+        );
+
+        for (let i = 0; i < MAX_HEALTH; i++) {
+            this.healthIcons[i] = this.game.add.sprite(
+                this.game.width / 2 + (5 * i) + HEALTH_DISPLAY_X,
+                HEALTH_DISPLAY_Y,
+                "health",
+            );
+        }
+
+        this.game.add.text(
+            this.game.width / 2 + 10,
+            ENGINE_DISPLAY_Y,
+            "Engine: ",
+            HUD_TEXT_STYLE,
+        );
+
+        for (let i = 0; i < MAX_ENGINE; i++) {
+            this.engineIcons[i] = this.game.add.sprite(
+                this.game.width / 2 + (5 * i) + ENGINE_DISPLAY_X,
+                ENGINE_DISPLAY_Y,
+                "engine",
+            );
+        }
+
+        this.game.add.text(
+            this.game.width / 2 + 10,
+            WEIGHT_DISPLAY_Y,
+            "Weight: ",
+            HUD_TEXT_STYLE,
+        );
+
+        for (let i = 0; i < MAX_ENGINE; i++) {
+            this.weightIcons[i] = this.game.add.sprite(
+                this.game.width / 2 + (5 * i) + WEIGHT_DISPLAY_X,
+                WEIGHT_DISPLAY_Y,
+                "weight",
+            );
+        }
+
+        this.game.add.text(
+            this.game.width / 2 + 195, // dOnT uSe mAgiC nUmBErS
+            440, // MAGIC NUMBER
+            "Cargo Hold",
+            {
+                ...HUD_TEXT_STYLE,
+                fill: "#555",
+            },
+        );
+
+        // do this last so they go on top of the text
+        this.componentGroup = this.game.add.group();
+        this.createStartingComponents();
     }
 
     public update(): ShipUpdateMessage {
-        return this.system.update();
+        const updateMessage: ShipUpdateMessage = this.system.update();
+
+        for (let i: number = 0; i < MAX_ENGINE; i++)  {
+            this.engineIcons[i].visible = i < updateMessage.topSpeed;
+        }
+        for (let i = 0; i < MAX_HEALTH; i++) {
+            this.healthIcons[i].visible = i < this.playerHealth;
+        }
+        for (let i = 0; i < MAX_ENGINE; i++) {
+            this.weightIcons[i].visible = i < updateMessage.weight;
+        }
+
+        return updateMessage;
+    }
+
+    public damagePlayer(damage: number) {
+        this.playerHealth -= damage;
+    }
+
+    public getPlayerHealth(): number {
+        return this.playerHealth;
+    }
+
+    public clearAllPrinces(): void {
+        this.componentGroup.forEach((c: BaseComponent) => {
+            if (c instanceof Prince) {
+                c.destroy();
+            }
+        });
     }
 
     public hasConnectedTestComponent(): boolean {
         // TODO
         return true;
+    }
+
+    public princeInInventory(): boolean {
+        for (const c of this.componentGroup.children) {
+            if (c instanceof Prince) {
+                return true;
+            }
+        }
+        return false;
     }
 
     // PUBLIC PROPERTIES

@@ -3,6 +3,8 @@ import BasicEnemy from "../enemies/basic_enemy";
 import BossEnemy from "../enemies/boss_enemy";
 import DummyDrone from "../enemies/dummy_drone";
 
+import BaseStation from "../player/base_station";
+
 import { COMPONENT_TYPES, ENEMY_TYPES, WAVE_TYPE } from "../constants";
 
 import Engineering, { ShipUpdateMessage } from "../engineering/engineering";
@@ -90,6 +92,7 @@ export default class Gameplay extends Phaser.State {
     private engineeringBounds: Phaser.Rectangle;
 
     private borderSprite: Phaser.Sprite;
+    private baseStation: BaseStation;
 
     // engineering section
     private engineering: Engineering;
@@ -105,6 +108,8 @@ export default class Gameplay extends Phaser.State {
         this.game.load.image("health", "../assets/powerup.png");
         this.game.load.image("engine", "../assets/powerup.png");
         this.game.load.image("weight", "../assets/powerup.png");
+
+        this.game.load.image("base_station", "../assets/base_station.png");
 
         this.game.load.image("enemy", "../assets/enemy_1.png");
         this.game.load.spritesheet("boss_enemy", "../assets/boss_enemy.png", 128, 128, 3);
@@ -217,13 +222,17 @@ export default class Gameplay extends Phaser.State {
             "stars_3",
         ));
 
-        // setup engineering
-        this.engineering.create();
+        //  baseStation
+        this.baseStation = new BaseStation(this.game, 0, 0);
+        this.game.add.existing(this.baseStation);
+        this.baseStation.kill();
 
-        // sprites and physics
+        // the player
         this.player = new Player(this.game, this.game.width / 4, this.game.height - 50, "player");
         this.game.add.existing(this.player);
-        // groups
+
+        // setup engineering
+        this.engineering.create();
 
         // assign collision groups
         this.player.body.setCollisionGroup(this.playerCollisionGroup);
@@ -284,6 +293,10 @@ export default class Gameplay extends Phaser.State {
             playerDeathExplosion.animations.getAnimation("explode").play(30, false, true);
         }
 
+        if (!this.player.alive && !this.playerDeathQueue.length) {
+            this.game.state.start("gameover");
+        }
+
         // update time variables
         this.gameMessageCenterTime--;
 
@@ -299,6 +312,24 @@ export default class Gameplay extends Phaser.State {
         return this.gameMessageCenterTime > 0;
     }
 
+    public generateBaseStation(): void {
+        this.baseStation.reset(this.shmupBounds.width / 4, -64);
+        this.player.dock(this.baseStation.getDockPoint());
+    }
+
+    public baseStationDone(): boolean {
+        if (this.baseStation.y > this.player.y - this.player.height) {
+            this.engineering.clearAllPrinces();
+        }
+        if (this.baseStation.y > this.shmupBounds.height) {
+            console.log("BASE STATION DONE");
+            this.baseStation.kill();
+            this.player.undock();
+            return true;
+        }
+        return false;
+    }
+
     public setUpcomingWaves(waves: Wave[]) {
         this.currentLevelWaves = waves;
         this.currentWaveIndex = 0;
@@ -306,6 +337,10 @@ export default class Gameplay extends Phaser.State {
 
     public waveIndexAllDead(index: number) {
         return this.currentLevelWaves[index].allSpawned && this.currentLevelWaves[index].allDead();
+    }
+
+    public princeInInventory(): boolean {
+        return this.engineering.princeInInventory();
     }
 
     public testPowerupPickedUp() {
@@ -363,15 +398,6 @@ export default class Gameplay extends Phaser.State {
         });
 
         return group;
-    }
-
-    private allWavesFinished(): boolean {
-        for (const wave of this.currentLevelWaves) {
-            if (!wave.allSpawned) {
-                return false;
-            }
-        }
-        return true;
     }
 
     private clearText() {
@@ -651,10 +677,10 @@ export default class Gameplay extends Phaser.State {
             explosion.play("explode", 30, false, true);
         }
 
-        player.sprite.damage(1);
+        this.engineering.damagePlayer(1);
 
-        if (player.sprite.health <= 0) {
-            this.playerIsDead(this.player);
+        if (this.engineering.getPlayerHealth() <= 0) {
+            this.explodePlayer(this.player);
             this.game.sound.play("dead");
         } else {
             this.game.sound.play("hurt");
@@ -663,8 +689,9 @@ export default class Gameplay extends Phaser.State {
         bullet.sprite.kill();
     }
 
-    private playerIsDead(player: Phaser.Sprite): void {
+    private explodePlayer(player: Phaser.Sprite): void {
         this.engineering.explode();
+        this.player.kill();
         for (let i: number = 0; i < 60; i++) {
             const deathExplosion: Phaser.Sprite = this.groupExplosions.getFirstExists(false);
             if (deathExplosion) {

@@ -41,10 +41,10 @@ export class BasicShip extends Ship {
             [null, null, null, null, null, null, null, null, null, null],
             [0, 0, null, null, 0, 0, null, null, 0, 0],
             [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, null, null, null, null, 0, 0, 0],
             [0, null, null, null, null, null, null, null, null, 0],
-            [null, null, null, null, null, null, null, null, null, null],
-            [null, null, null, null, null, null, null, null, null, null],
             [0, null, null, null, null, null, null, null, null, 0],
+            [0, 0, null, null, null, null, null, null, 0, 0],
         ];
         this.cargoHoldYStart = 8;
     }

@@ -25,3 +25,7 @@ export enum ENEMY_TYPES {
     BOSS,
     DUMMY_DRONE,
 }
+
+export const MAX_HEALTH: number = 4;
+export const MAX_ENGINE: number = 10;
+export const MAX_WEIGHT: number = 10;
