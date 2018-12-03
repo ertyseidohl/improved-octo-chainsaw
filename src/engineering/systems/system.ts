@@ -20,7 +20,7 @@ export class System {
 
     public update(): ShipUpdateMessage {
         const weight = this.weightSubSystem.getShipWeight();
-        const topSpeed = this.engineSubSystem.getSpeed() - (weight / 4);
+        const topSpeed = Math.max(0, this.engineSubSystem.getSpeed() - (weight / 8));
         const guns = this.gunsSubSystem.getGuns();
         return {
             guns,

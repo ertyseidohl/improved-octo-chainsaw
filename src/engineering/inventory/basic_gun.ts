@@ -33,7 +33,7 @@ export class BasicGun extends BaseComponent {
     }
 
     public getGuns(): number {
-        return this.getPower();
+        return 1;
     }
 
 }

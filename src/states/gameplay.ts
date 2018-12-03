@@ -2,7 +2,7 @@ import BaseEnemy from "../enemies/base_enemy";
 
 import { WAVE_TYPE } from "../constants";
 
-import Engineering from "../engineering/engineering";
+import Engineering, { ShipUpdateMessage } from "../engineering/engineering";
 import LevelManager from "../levels/level_manager";
 import Player from "../player/player";
 import { Powerup } from "../player/powerup";
@@ -269,7 +269,8 @@ export default class Startup extends Phaser.State {
         for (let i: number = 0; i < this.backgrounds.length; i++) {
             this.backgrounds[i].tilePosition.y += (i + 1);
         }
-        this.engineering.update();
+        const shipUpdateMessage: ShipUpdateMessage = this.engineering.update();
+        this.player.getUpdateMessage(shipUpdateMessage);
 
         if (this.playerDeathQueue.length && Math.random() < 0.2) {
             const playerDeathExplosion: Phaser.Sprite = this.playerDeathQueue.pop();

@@ -9,11 +9,11 @@ export class GunSubSystem {
     }
 
     public getGuns(): number {
-        let speed = 0;
+        let guns = 0;
         for (const component of this.inventorySystem.getAllComponents()) {
-            speed += component.getGuns();
+            guns += component.getGuns();
         }
-        return speed;
+        return guns;
     }
 
 }
