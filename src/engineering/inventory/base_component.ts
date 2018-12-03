@@ -78,6 +78,10 @@ export abstract class BaseComponent extends Phaser.Sprite {
         return this.componentState.updatePower(power);
     }
 
+    public getPower() {
+        return this.componentState.getPower();
+    }
+
     public getWeight(): number {
         return this.componentState.getWeight();
     }
