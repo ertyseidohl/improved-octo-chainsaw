@@ -1,6 +1,7 @@
 // DEPENDENCIES
 import { BaseComponent } from "../base_component";
-import { BaseDragHandler } from "./base";
+
+import { BaseDragHandler, GlobalDragState } from "./base";
 
 import { PowerSubSystem } from "../../systems/power_subsystem";
 import { InventorySystem } from "../system";
@@ -53,11 +54,8 @@ class RopeWire extends Phaser.Group {
     }
 }
 
-type Wire = RopeWire;
-const Wire = RopeWire;
-
 interface ConnectionState {
-    wire: Wire;
+    wire: RopeWire;
 }
 
 interface ConnectionLink {
@@ -73,7 +71,7 @@ interface Coordinate {
 interface PendingConnect {
     source: BaseComponent;
     start: Coordinate;
-    wire: Wire;
+    wire: RopeWire;
 }
 
 type TargetToState = Map<Phaser.Sprite, ConnectionState>;
@@ -88,7 +86,7 @@ class Connections {
     public tryConnect(
         source: Phaser.Sprite,
         sink: Phaser.Sprite,
-        wire: Wire,
+        wire: RopeWire,
     ): boolean {
         let existing = this.entries.get(source);
         if (undefined === existing) {
@@ -117,7 +115,7 @@ export class ConnectDragHandler extends BaseDragHandler {
     private connections: Connections = new Connections();
     private pendingConnect: PendingConnect | null = null;
     private wiresGroup: Phaser.Group;
-    private connectedWires = new Map<Wire, ConnectionLink>();
+    private connectedWires = new Map<RopeWire, ConnectionLink>();
 
     // CREATORS
     constructor(
@@ -139,7 +137,7 @@ export class ConnectDragHandler extends BaseDragHandler {
         this.pendingConnect = {
             source: comp,
             start: { x: comp.x, y: comp.y },
-            wire: new Wire(
+            wire: new RopeWire(
                 this.game,
                 this.wires,
                 "",
@@ -195,7 +193,7 @@ export class ConnectDragHandler extends BaseDragHandler {
 
     // PRIVATE METHODS
     private wireDragStart(pad: Phaser.Sprite, pointer: Phaser.Pointer) {
-        const wire = pad.data.wire as Wire;
+        const wire = pad.data.wire as RopeWire;
         const p = this.game.input.mousePointer;
         const { source, sink } = this.connectedWires.get(wire);
         this.connectedWires.delete(wire);
@@ -215,7 +213,7 @@ export class ConnectDragHandler extends BaseDragHandler {
     }
 
     private wireDragUpdate(pad: Phaser.Sprite, p: Phaser.Pointer) {
-        const wire = pad.data.wire as Wire;
+        const wire = pad.data.wire as RopeWire;
         wire.sinkPoint = p.position;
     }
 

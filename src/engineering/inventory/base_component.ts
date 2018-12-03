@@ -24,7 +24,7 @@ export abstract class BaseComponent extends Phaser.Sprite {
     constructor(game: Phaser.Game, inventorySystem: InventorySystem,
                 key: string,
                 tileWidth: number, tileHeight: number,
-                position: Phaser.Point,
+                position: Phaser.Point = new Phaser.Point(0, 0),
     ) {
         super(game, position.x, position.y, key, 0);
 
@@ -94,7 +94,7 @@ export abstract class BaseComponent extends Phaser.Sprite {
         return 0;
     }
 
-    private onDragStart(): void {
+    private onDragStart(game: any, pointer: Phaser.Pointer): void {
         this.inventorySystem.dragHandler.dragStart(this);
     }
 

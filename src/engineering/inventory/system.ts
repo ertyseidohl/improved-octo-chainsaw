@@ -210,7 +210,7 @@ export class InventorySystem {
     }
 
     public placeInFirstAvailable(component: BaseComponent): boolean {
-        for (let i: number = 0; i < this.width; i++) {
+        for (let i: number = 0; i < this.height; i++) {
             for (let j: number = 0; j < this.width; j++) {
                 const newCoords = this.gridIndexToPixels(j, i);
                 component.x = newCoords.x;

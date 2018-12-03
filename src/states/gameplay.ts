@@ -4,6 +4,7 @@ import { ENEMY_WAVE } from "../constants";
 
 import Engineering from "../engineering/engineering";
 import Player from "../player/player";
+import { Powerup } from "../player/powerup";
 
 // constants
 const ENEMY_POOL_COUNT: number = 30;
@@ -11,6 +12,19 @@ const ENEMY_SPAWN_TIME: number = 2000;
 const ENEMY_Y_SPAWN: number = -20;
 const ENEMY_WIDTH: number = 100; // spacing number for spawning enemies
 
+// gameplay states
+enum GAMEPLAY_STATE {
+    GETREADY,
+    WAVES,
+    BOSS,
+    VICTORY,
+}
+
+enum READY_STATES {
+    READY,
+    DRAMATIC_PAUSE,
+    GO,
+}
 const POWERUP_POOL_COUNT: number = 30;
 
 // wave constants
@@ -45,12 +59,21 @@ enum SWOOP_TYPE {
 }
 
 export default class Startup extends Phaser.State {
+    private gameplayState: number;
+    private startState: number;
+    private startStateTime: number;
+
+    private gameMessageCenter: Phaser.Text;
+    private gameMessageCenterTime: number; // set negative if infinite
+
     // game objects
     private player: Player;
     private playerCollisionGroup: Phaser.Physics.P2.CollisionGroup;
     private enemyCollisionGroup: Phaser.Physics.P2.CollisionGroup;
     private bulletCollisionGroup: Phaser.Physics.P2.CollisionGroup;
     private worldCollisionGroup: Phaser.Physics.P2.CollisionGroup;
+    private powerupCollisionGroup: Phaser.Physics.P2.CollisionGroup;
+
     private backgrounds: Phaser.TileSprite[] = [];
     private playerDeathQueue: Phaser.Sprite[] = [];
     private spawnEnmyNumber: number; // we'll use this variable for all wave types
@@ -65,6 +88,9 @@ export default class Startup extends Phaser.State {
     private spawnSwoopTime: number;
     private spawnSwoopType: number;
 
+    // level stuff
+    private level: number;
+
     // Enemy vars
     private enemyRndmCreateCoolDwn = ENEMY_SPAWN_TIME;
     private enemyCreateTime = 0;
@@ -77,8 +103,6 @@ export default class Startup extends Phaser.State {
 
     private shmupBounds: Phaser.Rectangle;
     private engineeringBounds: Phaser.Rectangle;
-
-    private liveComponents: Phaser.Group;
 
     private borderSprite: Phaser.Sprite;
 
@@ -112,13 +136,23 @@ export default class Startup extends Phaser.State {
     }
 
     public create(): void {
+
+        // NOOBIE NOTE: THINGS LIKE TEXT AND SPRITES MUST BE ADDED CORRECT ORDER
+        // i.e. adding text, then background, means the text will be behind
+        // the background, and therefore invisible.
+
         const { width, height } = this.game;
+
+        this.gameplayState = GAMEPLAY_STATE.GETREADY;
+        this.startState = 0; // this is janky forgive me!!!
+        this.startStateTime = this.game.time.now + 2000; // "Get Ready!" 2 seconds
 
         // collision groups
         this.playerCollisionGroup = this.game.physics.p2.createCollisionGroup();
         this.bulletCollisionGroup = this.game.physics.p2.createCollisionGroup();
         this.worldCollisionGroup = this.game.physics.p2.createCollisionGroup();
         this.enemyCollisionGroup = this.game.physics.p2.createCollisionGroup();
+        this.powerupCollisionGroup = this.game.physics.p2.createCollisionGroup();
 
         // This part is vital if you want the objects
         // with their own collision groups to still collide with the world bounds
@@ -131,7 +165,12 @@ export default class Startup extends Phaser.State {
         const borderSpriteBody: Phaser.Physics.P2.Body = this.borderSprite.body;
         borderSpriteBody.static = true;
         borderSpriteBody.setCollisionGroup(this.worldCollisionGroup);
-        borderSpriteBody.collides([this.playerCollisionGroup, this.enemyCollisionGroup, this.bulletCollisionGroup]);
+        borderSpriteBody.collides([
+            this.playerCollisionGroup,
+            this.enemyCollisionGroup,
+            this.bulletCollisionGroup,
+            this.powerupCollisionGroup,
+        ]);
 
         this.shmupBounds = new Phaser.Rectangle(
             0,
@@ -191,9 +230,13 @@ export default class Startup extends Phaser.State {
         this.player.body.collides(this.worldCollisionGroup);
         this.player.body.collides(this.enemyCollisionGroup);
         this.player.body.collides(this.bulletCollisionGroup);
+        this.player.body.collides(this.powerupCollisionGroup);
 
         this.player.setBulletsCollisionGroup(this.bulletCollisionGroup);
         this.player.setBulletsCollides(this.enemyCollisionGroup, this.bulletHitEnemy, this);
+
+        // powerups
+        this.groupPowerups = this.game.add.group();
 
         // enemies
         this.spawnWaveTime = this.game.time.now + WAVE_TIME_MAX;
@@ -223,6 +266,19 @@ export default class Startup extends Phaser.State {
         this.groupExplosionsSmall = this.game.add.group();
         this.groupExplosionsSmall.createMultiple(10, "explosion_small");
         this.groupExplosionsSmall.forEach((explosion: Phaser.Sprite) => explosion.animations.add("explode"));
+
+        this.gameMessageCenter = new Phaser.Text(
+            this.game,
+            0,
+            0,
+            "TEST",
+            {
+                font: "34px pixelsix", fill: "#fff",
+                boundsAlignH: "center", boundsAlignV: "middle",
+            },
+        );
+        this.gameMessageCenter.setTextBounds(0, 0, this.shmupBounds.width, this.shmupBounds.height);
+        this.game.add.existing(this.gameMessageCenter);
     }
 
     public update(): void {
@@ -240,6 +296,53 @@ export default class Startup extends Phaser.State {
     }
 
     private updateShmup(): void {
+        switch (this.gameplayState) {
+            case GAMEPLAY_STATE.GETREADY:
+            switch (this.startState) {
+                case READY_STATES.READY:
+                this.gameMessageCenterTime = -1; // remember must be negative to be permenant
+                this.gameMessageCenter.setText("Get Ready...");
+                if (this.game.time.now >= this.startStateTime) {
+                    this.startStateTime = this.game.time.now + 1000; // one second dramatic pause
+                    this.startState = READY_STATES.DRAMATIC_PAUSE;
+                }
+                break;
+                case READY_STATES.DRAMATIC_PAUSE:
+                this.gameMessageCenter.setText("");
+                if (this.game.time.now >= this.startStateTime) {
+                    this.gameMessageCenter.setText("GO!!!");
+                    this.startState = READY_STATES.GO;
+                }
+                break;
+                case READY_STATES.GO:
+                this.gameMessageCenter.setText("GO!!!");
+                this.gameMessageCenterTime = this.game.time.now + 2000;
+                this.gameplayState = GAMEPLAY_STATE.WAVES;
+                break;
+            }
+            break;
+            case GAMEPLAY_STATE.WAVES:
+            this.createWaves();
+            break;
+            case GAMEPLAY_STATE.BOSS:
+            break;
+            case GAMEPLAY_STATE.VICTORY:
+            break;
+        }
+        this.displayGameMessages();
+    }
+
+    private displayGameMessages(): void {
+        // center message
+        // style = { font: "bold 32px Arial", fill: "#fff", boundsAlignH: "center", boundsAlignV: "middle" };
+        if (this.gameMessageCenterTime > 0) {
+            if (this.game.time.now >= this.gameMessageCenterTime) {
+                this.gameMessageCenter.setText("");
+            }
+        }
+    }
+
+    private createWaves(): void {
         // if time to spawn wave, and wave is finished, generate enemies
         // we don't need a "wave finished" variable, we just set spawnWaveType to NONE and check for that
         if (this.game.time.now >= this.spawnWaveTime && this.spawnWaveType === ENEMY_WAVE.NONE) {
@@ -513,14 +616,26 @@ export default class Startup extends Phaser.State {
     }
 
     private spawnPowerup(enemy: Phaser.Physics.P2.Body) {
-        // const powerup = this.groupPowerups.getFirstExists(false);
-        // if (powerup) {
-        //     powerup.reset(enemy.sprite.x, enemy.sprite.y);
-        //     const powerupBody: Phaser.Physics.P2.Body = powerup.body;
-        //     powerupBody.velocity.y = Math.random() * 42;
-        //     powerupBody.velocity.x = Math.random() * 42 - 84;
-        //     powerupBody.fixedRotation = true;
-        // }
+        const powerup = Powerup.createRandom(this.game, enemy.x, enemy.y);
+        this.groupPowerups.add(powerup);
+        this.game.physics.p2.enable(powerup);
+        const powerupBody: Phaser.Physics.P2.Body = powerup.body;
+        powerupBody.setCollisionGroup(this.powerupCollisionGroup);
+        powerupBody.velocity.y = Math.random() * 42;
+        powerupBody.velocity.x = Math.random() * 42 - 84;
+        powerupBody.fixedRotation = true;
+        this.game.add.existing(powerup);
+        powerupBody.collides([this.playerCollisionGroup, this.worldCollisionGroup], this.collectPowerup, this);
+    }
+
+    private collectPowerup(powerup: Phaser.Physics.P2.Body, player: Phaser.Physics.P2.Body): void {
+        if (player !== this.player.body) {
+            return;
+        }
+        const powerupSprite: Powerup = powerup.sprite as Powerup;
+        if (this.engineering.createComponentByName(powerupSprite.getComponentName())) {
+            powerupSprite.destroy();
+        }
     }
 
     private bulletHitEnemy(bullet: Phaser.Physics.P2.Body, enemy: Phaser.Physics.P2.Body): void {
@@ -585,10 +700,6 @@ export default class Startup extends Phaser.State {
                 this.playerDeathQueue.push(deathExplosion);
             }
         }
-    }
-
-    private powerUpHitPlayer(): void {
-        // not implemented
     }
 
     private createEnemy(waveType: number, xSpawn: number) {

@@ -11,7 +11,8 @@ import { ShieldGenerator } from "./inventory/shield_generator";
 import { SmallGun } from "./inventory/small_gun";
 // import { MissileLauncher } from "./inventory/missile_launcher";
 
-import { HandlerType, MultiDragHandler } from "./inventory/drag_handler/multi";
+import { HandlerMode } from "./inventory/drag_handler/base";
+import { MultiDragHandler } from "./inventory/drag_handler/multi";
 import { BasicShip, InventorySystem, NUM_TILE_SPRITES} from "./inventory/system";
 
 import { PowerSubSystem } from "./systems/power_subsystem";
@@ -121,15 +122,17 @@ export default class Engineering {
 
     public createComponentByName(componentType: COMPONENT_TYPES) {
         let newComponent: BaseComponent;
-        switch (name) {
+        switch (componentType) {
             case COMPONENT_TYPES.BASIC_GUN:
-                newComponent = new BasicGun(this.game, this.inventorySystem, new Point(0, 0));
+                newComponent = new BasicGun(this.game, this.inventorySystem);
                 break;
             case COMPONENT_TYPES.ENGINE:
-                newComponent = new Engine(this.game, this.inventorySystem, new Point(0, 0));
+                newComponent = new Engine(this.game, this.inventorySystem);
                 break;
+            default:
+                throw new Error(`unknown component type for createComponentByname: ${componentType}`);
         }
-        return this.addComponent(newComponent);
+        return this.addComponent(newComponent, null, true);
     }
 
     // PRIVATE METHODS
@@ -158,29 +161,41 @@ export default class Engineering {
     }
 
     private createStartingComponents(): void {
-        const firstGun = new BasicGun(this.game, this.inventorySystem, new Phaser.Point(0, 0));
-        this.addComponent(firstGun, null, true);
+        const firstGun = new BasicGun(this.game, this.inventorySystem);
+        this.addComponent(firstGun);
 
-        const secondGun = new BasicGun(this.game, this.inventorySystem, new Phaser.Point(0, 0));
-        this.addComponent(secondGun, null, true);
+        const secondGun = new BasicGun(this.game, this.inventorySystem);
+        this.addComponent(secondGun);
+
+        const firstPowerSource = new EnergyCell(this.game, this.inventorySystem);
+        this.addComponent(firstPowerSource, new Phaser.Point(4, 4));
+
+        const secondPowerSource = new EnergyCell(this.game, this.inventorySystem);
+        this.addComponent(secondPowerSource, new Phaser.Point(5, 4));
+
+        const firstEngine = new Engine(this.game, this.inventorySystem);
+        this.addComponent(firstEngine, new Phaser.Point(3, 6));
+
+        const secondEngine = new Engine(this.game, this.inventorySystem);
+        this.addComponent(secondEngine, new Phaser.Point(6, 6));
     }
 
     private onMouseDown() {
         const p = this.game.input.mousePointer;
-        if (this.bounds.contains(p.x, p.y) && p.rightButton.isDown) {
+        if (this.bounds.contains(p.x, p.y) && p.rightButton.isDown && !p.leftButton.isDown) {
             this.dragSwitchPressed(null, this.game.input.mousePointer);
         }
     }
 
     private dragSwitchPressed(_: any, p: Phaser.Pointer) {
         switch (this.dragHandler.handler) {
-            case HandlerType.MOVE: // transition to 'CONNECT'
+            case HandlerMode.MOVE: // transition to 'CONNECT'
                 this.dragBitmap.fill(0, 255, 0);
-                this.dragHandler.handler = HandlerType.CONNECT;
+                this.dragHandler.setHandler(HandlerMode.CONNECT);
                 break;
-            case HandlerType.CONNECT: // transition to 'MOVE'
+            case HandlerMode.CONNECT: // transition to 'MOVE'
                 this.dragBitmap.fill(255, 0, 0);
-                this.dragHandler.handler = HandlerType.MOVE;
+                this.dragHandler.setHandler(HandlerMode.MOVE);
                 break;
         }
     }

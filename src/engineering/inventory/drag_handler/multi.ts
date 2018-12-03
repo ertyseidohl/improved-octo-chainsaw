@@ -1,23 +1,19 @@
 // DEPENDENCIES
 import { BaseComponent } from "../base_component";
-import { BaseDragHandler } from "./base";
+import { BaseDragHandler, GlobalDragState, HandlerMode } from "./base";
 import { ConnectDragHandler } from "./connect";
 import { MoveDragHandler } from "./move";
 
 import { PowerSubSystem } from "../../systems/power_subsystem";
 import { InventorySystem } from "../system";
 
-// TYPES
-export enum HandlerType {
-    MOVE = 0,
-    CONNECT = 1,
-}
-
 export class MultiDragHandler extends BaseDragHandler {
 
     // PRIVATE DATA
-    private current: HandlerType;
+    private current: HandlerMode;
     private handlers: BaseDragHandler[] = [];
+
+    private globalDragState: GlobalDragState;
 
     // CREATORS
     constructor(
@@ -26,10 +22,12 @@ export class MultiDragHandler extends BaseDragHandler {
         powerSystem: PowerSubSystem,
     ) {
         super();
-        this.current = HandlerType.MOVE;
+        this.current = HandlerMode.MOVE;
 
-        this.handlers[HandlerType.MOVE] = new MoveDragHandler(inventorySystem);
-        this.handlers[HandlerType.CONNECT] = new ConnectDragHandler(
+        this.globalDragState = new GlobalDragState();
+
+        this.handlers[HandlerMode.MOVE] = new MoveDragHandler(inventorySystem);
+        this.handlers[HandlerMode.CONNECT] = new ConnectDragHandler(
             game,
             inventorySystem,
             powerSystem,
@@ -39,22 +37,30 @@ export class MultiDragHandler extends BaseDragHandler {
     // PUBLIC METHODS
     public dragStart(comp: BaseComponent): void {
         this.handlers[this.current].dragStart(comp);
+        this.globalDragState.currentlyActive = true;
     }
 
     public dragStop(comp: BaseComponent): void {
         this.handlers[this.current].dragStop(comp);
+        this.globalDragState.currentlyActive = false;
     }
 
     public dragUpdate(comp: BaseComponent): void {
         this.handlers[this.current].dragUpdate(comp);
     }
 
+    public setHandler(handler: HandlerMode): void {
+        if (!this.globalDragState.currentlyActive) {
+            this.handler = handler;
+        }
+    }
+
     // PUBLIC PROPERTIES
-    get handler(): HandlerType {
+    get handler(): HandlerMode {
         return this.current;
     }
 
-    set handler(value: HandlerType) {
+    set handler(value: HandlerMode) {
         this.current = value;
     }
 
