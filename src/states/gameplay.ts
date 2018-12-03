@@ -118,6 +118,8 @@ export default class Gameplay extends Phaser.State {
 
         this.game.load.image("base_station", "../assets/base_station.png");
 
+        this.game.load.spritesheet("drag_wire", "../assets/drag_wire.png", 32, 256, 2);
+
         this.game.load.image("enemy", "../assets/enemy_1.png");
         this.game.load.spritesheet("boss_enemy", "../assets/boss_enemy.png", 128, 128, 3);
         this.game.load.spritesheet("dummy_drone", "../assets/dummy_drone.png", 64, 64, 3);
@@ -707,7 +709,7 @@ export default class Gameplay extends Phaser.State {
                 this.game.sound.play("explosion");
             }
             const powerupType: COMPONENT_TYPES | null = enemySprite.getPowerupToSpawn();
-            if (powerupType) {
+            if (powerupType !== null) {
                 this.spawnPowerup(enemy, powerupType);
             }
         }

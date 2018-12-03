@@ -73,6 +73,8 @@ export default class Engineering {
 
     public bounds: Phaser.Rectangle;
 
+    private dragSwitch: Phaser.Sprite;
+
     private points: number;
     private pointsText: Phaser.Text;
 
@@ -84,7 +86,6 @@ export default class Engineering {
 
     private playerHealth: number;
 
-    private dragBitmap: Phaser.BitmapData;
     private dragHandler: MultiDragHandler;
     private inventorySystem: InventorySystem;
     private powerSystem: PowerSubSystem;
@@ -138,15 +139,14 @@ export default class Engineering {
 
         // button to switch drag modes
         const corner = this.bounds.topRight;
-        this.dragBitmap = this.game.add.bitmapData(32, 32);
-        this.dragBitmap.fill(255, 0, 0);
-        const dragSwitch = this.game.add.sprite(
+        this.dragSwitch = this.game.add.sprite(
             corner.x - 32,
             corner.y,
-            this.dragBitmap,
+            "drag_wire",
+            0,
         );
-        dragSwitch.inputEnabled = true;
-        dragSwitch.events.onInputDown.add(this.dragSwitchPressed, this);
+        this.dragSwitch.inputEnabled = true;
+        this.dragSwitch.events.onInputDown.add(this.dragSwitchPressed, this);
 
         this.game.add.text(
             this.game.width / 2 + 10,
@@ -359,7 +359,7 @@ export default class Engineering {
     private dragSwitchPressed(_: any, p: Phaser.Pointer) {
         switch (this.dragHandler.handler) {
             case HandlerMode.MOVE: // transition to 'CONNECT'
-                this.dragBitmap.fill(0, 255, 0);
+                this.dragSwitch.frame = 1;
                 this.dragHandler.setHandler(HandlerMode.CONNECT);
 
                 this.powerHandleGroup = this.game.add.group();
@@ -376,7 +376,7 @@ export default class Engineering {
 
                 break;
             case HandlerMode.CONNECT: // transition to 'MOVE'
-                this.dragBitmap.fill(255, 0, 0);
+                this.dragSwitch.frame = 0;
                 this.dragHandler.setHandler(HandlerMode.MOVE);
 
                 for (const c of this.inventorySystem.getAllComponents()) {
