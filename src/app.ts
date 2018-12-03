@@ -8,6 +8,7 @@ import "phaser";
 import GameOver from "./states/gameover";
 import Gameplay from "./states/gameplay";
 import Splash from "./states/splash";
+import Splash2 from "./states/splash_2";
 import Startup from "./states/startup";
 import YouWin from "./states/youwin";
 
@@ -20,6 +21,7 @@ class App extends Phaser.Game {
 
         this.state.add("startup", Startup);
         this.state.add("splash", Splash);
+        this.state.add("splash_2", Splash2);
         this.state.add("gameplay", Gameplay);
         this.state.add("youwin", YouWin);
         this.state.add("gameover", GameOver);

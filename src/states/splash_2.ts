@@ -1,4 +1,4 @@
-export default class Splash extends Phaser.State {
+export default class Splash2 extends Phaser.State {
 
     // DATA
     private enter: Phaser.Key;
@@ -6,12 +6,12 @@ export default class Splash extends Phaser.State {
     private text: Phaser.Text;
 
     public preload(): void {
-        this.game.load.image("splash", "../assets/splash.png");
+        this.game.load.image("splash_2", "../assets/splash_2.png");
     }
 
     // METHODS
     public create(): void {
-        this.game.add.image(0, 0, "splash");
+        this.game.add.image(0, 0, "splash_2");
         this.enter = this.input.keyboard.addKey(Phaser.KeyCode.ENTER);
         this.enter.onDown.addOnce(this.startGameplay, this);
 
@@ -19,7 +19,7 @@ export default class Splash extends Phaser.State {
 
     // PRIVATE METHODS
     private startGameplay(): void {
-        this.state.start("splash_2");
+        this.state.start("gameplay");
     }
 
 }
