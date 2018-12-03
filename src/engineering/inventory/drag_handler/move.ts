@@ -45,6 +45,7 @@ export class MoveDragHandler extends BaseDragHandler {
 
     // PUBLIC METHODS
     public dragStart(comp: BaseComponent): void {
+        // TBD - prevent draggin by right click
         const state = this.getState(comp);
         state.state = "draggingOkay";
         comp.bringToTop();

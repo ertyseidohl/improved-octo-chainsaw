@@ -1,13 +1,26 @@
-// export abstract class Powerup extends Phaser.Sprite {
-//     public abstract getComponentName(): string;
-// }
+import { COMPONENT_TYPES } from "../constants";
 
-// export class BasicGunPowerup extends Powerup {
-//     constructor(game: Phaser.Game, x: number, y: number) {
-//         super(game, x, y, "basic_gun_powerup");
-//     }
+export abstract class Powerup extends Phaser.Sprite {
+    public abstract getComponentName(): string;
+}
 
-//     public getComponentName(): string {
-//         return "basic_gun";
-//     }
-// }
+export class BasicGunPowerup extends Powerup {
+    constructor(game: Phaser.Game, x: number, y: number) {
+        super(game, x, y, "basic_gun_powerup");
+    }
+
+    public getComponentName(): string {
+        return COMPONENT_TYPES.BASIC_GUN;
+    }
+}
+
+
+export class EnginePowerup extends Powerup {
+    constructor(game: Phaser.Game, x: number, y: number) {
+        super(game, x, y, "engine_1_powerup");
+    }
+
+    public getComponentName(): string {
+        return COMPONENT_TYPES.ENGINE;
+    }
+}

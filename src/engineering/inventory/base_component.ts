@@ -24,7 +24,8 @@ export abstract class BaseComponent extends Phaser.Sprite {
     constructor(game: Phaser.Game, inventorySystem: InventorySystem,
                 key: string,
                 tileWidth: number, tileHeight: number,
-                position: Phaser.Point) {
+                position: Phaser.Point,
+    ) {
         super(game, position.x, position.y, key, 0);
 
         this.inventorySystem = inventorySystem;
