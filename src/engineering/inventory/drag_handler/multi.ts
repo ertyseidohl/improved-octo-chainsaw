@@ -5,6 +5,7 @@ import { ConnectDragHandler } from "./connect";
 
 import { InventorySystem } from "../system";
 import { MoveDragHandler } from "./move";
+import { PowerSubSystem } from "../power_subsystem";
 
 // TYPES
 export enum HandlerType {
@@ -19,12 +20,20 @@ export class MultiDragHandler extends BaseDragHandler {
     private handlers: BaseDragHandler[] = [];
 
     // CREATORS
-    constructor(game: Phaser.Game, inventorySystem: InventorySystem) {
+    constructor(
+        game: Phaser.Game,
+        inventorySystem: InventorySystem,
+        powerSystem: PowerSubSystem,
+    ) {
         super();
         this.current = HandlerType.MOVE;
 
         this.handlers[HandlerType.MOVE] = new MoveDragHandler(inventorySystem);
-        this.handlers[HandlerType.CONNECT] = new ConnectDragHandler(game, inventorySystem);
+        this.handlers[HandlerType.CONNECT] = new ConnectDragHandler(
+            game,
+            inventorySystem,
+            powerSystem,
+        );
     }
 
     // PUBLIC METHODS

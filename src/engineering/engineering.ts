@@ -46,12 +46,17 @@ export default class Engineering {
             32, 32,
             BasicShip,
         );
-        this.dragHandler = new MultiDragHandler(this.game, this.inventorySystem);
-        this.inventorySystem.dragHandler = this.dragHandler;
 
         this.powerSystem = new PowerSubSystem();
 
         this.componentGroup = this.game.add.group();
+        this.dragHandler = new MultiDragHandler(
+            this.game,
+            this.inventorySystem,
+            this.powerSystem,
+        );
+        this.inventorySystem.dragHandler = this.dragHandler;
+
         this.createStartingComponents();
 
         // button to switch drag modes
