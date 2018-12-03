@@ -14,16 +14,15 @@ interface PointLine {
 
 abstract class Wire extends Phaser.Sprite {
 
+    public color: Phaser.Color;
     private points: Phaser.Point[];
 
     private lastOrigin: Phaser.Point;
     private lastTerminal: Phaser.Point;
 
-    private color: Phaser.Color;
-
-    constructor(game: Phaser.Game) {
+    constructor(game: Phaser.Game, color: Phaser.Color) {
         super(game, 700, 400, "");
-        this.color = COLORS[Math.floor(Math.random() * COLORS.length)];
+        this.color = color || COLORS[Math.floor(Math.random() * COLORS.length)];
         this.game.add.existing(this);
         this.bringToTop();
         this.renderable = true;
@@ -138,20 +137,50 @@ export class ConnectedWire extends Wire {
     private origin: BaseComponent;
     private terminal: BaseComponent;
 
-    constructor(game: Phaser.Game, originComponent: BaseComponent, terminalComponent: BaseComponent) {
-        super(game);
+    private originPadIndex: number;
+    private terminalPadIndex: number;
+
+    constructor(game: Phaser.Game, originComponent: BaseComponent, originPadIndex: number,
+                terminalComponent: BaseComponent, terminalPadIndex: number, color?: Phaser.Color) {
+        super(game, color);
         this.origin = originComponent;
         this.terminal = terminalComponent;
+
+        this.originPadIndex = originPadIndex;
+        this.terminalPadIndex = terminalPadIndex;
     }
 
     public getOriginPoint(): Phaser.Point {
-        const pad = this.origin.getPowerPads();
-
+        const pad = this.origin.getPowerPads(this.originPadIndex);
         return pad;
     }
 
     public getTerminalPoint(): Phaser.Point {
-        const pad = this.terminal.getPowerPads();
+        const pad = this.terminal.getPowerPads(this.terminalPadIndex);
         return pad;
+    }
+}
+
+export class DraggingWire extends Wire {
+
+    private origin: BaseComponent;
+    private handle: Phaser.Sprite;
+
+    constructor(game: Phaser.Game, originComponet: BaseComponent, handle: Phaser.Sprite) {
+        super(game, null);
+        this.origin = originComponet;
+        this.handle = handle;
+    }
+
+    public getOriginPoint(): Phaser.Point {
+        const pad = this.origin.getPowerHandlePoint();
+        return pad;
+    }
+
+    public getTerminalPoint(): Phaser.Point {
+        return new Phaser.Point(
+            this.handle.x,
+            this.handle.y,
+        );
     }
 }

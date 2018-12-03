@@ -36,10 +36,10 @@ export class BasicGun extends BaseComponent {
         return 1;
     }
 
-    public getPowerPads(): Phaser.Point {
+    public getPowerPads(index: number): Phaser.Point {
         return new Phaser.Point(
-            this.x + 16,
-            this.y + 72,
+            this.x + this.powerPadsOffsets[index].x,
+            this.y + 64 + this.powerPadsOffsets[index].y,
         );
     }
 

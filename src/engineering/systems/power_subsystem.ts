@@ -2,7 +2,7 @@ import { BaseComponent } from "../inventory/base_component";
 
 abstract class SubSystem {
     public abstract detach(source: BaseComponent, sink: BaseComponent): void;
-    public abstract attach(source: BaseComponent, sink: BaseComponent): void;
+    public abstract attach(source: BaseComponent, sink: BaseComponent, plugIndex: number): void;
     public abstract updateAllComponents(): void;
 }
 
@@ -19,7 +19,7 @@ export class PowerSubSystem extends SubSystem {
         this.sinkCount = new Map<BaseComponent, number>();
     }
 
-    public attach(source: BaseComponent, sink: BaseComponent): void {
+    public attach(source: BaseComponent, sink: BaseComponent, plugIndex: number): void {
         let sinkSet = this.sourceToSinkMap.get(source);
         if (!sinkSet) {
             sinkSet = new Set<BaseComponent>();
@@ -36,6 +36,9 @@ export class PowerSubSystem extends SubSystem {
 
         const count = this.sinkCount.get(sink) || 0;
         this.sinkCount.set(sink, count + 1);
+
+        source.plugIn(plugIndex);
+        sink.plugIn(plugIndex);
     }
 
     public detach(source: BaseComponent, sink: BaseComponent, n?: number): void {

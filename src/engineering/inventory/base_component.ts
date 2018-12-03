@@ -1,8 +1,6 @@
 import { ComponentState, StateConfig } from "./component_state";
 import { Constraints, InventorySystem } from "./system";
 
-import { Pointer } from "phaser-ce";
-
 export enum PowerType {
     None,
     Source,
@@ -15,6 +13,13 @@ export abstract class BaseComponent extends Phaser.Sprite {
     public tileHeight: number;
 
     public onShip: boolean;
+
+    protected powerPadsOffsets = [
+        new Phaser.Point(12, 12),
+        new Phaser.Point(18, 14),
+        new Phaser.Point(14, 18),
+        new Phaser.Point(20, 20),
+    ];
 
     private inventorySystem: InventorySystem;
 
@@ -54,6 +59,16 @@ export abstract class BaseComponent extends Phaser.Sprite {
 
     public abstract getDescription(): string[];
     public abstract getStateConfig(): StateConfig;
+
+    public lockDrag(): void {
+        this.input.disableDrag();
+        this.inputEnabled = false;
+    }
+
+    public unlockDrag(): void {
+        this.inputEnabled = true;
+        this.input.enableDrag();
+    }
 
     public getPowerType(): PowerType {
         if (this.getStateConfig().powerConsumer) {
@@ -96,8 +111,19 @@ export abstract class BaseComponent extends Phaser.Sprite {
         return 0;
     }
 
-    public getPowerPads(): Phaser.Point {
+    public getPowerHandlePoint(): Phaser.Point {
         return null;
+    }
+
+    public getNextPowerPadIndex(): number {
+        return -1;
+    }
+    public getPowerPads(index: number): Phaser.Point {
+        return null;
+    }
+
+    public plugIn(index): void {
+        // noop
     }
 
     private onDragStart(game: any, pointer: Phaser.Pointer): void {
