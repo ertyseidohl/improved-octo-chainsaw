@@ -19,7 +19,7 @@ export class BasicGun extends BaseComponent {
         return {
             powerConsumer: {
                 powerLoad: 2,
-                minPowerDraw: 1,
+                minPowerDraw: 1.5,
             },
             powerSource: null,
             weight: 6,
@@ -33,7 +33,11 @@ export class BasicGun extends BaseComponent {
     }
 
     public getGuns(): number {
+<<<<<<< HEAD
         return 1;
+=======
+        return Math.floor(this.getPower() / 2);
+>>>>>>> 599f0d2... more challenging basic gun
     }
 
     public getPowerPads(index: number): Phaser.Point {
