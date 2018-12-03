@@ -14,16 +14,15 @@ interface PointLine {
 
 abstract class Wire extends Phaser.Sprite {
 
+    public color: Phaser.Color;
     private points: Phaser.Point[];
 
     private lastOrigin: Phaser.Point;
     private lastTerminal: Phaser.Point;
 
-    private color: Phaser.Color;
-
-    constructor(game: Phaser.Game) {
+    constructor(game: Phaser.Game, color: Phaser.Color) {
         super(game, 700, 400, "");
-        this.color = COLORS[Math.floor(Math.random() * COLORS.length)];
+        this.color = color || COLORS[Math.floor(Math.random() * COLORS.length)];
         this.game.add.existing(this);
         this.bringToTop();
         this.renderable = true;
@@ -142,8 +141,8 @@ export class ConnectedWire extends Wire {
     private terminalPadIndex: number;
 
     constructor(game: Phaser.Game, originComponent: BaseComponent, originPadIndex: number,
-                terminalComponent: BaseComponent, terminalPadIndex: number) {
-        super(game);
+                terminalComponent: BaseComponent, terminalPadIndex: number, color?: Phaser.Color) {
+        super(game, color);
         this.origin = originComponent;
         this.terminal = terminalComponent;
 
@@ -168,7 +167,7 @@ export class DraggingWire extends Wire {
     private handle: Phaser.Sprite;
 
     constructor(game: Phaser.Game, originComponet: BaseComponent, handle: Phaser.Sprite) {
-        super(game);
+        super(game, null);
         this.origin = originComponet;
         this.handle = handle;
     }

@@ -57,6 +57,7 @@ export default class Engineering {
 
     private componentGroup: Phaser.Group;
     private powerHandleGroup: Phaser.Group;
+    private wireGroup: Phaser.Group;
 
     private mouseInBounds: boolean;
 
@@ -89,6 +90,7 @@ export default class Engineering {
 
         this.componentGroup = this.game.add.group();
         this.powerHandleGroup = this.game.add.group();
+        this.wireGroup = this.game.add.group();
 
         this.dragHandler = new MultiDragHandler(
             this.game,
@@ -207,27 +209,29 @@ export default class Engineering {
                 this.dragBitmap.fill(0, 255, 0);
                 this.dragHandler.setHandler(HandlerMode.CONNECT);
 
+                this.powerHandleGroup = this.game.add.group();
 
                 for (const c of this.inventorySystem.getAllComponents()) {
                     c.lockDrag();
                     if (c.getPowerType() === PowerType.Source && c.getNextPowerPadIndex() >= 0) {
-                        const pad = new StartPad(this.game, c, this.inventorySystem);
+                        const pad = new StartPad(this.game, c, this.inventorySystem, this.powerSystem, this.wireGroup);
                         this.powerHandleGroup.add(pad);
                     }
                 }
 
+                this.wireGroup.visible = true;
 
                 break;
             case HandlerMode.CONNECT: // transition to 'MOVE'
                 this.dragBitmap.fill(255, 0, 0);
                 this.dragHandler.setHandler(HandlerMode.MOVE);
 
-                this.powerHandleGroup = this.game.add.group();
-
                 for (const c of this.inventorySystem.getAllComponents()) {
                     c.unlockDrag();
-                    this.powerHandleGroup.destroy();
                 }
+
+                this.powerHandleGroup.destroy();
+                this.wireGroup.visible = false;
 
                 break;
         }

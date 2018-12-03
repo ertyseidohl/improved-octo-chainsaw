@@ -122,6 +122,10 @@ export abstract class BaseComponent extends Phaser.Sprite {
         return null;
     }
 
+    public plugIn(index): void {
+        // noop
+    }
+
     private onDragStart(game: any, pointer: Phaser.Pointer): void {
         this.inventorySystem.dragHandler.dragStart(this);
     }

@@ -4,13 +4,16 @@ import { InventorySystem } from "./system";
 
 export class EnergyCell extends BaseComponent {
 
-    private powerPadsIndexes = [0, 1, 2, 3];
+    private powerPadsIndexes: Map<number, boolean>;
+    private powerPadsUsed = 0;
 
     constructor(game: Phaser.Game, inventorySystem: InventorySystem, position?: Phaser.Point) {
         super(game, inventorySystem, "energy_cell", 1, 1, position);
 
         const energyCellAnimation = this.animations.add("zap", [1, 2, 3, 4]);
         energyCellAnimation.play(20, true);
+
+        this.powerPadsIndexes = this.generatePlugs();
     }
 
     public getStateConfig(): StateConfig {
@@ -29,16 +32,17 @@ export class EnergyCell extends BaseComponent {
         ];
     }
 
+    public plugIn(index: number) {
+        this.powerPadsUsed += 1;
+        this.powerPadsIndexes.set(index, true);
+    }
+
     public getNextPowerPadIndex(): number {
-        if (this.powerPadsIndexes.length > 0) {
-            return this.powerPadsIndexes[0];
-        } else {
-            return -1;
-        }
+        return this.first(this.powerPadsIndexes);
     }
 
     public getPowerPads(index: number): Phaser.Point {
-        if (this.powerPadsIndexes.length <= 0) {
+        if (index >= 4) {
             return null;
         }
         return new Phaser.Point(
@@ -52,6 +56,23 @@ export class EnergyCell extends BaseComponent {
             this.x + 15,
             this.y + 4,
         );
+    }
+
+    private generatePlugs(): Map<number, boolean> {
+        const plugs = new Map<number, boolean>();
+        for (let i = 0; i < 4; i += 1) {
+            plugs.set(i, false);
+        }
+        return plugs;
+    }
+
+    private first(indexes: Map<number, boolean>): number {
+        for (let i = 0; i < indexes.size; i += 1) {
+            if (indexes.get(i) === false) {
+                return i;
+            }
+        }
+        return -1;
     }
 
 }
