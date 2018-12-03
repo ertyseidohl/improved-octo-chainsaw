@@ -4,8 +4,8 @@ import BaseEnemy from "./base_enemy";
 const STOP_POINT = 300;
 
 export default class DummyDrone extends BaseEnemy {
-    constructor(game: Phaser.Game, x: number, y: number) {
-        super(game, x, y, "dummy_drone");
+    constructor(game: Phaser.Game, x: number, y: number, bulletsGroup: Phaser.Group) {
+        super(game, x, y, "dummy_drone", bulletsGroup);
 
         const glow: Phaser.Animation = this.animations.add("rotate", [0, 1, 2]);
         glow.play(5, true);

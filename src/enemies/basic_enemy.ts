@@ -2,8 +2,8 @@ import { COMPONENT_TYPES } from "../constants";
 import BaseEnemy from "./base_enemy";
 
 export default class BasicEnemy extends BaseEnemy {
-    constructor(game: Phaser.Game, x: number, y: number) {
-        super(game, x, y, "enemy");
+    constructor(game: Phaser.Game, x: number, y: number, bulletsGroup: Phaser.Group) {
+        super(game, x, y, "enemy", bulletsGroup);
     }
 
     public getPowerupToSpawn(): COMPONENT_TYPES | null {

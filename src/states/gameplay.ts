@@ -86,8 +86,7 @@ export default class Gameplay extends Phaser.State {
 
     private levelManager: LevelManager;
 
-    // level stuff
-    private level: number;
+    private bulletsGroup: Phaser.Group;
 
     // groups
     private groupExplosions: Phaser.Group;
@@ -258,6 +257,15 @@ export default class Gameplay extends Phaser.State {
         // powerups
         this.groupPowerups = this.game.add.group();
 
+        // bullets
+        this.bulletsGroup = this.game.add.group();
+        this.bulletsGroup.createMultiple(64, "enemyBullet");
+        this.game.physics.p2.enable(this.bulletsGroup);
+        this.bulletsGroup.setAll("outOfBoundsKill", true);
+        this.bulletsGroup.setAll("checkWorldBounds", true);
+        this.bulletsGroup.setAll("body.collideWorldBounds", false);
+        this.bulletsGroup.setAll("body.fixedRotation", true);
+
         // basic enemies
         this.generateEnemyGroup(30, ENEMY_TYPES.BASIC);
         this.generateEnemyGroup(2, ENEMY_TYPES.BOSS);
@@ -391,16 +399,16 @@ export default class Gameplay extends Phaser.State {
             let newEnemy: BaseEnemy;
             switch (enemyType) {
                 case ENEMY_TYPES.BASIC:
-                    newEnemy = new BasicEnemy(this.game, Math.random(), 0);
+                    newEnemy = new BasicEnemy(this.game, Math.random(), 0, this.bulletsGroup);
                     break;
                 case ENEMY_TYPES.BOSS:
-                    newEnemy = new BossEnemy(this.game, Math.random(), 0);
+                    newEnemy = new BossEnemy(this.game, Math.random(), 0, this.bulletsGroup);
                     break;
                 case ENEMY_TYPES.DUMMY_DRONE:
-                    newEnemy = new DummyDrone(this.game, Math.random(), 0);
+                    newEnemy = new DummyDrone(this.game, Math.random(), 0, this.bulletsGroup);
                     break;
                 case ENEMY_TYPES.BOMB:
-                    newEnemy = new BombEnemy(this.game, Math.random(), 0);
+                    newEnemy = new BombEnemy(this.game, Math.random(), 0, this.bulletsGroup);
                     break;
             }
             newEnemy.setBulletsCollisionGroup(this.bulletCollisionGroup);

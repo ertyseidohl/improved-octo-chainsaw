@@ -9,8 +9,8 @@ export default class BombEnemy extends BaseEnemy {
 
     private movingBackAndForth: boolean = false;
 
-    constructor(game: Phaser.Game, x: number, y: number) {
-        super(game, x, y, "bomb_enemy");
+    constructor(game: Phaser.Game, x: number, y: number, bulletsGroup: Phaser.Group) {
+        super(game, x, y, "bomb_enemy", bulletsGroup);
     }
 
     public getPowerupToSpawn(): COMPONENT_TYPES | null {
@@ -38,8 +38,8 @@ export default class BombEnemy extends BaseEnemy {
                 this.enemyBody.velocity.x += 200;
             }
             this.enemyBody.velocity.y = 0;
-            if (this.game.time.now >= this.actionTime) {
-                this.actionTime = this.game.time.now +
+            if (this.game.time.now >= this.shootTime) {
+                this.shootTime = this.game.time.now +
                         this.game.rnd.integerInRange(this.actionTimeMin, this.actionTimeMax);
 
                 this.shoot();

@@ -3,11 +3,16 @@ import { Powerup } from "../player/powerup";
 import BaseEnemy from "./base_enemy";
 
 export default class BossEnemy extends BaseEnemy {
+    public maxHealth: number = 30;
+
     protected speedMin: number = 100;
     protected speedMax: number = 300;
 
-    constructor(game: Phaser.Game, x: number, y: number) {
-        super(game, x, y, "boss_enemy");
+    protected shootTimeMin = 600;
+    protected shootTimeMax = 600;
+
+    constructor(game: Phaser.Game, x: number, y: number, bulletsGroup: Phaser.Group) {
+        super(game, x, y, "boss_enemy", bulletsGroup);
 
         const glow: Phaser.Animation = this.animations.add("glow", [0, 1, 2]);
         glow.play(5, true);
@@ -21,7 +26,6 @@ export default class BossEnemy extends BaseEnemy {
         if (!this.alive) {
             return;
         }
-        super.update();
 
         if (!this.isInWindow()) {
             this.enemyBody.velocity.y = this.speedMin;
@@ -46,6 +50,82 @@ export default class BossEnemy extends BaseEnemy {
                 speed = this.game.rnd.integerInRange(this.speedMin, this.speedMax);
                 this.enemyBody.velocity.y = speed * direction;
             }
+
+            this.bounceOffWalls();
+
+            if (this.game.time.now >= this.shootTime) {
+                this.shootTime = this.game.time.now + this.game.rnd.integerInRange(
+                    this.shootTimeMin, this.shootTimeMax);
+                this.shoot();
+            }
+        }
+    }
+
+    protected shoot(): void {
+        let bullet;
+
+        bullet = this.bulletsGroup.getFirstExists(false);
+        if (bullet) {
+            const bulletBody: Phaser.Physics.P2.Body = bullet.body;
+            bullet.reset(this.x, this.y + 20);
+            bulletBody.velocity.x = this.bulletSpeed;
+            bulletBody.velocity.y = this.bulletSpeed;
+        }
+
+        bullet = this.bulletsGroup.getFirstExists(false);
+        if (bullet) {
+            const bulletBody: Phaser.Physics.P2.Body = bullet.body;
+            bullet.reset(this.x, this.y + 20);
+            bulletBody.velocity.x = 0;
+            bulletBody.velocity.y = this.bulletSpeed;
+        }
+
+        bullet = this.bulletsGroup.getFirstExists(false);
+        if (bullet) {
+            const bulletBody: Phaser.Physics.P2.Body = bullet.body;
+            bullet.reset(this.x, this.y + 20);
+            bulletBody.velocity.x = -this.bulletSpeed;
+            bulletBody.velocity.y = this.bulletSpeed;
+        }
+
+        bullet = this.bulletsGroup.getFirstExists(false);
+        if (bullet) {
+            const bulletBody: Phaser.Physics.P2.Body = bullet.body;
+            bullet.reset(this.x, this.y + 20);
+            bulletBody.velocity.x = -this.bulletSpeed;
+            bulletBody.velocity.y = 0;
+        }
+
+        bullet = this.bulletsGroup.getFirstExists(false);
+        if (bullet) {
+            const bulletBody: Phaser.Physics.P2.Body = bullet.body;
+            bullet.reset(this.x, this.y + 20);
+            bulletBody.velocity.x = -this.bulletSpeed;
+            bulletBody.velocity.y = -this.bulletSpeed;
+        }
+
+        bullet = this.bulletsGroup.getFirstExists(false);
+        if (bullet) {
+            const bulletBody: Phaser.Physics.P2.Body = bullet.body;
+            bullet.reset(this.x, this.y + 20);
+            bulletBody.velocity.x = 0;
+            bulletBody.velocity.y = -this.bulletSpeed;
+        }
+
+        bullet = this.bulletsGroup.getFirstExists(false);
+        if (bullet) {
+            const bulletBody: Phaser.Physics.P2.Body = bullet.body;
+            bullet.reset(this.x, this.y + 20);
+            bulletBody.velocity.x = this.bulletSpeed;
+            bulletBody.velocity.y = -this.bulletSpeed;
+        }
+
+        bullet = this.bulletsGroup.getFirstExists(false);
+        if (bullet) {
+            const bulletBody: Phaser.Physics.P2.Body = bullet.body;
+            bullet.reset(this.x, this.y + 20);
+            bulletBody.velocity.x = this.bulletSpeed;
+            bulletBody.velocity.y = 0;
         }
     }
 }
