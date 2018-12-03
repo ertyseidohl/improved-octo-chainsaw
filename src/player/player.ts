@@ -4,7 +4,26 @@ const PLAYER_SPEED: number = 200; // EVAN wanted this faster
 const PLAYER_SCALE: number = 2;
 
 const BULLET_SPEED: number = 700;
+
+
+// HUD
+const HEALTH_DISPLAY_Y: number = 20;
+const HEALTH_DISPLAY_X: number = 80;
 const MAX_HEALTH: number = 4;
+
+const ENGINE_DISPLAY_Y: number = 60;
+const ENGINE_DISPLAY_X: number = 85;
+const MAX_ENGINE: number = 10;
+
+const WEIGHT_DISPLAY_Y: number = 100;
+const WEIGHT_DISPLAY_X: number = 85;
+const MAX_WEIGHT: number = 10;
+
+const HUD_TEXT_STYLE: Phaser.PhaserTextStyle = {
+    fill: "white",
+    font: "pixelsix",
+    fontSize: 20,
+};
 
 export default class Player extends Phaser.Sprite {
     public playerBody: Phaser.Physics.P2.Body;
@@ -21,6 +40,8 @@ export default class Player extends Phaser.Sprite {
     private shotCooldown: number = 12; // using frames
     private fireTime: number = 0;
     private healthIcons: Phaser.Sprite[];
+    private engineIcons: Phaser.Sprite[];
+    private weightIcons: Phaser.Sprite[];
 
     // from engineering
     private speedModifier: number = 0;
@@ -36,6 +57,8 @@ export default class Player extends Phaser.Sprite {
         this.maxHealth = MAX_HEALTH;
         this.health = this.maxHealth;
         this.healthIcons = [];
+        this.engineIcons = [];
+        this.weightIcons = [];
 
         // input
         this.keyUp = this.game.input.keyboard.addKey(Phaser.Keyboard.UP);
@@ -53,14 +76,58 @@ export default class Player extends Phaser.Sprite {
         this.bulletsGroup.setAll("body.collideWorldBounds", false);
         this.bulletsGroup.setAll("body.fixedRotation", true);
 
+        this.game.add.text(
+            this.game.width / 2 + 10,
+            HEALTH_DISPLAY_Y,
+            "Health: ",
+            HUD_TEXT_STYLE,
+        );
+
         for (let i = 0; i < MAX_HEALTH; i++) {
-            this.healthIcons[i] =
-            this.game.add.sprite(this.game.width / 2 + 5, this.game.height - 7 * i - 30, "health");
+            this.healthIcons[i] = this.game.add.sprite(
+                this.game.width / 2 + (5 * i) + HEALTH_DISPLAY_X,
+                HEALTH_DISPLAY_Y,
+                "health",
+            );
+        }
+
+        this.game.add.text(
+            this.game.width / 2 + 10,
+            ENGINE_DISPLAY_Y,
+            "Engine: ",
+            HUD_TEXT_STYLE,
+        );
+
+        for (let i = 0; i < MAX_ENGINE; i++) {
+            this.engineIcons[i] = this.game.add.sprite(
+                this.game.width / 2 + (5 * i) + ENGINE_DISPLAY_X,
+                ENGINE_DISPLAY_Y,
+                "engine",
+            );
+        }
+
+        this.game.add.text(
+            this.game.width / 2 + 10,
+            WEIGHT_DISPLAY_Y,
+            "Weight: ",
+            HUD_TEXT_STYLE,
+        );
+
+        for (let i = 0; i < MAX_ENGINE; i++) {
+            this.weightIcons[i] = this.game.add.sprite(
+                this.game.width / 2 + (5 * i) + WEIGHT_DISPLAY_X,
+                WEIGHT_DISPLAY_Y,
+                "weight",
+            );
         }
     }
 
     public getUpdateMessage(updateMessage: ShipUpdateMessage): void {
         this.speedModifier = updateMessage.topSpeed;
+        for (let i: number = 0; i < MAX_ENGINE; i++)  {
+            this.engineIcons[i].visible = i < this.speedModifier;
+        }
+
         this.gunCount = updateMessage.guns;
     }
 
@@ -110,11 +177,7 @@ export default class Player extends Phaser.Sprite {
         this.fireTime--;
 
         for (let i = 0; i < MAX_HEALTH; i++) {
-            if (this.health > i) {
-                this.healthIcons[i].alive = true;
-            } else {
-                this.healthIcons[i].kill();
-            }
+            this.healthIcons[i].visible = i < this.health;
         }
     }
 

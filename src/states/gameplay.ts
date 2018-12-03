@@ -99,6 +99,8 @@ export default class Startup extends Phaser.State {
         this.game.load.image("enemyBullet", "../assets/enemy-bullet.png");
         this.game.load.image("powerup", "../assets/powerup.png");
         this.game.load.image("health", "../assets/powerup.png");
+        this.game.load.image("engine", "../assets/powerup.png");
+        this.game.load.image("weight", "../assets/powerup.png");
 
         this.game.load.spritesheet("prince", "../assets/prince.png", 128, 128, 4);
         this.game.load.spritesheet("explosion", "../assets/explosion.png", 64, 64, 6);
