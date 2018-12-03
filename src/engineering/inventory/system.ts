@@ -23,29 +23,32 @@ export enum Constraints {
     DOUBLE_BACK,
 }
 
-interface Ship {
-    map: BaseComponentOrEmpty[][];
-    cargoHoldYStart: number;
+abstract class Ship {
+    public map: BaseComponentOrEmpty[][];
+    public cargoHoldYStart: number;
 }
 
-export const BasicShip: Ship = {
-    map: [
-        [0, 0, 0, 0, null, null, 0, 0, 0, 0],
-        [0, 0, 0, null, null, null, null, 0, 0, 0],
-        [0, 0, 0, null, null, null, null, 0, 0, 0],
-        [0, 0, 0, null, null, null, null, 0, 0, 0],
-        [0, 0, null, null, null, null, null, null, 0, 0],
-        [0, null, null, null, null, null, null, null, null, 0],
-        [null, null, null, null, null, null, null, null, null, null],
-        [0, 0, null, null, 0, 0, null, null, 0, 0],
-        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        [0, null, null, null, null, null, null, null, null, 0],
-        [null, null, null, null, null, null, null, null, null, null],
-        [null, null, null, null, null, null, null, null, null, null],
-        [0, null, null, null, null, null, null, null, null, 0],
-    ],
-    cargoHoldYStart: 8,
-};
+export class BasicShip extends Ship {
+    constructor() {
+        super();
+        this.map =  [
+            [0, 0, 0, 0, null, null, 0, 0, 0, 0],
+            [0, 0, 0, null, null, null, null, 0, 0, 0],
+            [0, 0, 0, null, null, null, null, 0, 0, 0],
+            [0, 0, 0, null, null, null, null, 0, 0, 0],
+            [0, 0, null, null, null, null, null, null, 0, 0],
+            [0, null, null, null, null, null, null, null, null, 0],
+            [null, null, null, null, null, null, null, null, null, null],
+            [0, 0, null, null, 0, 0, null, null, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, null, null, null, null, null, null, null, null, 0],
+            [null, null, null, null, null, null, null, null, null, null],
+            [null, null, null, null, null, null, null, null, null, null],
+            [0, null, null, null, null, null, null, null, null, 0],
+        ];
+        this.cargoHoldYStart = 8;
+    }
+}
 
 class Index {
     public x: number;

@@ -33,12 +33,28 @@ export interface ShipUpdateMessage {
 
 export default class Engineering {
 
+    public static preload(game: Phaser.Game): void {
+        game.load.spritesheet("engine_1", "../assets/engine_1.png", 32, 64, 5);
+
+        game.load.spritesheet("gun_1", "../assets/gun_1.png", 32, 32 * 3, 5);
+        game.load.spritesheet("gun_small", "../assets/gun_small.png", 32, 32 * 2, 5);
+        game.load.spritesheet("energy_cell", "../assets/energy_cell.png", 32, 32, 5);
+        game.load.spritesheet("energy_cell_2", "../assets/energy_cell_2.png", 32, 32, 5);
+        game.load.spritesheet("shield_generator", "../assets/shield_generator.png", 64, 32, 5);
+
+        for (let i: number = 1; i <= NUM_TILE_SPRITES; i++) {
+            game.load.image(`floor_tile_${i}`, `../assets/floor_tile_${i}.png`);
+        }
+
+        game.load.spritesheet("wire", "../assets/wire.png", 4, 4, 2);
+    }
+
     // PUBLIC DATA
     public bounds: Phaser.Rectangle;
 
     private componentGroup: Phaser.Group;
 
-    private mouseInBounds: boolean = false;
+    private mouseInBounds: boolean;
 
     private dragBitmap: Phaser.BitmapData;
     private dragHandler: MultiDragHandler;
@@ -57,8 +73,10 @@ export default class Engineering {
             this.game,
             600, 100,
             32, 32,
-            BasicShip,
+            new BasicShip(),
         );
+
+        this.mouseInBounds = false;
 
         this.powerSystem = new PowerSubSystem();
         this.system = new System(this.inventorySystem);
@@ -84,22 +102,6 @@ export default class Engineering {
         );
         dragSwitch.inputEnabled = true;
         dragSwitch.events.onInputDown.add(this.dragSwitchPressed, this);
-    }
-
-    public preload(): void {
-        this.game.load.spritesheet("engine_1", "../assets/engine_1.png", 32, 64, 5);
-
-        this.game.load.spritesheet("gun_1", "../assets/gun_1.png", 32, 32 * 3, 5);
-        this.game.load.spritesheet("gun_small", "../assets/gun_small.png", 32, 32 * 2, 5);
-        this.game.load.spritesheet("energy_cell", "../assets/energy_cell.png", 32, 32, 5);
-        this.game.load.spritesheet("energy_cell_2", "../assets/energy_cell_2.png", 32, 32, 5);
-        this.game.load.spritesheet("shield_generator", "../assets/shield_generator.png", 64, 32, 5);
-
-        for (let i: number = 1; i <= NUM_TILE_SPRITES; i++) {
-            this.game.load.image(`floor_tile_${i}`, `../assets/floor_tile_${i}.png`);
-        }
-
-        this.game.load.spritesheet("wire", "../assets/wire.png", 4, 4, 2);
     }
 
     public update(): ShipUpdateMessage {

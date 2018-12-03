@@ -20,7 +20,7 @@ export default class Player extends Phaser.Sprite {
     // game variables
     private shotCooldown: number = 12; // using frames
     private fireTime: number = 0;
-    private healthIcons: Phaser.Sprite[] = [];
+    private healthIcons: Phaser.Sprite[];
 
     // from engineering
     private speedModifier: number = 0;
@@ -35,6 +35,7 @@ export default class Player extends Phaser.Sprite {
 
         this.maxHealth = MAX_HEALTH;
         this.health = this.maxHealth;
+        this.healthIcons = [];
 
         // input
         this.keyUp = this.game.input.keyboard.addKey(Phaser.Keyboard.UP);

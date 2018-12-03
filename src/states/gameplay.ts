@@ -66,8 +66,8 @@ export default class Startup extends Phaser.State {
     private worldCollisionGroup: Phaser.Physics.P2.CollisionGroup;
     private powerupCollisionGroup: Phaser.Physics.P2.CollisionGroup;
 
-    private backgrounds: Phaser.TileSprite[] = [];
-    private playerDeathQueue: Phaser.Sprite[] = [];
+    private backgrounds: Phaser.TileSprite[];
+    private playerDeathQueue: Phaser.Sprite[];
 
     private currentLevelWaves: Wave[];
     private currentWaveIndex: number;
@@ -89,7 +89,7 @@ export default class Startup extends Phaser.State {
     private borderSprite: Phaser.Sprite;
 
     // engineering section
-    private engineering = new Engineering(this);
+    private engineering: Engineering;
 
     public preload(): void {
         this.game.load.image("player", "../assets/ship.png");
@@ -116,7 +116,7 @@ export default class Startup extends Phaser.State {
         this.game.load.image("gun_1_powerup", "../assets/gun_1_powerup.png");
         this.game.load.image("engine_1_powerup", "../assets/engine_1_powerup.png");
 
-        this.engineering.preload();
+        Engineering.preload(this.game);
     }
 
     public create(): void {
@@ -130,6 +130,10 @@ export default class Startup extends Phaser.State {
         this.gameplayState = GAMEPLAY_STATE.GETREADY;
         this.startState = 0; // this is janky forgive me!!!
         this.startStateTime = 120; // "Get Ready!" 2 seconds
+        this.backgrounds = [];
+        this.playerDeathQueue = [];
+
+        this.engineering = new Engineering(this);
 
         // collision groups
         this.playerCollisionGroup = this.game.physics.p2.createCollisionGroup();
