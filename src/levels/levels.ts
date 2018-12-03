@@ -45,6 +45,8 @@ export const LEVELS: Level[] = [
             gameState.setUpcomingWaves([
                 new Wave(0, WAVE_TYPE.DUMMY_DRONE),
             ]);
+            gameState.stopAllMusic();
+            gameState.playFightMusic();
         },
         update: () => {
             // todo
@@ -96,7 +98,8 @@ export const LEVELS: Level[] = [
     // BOSS ONE
     {
         init: (gameState: Gameplay) => {
-            console.log("INIT");
+            gameState.stopAllMusic();
+            gameState.playBossMusic();
             gameState.setUpcomingWaves([
                 new Wave(0, WAVE_TYPE.BOSS),
             ]);
@@ -124,6 +127,8 @@ export const LEVELS: Level[] = [
     textLevel("Now, get back to base so that we can start to repair our defences!", 400),
     {
         init: (gameState: Gameplay) => {
+            gameState.stopAllMusic();
+            gameState.playSafeMusic();
             gameState.displayText(
                 "Great work! Now go get the other [prince]s", 400);
             gameState.generateBaseStation();
@@ -137,6 +142,8 @@ export const LEVELS: Level[] = [
     // LEVEL TWO
     {
         init: (gameState: Gameplay) => {
+            gameState.stopAllMusic();
+            gameState.playFightMusic();
             gameState.setUpcomingWaves([
                 new Wave(0, WAVE_TYPE.ROW_STRAIGHT),
                 new Wave(60, WAVE_TYPE.ROW_STRAIGHT),

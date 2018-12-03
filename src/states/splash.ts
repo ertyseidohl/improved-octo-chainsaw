@@ -15,6 +15,10 @@ export default class Splash extends Phaser.State {
         this.enter = this.input.keyboard.addKey(Phaser.KeyCode.ENTER);
         this.enter.onDown.addOnce(this.startGameplay, this);
 
+        this.game.sound.stopAll();
+
+        this.game.sound.play("visager_final");
+
     }
 
     // PRIVATE METHODS

@@ -136,7 +136,7 @@ export default class Player extends Phaser.Sprite {
                 const bulletBody: Phaser.Physics.P2.Body = bullet.body;
                 bullet.reset(this.x + i * 5, this.y - 20);
                 bulletBody.velocity.y = -BULLET_SPEED;
-                this.game.sound.play("blaster");
+                this.game.sound.play("blaster", 0.1);
             }
         }
     }

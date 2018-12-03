@@ -146,6 +146,22 @@ export default class Gameplay extends Phaser.State {
         Engineering.preload(this.game);
     }
 
+    public stopAllMusic(): void {
+        this.game.sound.stopAll();
+    }
+
+    public playBossMusic(): void {
+        this.game.sound.play("visager_boss", 0.5, true);
+    }
+
+    public playSafeMusic(): void {
+        this.game.sound.play("visager_final", 0.5, true);
+    }
+
+    public playFightMusic(): void {
+        this.game.sound.play("visager_game", 0.5, true);
+    }
+
     public create(): void {
 
         // NOOBIE NOTE: THINGS LIKE TEXT AND SPRITES MUST BE ADDED CORRECT ORDER
