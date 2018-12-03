@@ -1,10 +1,11 @@
 import { BaseComponent } from "../base_component";
 
-/**
- * @class
- * This class is a pure abstract interface for receiving notifications of a
- * drag operation starting on a single component, and acting appropriately.
- */
+export enum HandlerMode {
+    NONE,
+    MOVE,
+    CONNECT,
+}
+
 export abstract class BaseDragHandler {
 
     public abstract dragStart(comp: BaseComponent): void;
@@ -13,4 +14,8 @@ export abstract class BaseDragHandler {
 
     public abstract dragUpdate(comp: BaseComponent): void;
 
+}
+
+export class GlobalDragState {
+    public currentlyActive: boolean = false;
 }

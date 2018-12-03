@@ -1,6 +1,6 @@
 // DEPENDENCIES
 import { BaseComponent } from "../base_component";
-import { BaseDragHandler } from "./base";
+import { BaseDragHandler, GlobalDragState } from "./base";
 
 import { InventorySystem } from "../system";
 

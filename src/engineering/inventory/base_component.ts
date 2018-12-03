@@ -78,7 +78,7 @@ export abstract class BaseComponent extends Phaser.Sprite {
         return this.componentState.updatePower(power);
     }
 
-    private onDragStart(): void {
+    private onDragStart(game: any, pointer: Phaser.Pointer): void {
         this.inventorySystem.dragHandler.dragStart(this);
     }
 

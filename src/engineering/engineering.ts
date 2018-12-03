@@ -11,7 +11,8 @@ import { ShieldGenerator } from "./inventory/shield_generator";
 import { SmallGun } from "./inventory/small_gun";
 // import { MissileLauncher } from "./inventory/missile_launcher";
 
-import { HandlerType, MultiDragHandler } from "./inventory/drag_handler/multi";
+import { HandlerMode } from "./inventory/drag_handler/base";
+import { MultiDragHandler } from "./inventory/drag_handler/multi";
 import { PowerSubSystem } from "./inventory/power_subsystem";
 import { BasicShip, InventorySystem, NUM_TILE_SPRITES} from "./inventory/system";
 
@@ -172,20 +173,20 @@ export default class Engineering {
 
     private onMouseDown() {
         const p = this.game.input.mousePointer;
-        if (this.bounds.contains(p.x, p.y) && p.rightButton.isDown) {
+        if (this.bounds.contains(p.x, p.y) && p.rightButton.isDown && !p.leftButton.isDown) {
             this.dragSwitchPressed(null, this.game.input.mousePointer);
         }
     }
 
     private dragSwitchPressed(_: any, p: Phaser.Pointer) {
         switch (this.dragHandler.handler) {
-            case HandlerType.MOVE: // transition to 'CONNECT'
+            case HandlerMode.MOVE: // transition to 'CONNECT'
                 this.dragBitmap.fill(0, 255, 0);
-                this.dragHandler.handler = HandlerType.CONNECT;
+                this.dragHandler.setHandler(HandlerMode.CONNECT);
                 break;
-            case HandlerType.CONNECT: // transition to 'MOVE'
+            case HandlerMode.CONNECT: // transition to 'MOVE'
                 this.dragBitmap.fill(255, 0, 0);
-                this.dragHandler.handler = HandlerType.MOVE;
+                this.dragHandler.setHandler(HandlerMode.MOVE);
                 break;
         }
     }
