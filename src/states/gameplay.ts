@@ -11,7 +11,14 @@ import { COMPONENT_TYPES, ENEMY_TYPES, WAVE_TYPE } from "../constants";
 import Engineering, { ShipUpdateMessage } from "../engineering/engineering";
 import LevelManager from "../levels/level_manager";
 import Player from "../player/player";
-import { BasicGunPowerup, EnginePowerup, Powerup, PrincePowerup } from "../player/powerup";
+import {
+    BasicGunPowerup,
+    EnginePowerup,
+    Powerup,
+    PrincePowerup,
+    SpaceDiamondPowerup,
+    SpaceJunkPowerup,
+} from "../player/powerup";
 
 import Wave from "../levels/wave";
 
@@ -132,6 +139,8 @@ export default class Gameplay extends Phaser.State {
 
         this.game.load.image("gun_1_powerup", "../assets/gun_1_powerup.png");
         this.game.load.image("engine_1_powerup", "../assets/engine_1_powerup.png");
+        this.game.load.image("space_junk", "../assets/space_junk.png");
+        this.game.load.image("space_diamond", "../assets/space_diamond.png");
 
         Engineering.preload(this.game);
     }
@@ -322,7 +331,7 @@ export default class Gameplay extends Phaser.State {
 
     public baseStationDone(): boolean {
         if (this.baseStation.y > this.player.y - this.player.height) {
-            this.engineering.clearAllPrinces();
+            this.engineering.dropOffCargo();
         }
         if (this.baseStation.y > this.shmupBounds.height) {
             console.log("BASE STATION DONE");
@@ -625,6 +634,12 @@ export default class Gameplay extends Phaser.State {
                 break;
             case COMPONENT_TYPES.PRINCE:
                 powerup = new PrincePowerup(this.game, enemy.x, enemy.y);
+                break;
+            case COMPONENT_TYPES.SPACE_JUNK:
+                powerup = new SpaceJunkPowerup(this.game, enemy.x, enemy.y);
+                break;
+            case COMPONENT_TYPES.SPACE_DIAMOND:
+                powerup = new SpaceDiamondPowerup(this.game, enemy.x, enemy.y);
                 break;
         }
         if (!this.testPowerup) {

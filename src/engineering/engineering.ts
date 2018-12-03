@@ -9,6 +9,8 @@ import { InputZ } from "./inventory/input_z";
 import { Prince } from "./inventory/prince";
 import { ShieldGenerator } from "./inventory/shield_generator";
 import { SmallGun } from "./inventory/small_gun";
+import { SpaceDiamond } from "./inventory/space_diamond";
+import { SpaceJunk } from "./inventory/space_junk";
 // import { MissileLauncher } from "./inventory/missile_launcher";
 
 import { HandlerMode } from "./inventory/drag_handler/base";
@@ -38,6 +40,8 @@ const ENGINE_DISPLAY_X: number = 85;
 const WEIGHT_DISPLAY_Y: number = 100;
 const WEIGHT_DISPLAY_X: number = 85;
 
+const POINTS_DISPLAY_Y: number = 768 - 24;
+
 const HUD_TEXT_STYLE: Phaser.PhaserTextStyle = {
     fill: "white",
     font: "pixelsix",
@@ -66,8 +70,10 @@ export default class Engineering {
         game.load.spritesheet("wire", "../assets/wire.png", 4, 4, 2);
     }
 
-    // PUBLIC DATA
     public bounds: Phaser.Rectangle;
+
+    private points: number;
+    private pointsText: Phaser.Text;
 
     private componentGroup: Phaser.Group;
 
@@ -95,6 +101,8 @@ export default class Engineering {
 
     // PUBLIC METHODS
     public create(): void {
+
+        this.points = 0;
 
         this.inventorySystem = new InventorySystem(
             this.game,
@@ -187,6 +195,13 @@ export default class Engineering {
             },
         );
 
+        this.pointsText = this.game.add.text(
+            this.game.width / 2 + 10,
+            POINTS_DISPLAY_Y,
+            "Points: 0",
+            HUD_TEXT_STYLE,
+        );
+
         // do this last so they go on top of the text
         this.componentGroup = this.game.add.group();
         this.createStartingComponents();
@@ -216,13 +231,20 @@ export default class Engineering {
         return this.playerHealth;
     }
 
-    public clearAllPrinces(): void {
+    public dropOffCargo(): void {
         this.componentGroup.forEach((c: BaseComponent) => {
             if (c instanceof Prince) {
+                this.points += 100;
+                this.componentGroup.remove(c);
+                c.destroy();
+            }
+            if (c instanceof SpaceDiamond) {
+                this.points += 20;
                 this.componentGroup.remove(c);
                 c.destroy();
             }
         });
+        this.pointsText.setText(`Points: ${this.points}`);
     }
 
     public hasConnectedTestComponent(): boolean {
@@ -265,6 +287,12 @@ export default class Engineering {
                 break;
             case COMPONENT_TYPES.PRINCE:
                 newComponent = new Prince(this.game, this.inventorySystem);
+                break;
+            case COMPONENT_TYPES.SPACE_JUNK:
+                newComponent = new SpaceJunk(this.game, this.inventorySystem);
+                break;
+            case COMPONENT_TYPES.SPACE_DIAMOND:
+                newComponent = new SpaceDiamond(this.game, this.inventorySystem);
                 break;
             default:
                 throw new Error(`unknown component type for createComponentByname: ${componentType}`);

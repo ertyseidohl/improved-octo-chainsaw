@@ -19,6 +19,8 @@ export enum COMPONENT_TYPES {
     BASIC_GUN,
     ENGINE,
     PRINCE,
+    SPACE_JUNK,
+    SPACE_DIAMOND,
 }
 
 export enum ENEMY_TYPES {
