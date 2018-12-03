@@ -7,7 +7,7 @@ export class ShieldGenerator extends BaseComponent {
     private animation: Phaser.Animation;
 
     constructor(game: Phaser.Game, inventorySystem: InventorySystem, position?: Phaser.Point) {
-        super(game, inventorySystem, "shield_generator", 1, 2, position);
+        super(game, inventorySystem, "shield_generator", 2, 1, position);
         this.animation = this.animations.add("shield", [1, 2, 3, 4]);
     }
 
@@ -15,7 +15,7 @@ export class ShieldGenerator extends BaseComponent {
         super.update();
 
         if (this.onShip && this.isOnline() && !this.animation.isPlaying) {
-            this.animation.play(20, true);
+            this.animation.play(5, true);
         } else if (!this.onShip || !this.isOnline()) {
             this.animation.stop();
             this.frame = 0;
