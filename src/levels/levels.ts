@@ -50,7 +50,7 @@ export const LEVELS: Level[] = [
             // todo
         },
         isOver: (gameState: Gameplay) => {
-            return gameState.waveIndexAllDead(0);
+            return gameState.allWavesDead();
         },
         cleanup: () => {
             // todo
@@ -87,7 +87,7 @@ export const LEVELS: Level[] = [
             // todo
         },
         isOver: (gameState: Gameplay) => {
-            return gameState.waveIndexAllDead(0);
+            return gameState.allWavesDead();
         },
         cleanup: () => {
             // todo
@@ -105,7 +105,7 @@ export const LEVELS: Level[] = [
             // todo
         },
         isOver: (gameState: Gameplay) => {
-            return gameState.waveIndexAllDead(0);
+            return gameState.allWavesDead();
         },
         cleanup: () => {
             // todo
@@ -135,7 +135,7 @@ export const LEVELS: Level[] = [
             // todo
         },
         isOver: (gameState: Gameplay) => {
-            return gameState.waveIndexAllDead(2);
+            return gameState.allWavesDead();
         },
         cleanup: () => {
             // todo

@@ -335,8 +335,13 @@ export default class Gameplay extends Phaser.State {
         this.currentWaveIndex = 0;
     }
 
-    public waveIndexAllDead(index: number) {
-        return this.currentLevelWaves[index].allSpawned && this.currentLevelWaves[index].allDead();
+    public allWavesDead() {
+        for (const wave of this.currentLevelWaves) {
+            if (!wave.allSpawned || !wave.allDead()) {
+                return false;
+            }
+        }
+        return true;
     }
 
     public princeInInventory(): boolean {

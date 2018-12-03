@@ -88,8 +88,8 @@ export default class Player extends Phaser.Sprite {
 
     public update(): void {
         if (this.docking) {
-            if (Math.abs(this.x - this.dockingTarget) > 10) {
-                this.playerBody.velocity.x = -(this.x - this.dockingTarget);
+            if (Math.abs(this.x - this.dockingTarget) > 1) {
+                this.playerBody.velocity.x = -(this.x - this.dockingTarget) * 5;
             } else {
                 this.playerBody.velocity.x *= 0.5;
             }
