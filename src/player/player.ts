@@ -1,6 +1,6 @@
 import { ShipUpdateMessage } from "../engineering/engineering";
 
-const PLAYER_SPEED: number = 200; // EVAN wanted this faster
+const PLAYER_SPEED: number = 150; // EVAN wanted this faster
 const PLAYER_SCALE: number = 2;
 
 const BULLET_SPEED: number = 700;
@@ -24,7 +24,7 @@ export default class Player extends Phaser.Sprite {
     private fireTime: number = 0;
 
     // from engineering
-    private speedModifier: number = 0;
+    private speedForce: number = 0;
     private gunCount: number = 0;
 
     public constructor(game: Phaser.Game, x: number, y: number, key: string) {
@@ -64,7 +64,9 @@ export default class Player extends Phaser.Sprite {
     }
 
     public getUpdateMessage(updateMessage: ShipUpdateMessage): void {
-        this.speedModifier = updateMessage.topSpeed;
+        let { topSpeed, weight, guns } = updateMessage;
+        const force = 2 * (6 + topSpeed) - weight / 2;
+        this.speedForce = PLAYER_SPEED + Math.max(0, 10 * force);
         this.gunCount = updateMessage.guns;
     }
 
@@ -105,16 +107,16 @@ export default class Player extends Phaser.Sprite {
 
         // controls
         if (this.keyUp.isDown) {
-            this.playerBody.velocity.y = -PLAYER_SPEED * this.speedModifier;
+            this.playerBody.velocity.y = -this.speedForce;
         }
         if (this.keyDown.isDown) {
-            this.playerBody.velocity.y = PLAYER_SPEED * this.speedModifier;
+            this.playerBody.velocity.y = this.speedForce;
         }
         if (this.keyLeft.isDown) {
-            this.playerBody.velocity.x = -PLAYER_SPEED * this.speedModifier;
+            this.playerBody.velocity.x = -this.speedForce;
         }
         if (this.keyRight.isDown) {
-            this.playerBody.velocity.x = PLAYER_SPEED * this.speedModifier;
+            this.playerBody.velocity.x = this.speedForce;
         }
         if (this.keyShoot.isDown) {
             if (this.alive) {
