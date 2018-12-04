@@ -5,10 +5,7 @@ import { InventorySystem } from "./system";
 export class EnergyCellHD extends EnergyCell {
 
     constructor(game: Phaser.Game, inventorySystem: InventorySystem, position?: Phaser.Point) {
-        super(game, inventorySystem, position, "energy_cell_2", 1, 1);
-
-        const energyCellAnimation = this.animations.add("zap", [1, 2, 3, 4]);
-        energyCellAnimation.play(5, true);
+        super(game, inventorySystem, position, "energy_cell_hd", 1, 1);
     }
 
     public getStateConfig(): StateConfig {

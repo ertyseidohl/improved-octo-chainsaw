@@ -1,5 +1,5 @@
 import { ComponentState, StateConfig } from "./component_state";
-import { Constraints, InventorySystem, INCINERATOR_BOUNDS } from "./system";
+import { Constraints, INCINERATOR_BOUNDS, InventorySystem } from "./system";
 
 export enum PowerType {
     None,
@@ -134,7 +134,7 @@ export abstract class BaseComponent extends Phaser.Sprite {
         return null;
     }
 
-    public plugIn(index): void {
+    public plugIn(index: any): void {
         // noop
     }
 

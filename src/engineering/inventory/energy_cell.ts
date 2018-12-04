@@ -15,10 +15,10 @@ export class EnergyCell extends BaseComponent {
         sizex: number = 1,
         sizey: number = 1,
     ) {
-        super(game, inventorySystem, "energy_cell", sizex, sizey, position);
+        super(game, inventorySystem, key, sizex, sizey, position);
 
         const energyCellAnimation = this.animations.add("zap", [1, 2, 3, 4]);
-        energyCellAnimation.play(20, true);
+        energyCellAnimation.play(5, true);
 
         this.powerPadsIndexes = this.generatePlugs();
     }

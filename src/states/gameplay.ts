@@ -13,14 +13,15 @@ import LevelManager from "../levels/level_manager";
 import Player from "../player/player";
 import {
     BasicGunPowerup,
+    BigEnginePowerup,
+    EnergyCellHDPowerup,
+    EnergyCellPowerup,
     EnginePowerup,
     Powerup,
     PrincePowerup,
     ShieldPowerup,
     SpaceDiamondPowerup,
     SpaceJunkPowerup,
-    EnergyCellPowerup,
-    EnergyCellHDPowerup,
 } from "../player/powerup";
 
 import Wave from "../levels/wave";
@@ -132,6 +133,7 @@ export default class Gameplay extends Phaser.State {
         this.game.load.spritesheet("explosion", "../assets/explosion.png", 64, 64, 6);
         this.game.load.spritesheet("explosion_small", "../assets/explosion_small.png", 32, 32, 4);
         this.game.load.spritesheet("missile_launcher", "../assets/missile_launcher.png", 64, 64, 8);
+        this.game.load.spritesheet("energy_cell_hd", "../assets/energy_cell_2.png", 32, 32, 5);
         this.game.load.image("background", "../assets/background.png");
         this.game.load.image("stars_1", "../assets/stars_1.png");
         this.game.load.image("stars_2", "../assets/stars_2.png");
@@ -144,6 +146,7 @@ export default class Gameplay extends Phaser.State {
         this.game.load.image("gun_1_powerup", "../assets/gun_1_powerup.png");
         this.game.load.image("engine_1_powerup", "../assets/engine_1_powerup.png");
         this.game.load.image("shield_powerup", "../assets/shield_powerup.png");
+        this.game.load.image("big_engine_powerup", "../assets/big_engine_powerup.png");
         this.game.load.image("energy_cell_powerup", "../assets/energy_cell_powerup.png");
         this.game.load.image("energy_cell_hd_powerup", "../assets/energy_cell_hd_powerup.png");
         this.game.load.image("space_junk", "../assets/space_junk.png");
@@ -673,6 +676,9 @@ export default class Gameplay extends Phaser.State {
         switch (powerupType) {
             case COMPONENT_TYPES.BASIC_GUN:
                 powerup = new BasicGunPowerup(this.game, enemy.x, enemy.y);
+                break;
+            case COMPONENT_TYPES.BIG_ENGINE:
+                powerup = new BigEnginePowerup(this.game, enemy.x, enemy.y);
                 break;
             case COMPONENT_TYPES.ENGINE:
                 powerup = new EnginePowerup(this.game, enemy.x, enemy.y);

@@ -44,6 +44,17 @@ export class BasicGunPowerup extends Powerup {
     }
 }
 
+export class BigEnginePowerup extends Powerup {
+    constructor(game: Phaser.Game, x: number, y: number) {
+        super(game, x, y, "big_engine_powerup");
+    }
+
+    public getComponentName(): COMPONENT_TYPES {
+        return COMPONENT_TYPES.BIG_ENGINE;
+    }
+}
+
+
 export class EnginePowerup extends Powerup {
     constructor(game: Phaser.Game, x: number, y: number) {
         super(game, x, y, "engine_1_powerup");

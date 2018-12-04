@@ -1,5 +1,6 @@
 import { BaseComponent, PowerType } from "./inventory/base_component";
 import { BasicGun } from "./inventory/basic_gun";
+import { BigEngine } from "./inventory/big_engine";
 import { EnergyCell } from "./inventory/energy_cell";
 import { EnergyCellHD } from "./inventory/energy_cell_hd";
 import { Engine } from "./inventory/engine";
@@ -15,7 +16,7 @@ import { SpaceJunk } from "./inventory/space_junk";
 
 import { HandlerMode } from "./inventory/drag_handler/base";
 import { MultiDragHandler } from "./inventory/drag_handler/multi";
-import { BasicShip, InventorySystem, NUM_TILE_SPRITES, INCINERATOR_BOUNDS} from "./inventory/system";
+import { BasicShip, INCINERATOR_BOUNDS, InventorySystem, NUM_TILE_SPRITES} from "./inventory/system";
 
 import { PowerSubSystem } from "./systems/power_subsystem";
 import { System } from "./systems/system";
@@ -23,8 +24,6 @@ import { System } from "./systems/system";
 import { COMPONENT_TYPES, MAX_ENGINE, MAX_HEALTH, MAX_WEIGHT } from "../constants";
 
 import { StartPad } from "./wiring/start_pad";
-import { ConnectedWire } from "./wiring/wire";
-import { Rectangle } from "phaser-ce";
 
 export interface ShipUpdateMessage {
     topSpeed: number;
@@ -61,11 +60,11 @@ export default class Engineering {
 
     public static preload(game: Phaser.Game): void {
         game.load.spritesheet("engine_1", "../assets/engine_1.png", 32, 64, 5);
+        game.load.spritesheet("big_engine", "../assets/big_engine.png", 64, 64, 3);
 
         game.load.spritesheet("gun_1", "../assets/gun_1.png", 32, 32 * 3, 5);
         game.load.spritesheet("gun_small", "../assets/gun_small.png", 32, 32 * 2, 5);
         game.load.spritesheet("energy_cell", "../assets/energy_cell.png", 32, 32, 5);
-        game.load.spritesheet("energy_cell_2", "../assets/energy_cell_2.png", 32, 32, 5);
         game.load.spritesheet("shield_generator", "../assets/shield_generator.png", 64, 32, 5);
 
         game.load.image("incinerator", "../assets/incinerator.png");
@@ -306,6 +305,9 @@ export default class Engineering {
             case COMPONENT_TYPES.BASIC_GUN:
                 newComponent = new BasicGun(this.game, this.inventorySystem);
                 break;
+            case COMPONENT_TYPES.BIG_ENGINE:
+                newComponent = new BigEngine(this.game, this.inventorySystem);
+                break;
             case COMPONENT_TYPES.ENGINE:
                 newComponent = new Engine(this.game, this.inventorySystem);
                 break;
@@ -365,6 +367,9 @@ export default class Engineering {
     private createStartingComponents(): void {
         const firstGun = new BasicGun(this.game, this.inventorySystem);
         this.addComponent(firstGun, null, false, true);
+
+        const p = new Prince(this.game, this.inventorySystem);
+        this.addComponent(p, null, false, true);
 
         const secondGun = new BasicGun(this.game, this.inventorySystem);
         this.addComponent(secondGun, null, false, true);

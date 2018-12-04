@@ -6,7 +6,7 @@ export default class LevelManager {
     private currentLevelNum: number;
 
     constructor(private gameplayState: Gameplay) {
-        this.currentLevelNum = 0;
+        this.currentLevelNum = 8;
         LEVELS[this.currentLevelNum].init(this.gameplayState);
     }
 
