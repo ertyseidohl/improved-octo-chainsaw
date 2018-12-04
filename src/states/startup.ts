@@ -3,6 +3,12 @@ export default class Startup extends Phaser.State {
     private loadingCount: number;
 
     public preload(): void {
+        // preload font
+        this.loadingText = this.game.add.text(100, 100, "Loading...", {font: "30px sans-serif", fill: "#FFFFFF"});
+
+        this.loadingText.setText("Loading...", true);
+        this.loadingCount = 0;
+
         // sound
         this.game.load.audio("blaster", "../assets/Laser_Shoot10.wav");
         this.game.load.audio("hit", "../assets/Explosion12.wav");
@@ -31,10 +37,6 @@ export default class Startup extends Phaser.State {
 
         Phaser.Canvas.setImageRenderingCrisp(this.game.canvas);
 
-        // preload font
-        this.loadingText = this.game.add.text(100, 100, "Loading...", {font: "30px pixelsix", fill: "#FFFFFF"});
-        this.loadingCount = 0;
-
         this.game.canvas.oncontextmenu = (e) => e.preventDefault();
 
         const visagerGame: Phaser.Sound = this.game.add.audio("visager_game");
@@ -57,7 +59,7 @@ export default class Startup extends Phaser.State {
     public update() {
         this.loadingCount ++;
         const dots = "...".substring(this.loadingCount % 3);
-        this.loadingText.setText("Loading" + dots);
+        this.loadingText.setText("Loading" + dots, true);
     }
 
     private startGame(): void {

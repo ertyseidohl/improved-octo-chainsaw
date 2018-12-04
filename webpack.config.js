@@ -9,7 +9,7 @@ const p2 = path.join(phaserModule, 'build/custom/p2.js')
 
 module.exports = {
     entry: path.join(__dirname, 'src/app.ts'),
-    mode: 'development',
+    mode: 'production',
     output: {
         path: path.resolve(__dirname, 'dist'),
         filename: '[name].js'
@@ -17,7 +17,6 @@ module.exports = {
     module: {
         rules: [
             { test: /\.ts$/, enforce: 'pre', loader: 'tslint-loader' },
-            { test: /assets(\/|\\)/, loader: 'file-loader?name=assets/[hash].[ext]' },
             { test: /pixi\.js$/, loader: 'expose-loader?PIXI' },
             { test: /phaser-split\.js$/, loader: 'expose-loader?Phaser' },
             { test: /p2\.js$/, loader: 'expose-loader?p2' },
@@ -38,6 +37,5 @@ module.exports = {
             p2: path.join(__dirname, 'node_modules/phaser-ce/build/custom/p2.js'),
             assets: path.join(__dirname, 'assets/')
         }
-    },
-    watch: true
+    }
 };
