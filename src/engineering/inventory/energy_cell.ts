@@ -60,7 +60,7 @@ export class EnergyCell extends BaseComponent {
         this.powerPadsIndexes.set(index, wire);
     }
 
-    public plugOut(index: any) {
+    public plugOut(index: number) {
         this.powerPadsUsed -= 1;
         this.powerPadsIndexes.set(index, null);
     }

@@ -342,6 +342,12 @@ export default class Engineering {
             case COMPONENT_TYPES.ENGINE:
                 newComponent = new Engine(this.game, this.inventorySystem);
                 break;
+            case COMPONENT_TYPES.ENERGY_CELL:
+                newComponent = new EnergyCell(this.game, this.inventorySystem);
+                break;
+            case COMPONENT_TYPES.ENERGY_CELL_HD:
+                newComponent = new EnergyCellHD(this.game, this.inventorySystem);
+                break;
             case COMPONENT_TYPES.PRINCE:
                 newComponent = new Prince(this.game, this.inventorySystem);
                 break;
