@@ -5,7 +5,7 @@ export abstract class Powerup extends Phaser.Sprite {
     private lifetime: number;
     private maxLifetime: number;
 
-    constructor(game: Phaser.Game, x: number, y: number, key: string, maxLifetime: number = 1000) {
+    constructor(game: Phaser.Game, x: number, y: number, key: string, maxLifetime: number = 600) {
         super(game, x, y, key);
         this.maxLifetime = maxLifetime;
         this.reset(x, y, 0);

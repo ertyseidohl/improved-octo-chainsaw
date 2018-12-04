@@ -49,8 +49,8 @@ class BorderBitmaps {
         if (count !== this.count) {
             this.count = count;
             const width = 16 + 5 * (count - 1);
-            this.bgs.resizeFrame(null, 2 + width, this.bg.height)
-            this.fgs.resizeFrame(null, width, this.fg.height)
+            this.bgs.resizeFrame(null, 2 + width, this.bg.height);
+            this.fgs.resizeFrame(null, width, this.fg.height);
         }
     }
 }
@@ -305,7 +305,7 @@ export default class Engineering {
     }
 
     public hasConnectedTestComponent(): boolean {
-        return this.testComponent.getPower() === 4;
+        return this.testComponent && this.testComponent.getPower() === 4;
     }
 
     public princeInInventory(): boolean {

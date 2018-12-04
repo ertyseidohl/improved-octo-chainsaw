@@ -110,7 +110,7 @@ export const LEVELS: Level[] = [
             // todo
         },
         isOver: (gameState: Gameplay) => {
-            return gameState.princeInInventory() && gameState.allWavesDead();
+            return gameState.allWavesDead();
         },
         cleanup: () => {
             // todo
@@ -138,16 +138,19 @@ export const LEVELS: Level[] = [
             return gameState.baseStationDone();
         },
         cleanup: (gameState: Gameplay) => {
-            gameState.displayText(
-                "Great work! Now go get the other four [prince]s", 400);
+            // todo
         },
     },
+    textLevel("Great work! Now go get the other four [prince]s", 400),
     // LEVEL TWO
     {
         init: (gameState: Gameplay) => {
             gameState.stopAllMusic();
             gameState.playFightMusic();
             gameState.setUpcomingWaves([
+                new Wave(0, WAVE_TYPE.ROW_STRAIGHT),
+                new Wave(60, WAVE_TYPE.ROW_STRAIGHT),
+                new Wave(240, WAVE_TYPE.BOMB),
                 new Wave(0, WAVE_TYPE.ROW_STRAIGHT),
                 new Wave(60, WAVE_TYPE.ROW_STRAIGHT),
                 new Wave(240, WAVE_TYPE.BOMB),
@@ -205,6 +208,10 @@ export const LEVELS: Level[] = [
                 new Wave(60, WAVE_TYPE.SWOOP_RIGHT),
                 new Wave(240, WAVE_TYPE.BIGV),
                 new Wave(60, WAVE_TYPE.BOMB),
+                new Wave(0, WAVE_TYPE.SWOOP_LEFT),
+                new Wave(60, WAVE_TYPE.SWOOP_RIGHT),
+                new Wave(240, WAVE_TYPE.BIGV),
+                new Wave(60, WAVE_TYPE.BOMB),
             ]);
         },
         update: () => {
@@ -224,6 +231,7 @@ export const LEVELS: Level[] = [
             gameState.setUpcomingWaves([
                 new Wave(0, WAVE_TYPE.BOSS),
                 new Wave(0, WAVE_TYPE.BOMB),
+                new Wave(60, WAVE_TYPE.BOMB),
             ]);
         },
         update: () => {
@@ -260,6 +268,14 @@ export const LEVELS: Level[] = [
                 new Wave(0, WAVE_TYPE.SWOOP_RIGHT),
                 new Wave(120, WAVE_TYPE.BIGV),
                 new Wave(60, WAVE_TYPE.BIGV),
+                new Wave(0, WAVE_TYPE.SWOOP_LEFT),
+                new Wave(0, WAVE_TYPE.SWOOP_RIGHT),
+                new Wave(120, WAVE_TYPE.BIGV),
+                new Wave(60, WAVE_TYPE.BIGV),
+                new Wave(0, WAVE_TYPE.SWOOP_LEFT),
+                new Wave(0, WAVE_TYPE.SWOOP_RIGHT),
+                new Wave(120, WAVE_TYPE.BIGV),
+                new Wave(60, WAVE_TYPE.BIGV),
             ]);
         },
         update: () => {
@@ -280,6 +296,8 @@ export const LEVELS: Level[] = [
                 new Wave(0, WAVE_TYPE.BOSS),
                 new Wave(0, WAVE_TYPE.BOMB),
                 new Wave(0, WAVE_TYPE.BOMB),
+                new Wave(120, WAVE_TYPE.BOMB),
+                new Wave(120, WAVE_TYPE.BOMB),
             ]);
         },
         update: () => {
@@ -320,6 +338,16 @@ export const LEVELS: Level[] = [
                 new Wave(120, WAVE_TYPE.ROW_STRAIGHT),
                 new Wave(60, WAVE_TYPE.ROW_STRAIGHT),
                 new Wave(60, WAVE_TYPE.ROW_STRAIGHT),
+                new Wave(0, WAVE_TYPE.SWOOP_LEFT),
+                new Wave(0, WAVE_TYPE.SWOOP_RIGHT),
+                new Wave(120, WAVE_TYPE.ROW_LEFT),
+                new Wave(0, WAVE_TYPE.ROW_RIGHT),
+                new Wave(120, WAVE_TYPE.ROW_STRAIGHT),
+                new Wave(0, WAVE_TYPE.SWOOP_LEFT),
+                new Wave(0, WAVE_TYPE.SWOOP_RIGHT),
+                new Wave(120, WAVE_TYPE.ROW_LEFT),
+                new Wave(0, WAVE_TYPE.ROW_RIGHT),
+                new Wave(120, WAVE_TYPE.ROW_STRAIGHT),
             ]);
         },
         update: () => {
@@ -338,9 +366,11 @@ export const LEVELS: Level[] = [
             gameState.playBossMusic();
             gameState.setUpcomingWaves([
                 new Wave(0, WAVE_TYPE.BIGV),
-                new Wave(30, WAVE_TYPE.BOSS),
                 new Wave(30, WAVE_TYPE.BIGV),
                 new Wave(30, WAVE_TYPE.BOMB),
+                new Wave(30, WAVE_TYPE.BIGV),
+                new Wave(30, WAVE_TYPE.BIGV),
+                new Wave(0, WAVE_TYPE.BOSS),
             ]);
         },
         update: () => {
@@ -357,8 +387,6 @@ export const LEVELS: Level[] = [
         init: (gameState: Gameplay) => {
             gameState.stopAllMusic();
             gameState.playSafeMusic();
-            gameState.displayText(
-                "You did it! Our planet is saved!", 400);
             gameState.generateBaseStation();
         },
         update: (gameState: Gameplay) => { /* empty */ },
@@ -367,4 +395,5 @@ export const LEVELS: Level[] = [
         },
         cleanup: (gameState: Gameplay) => { /* empty */ },
     },
+    textLevel("You did it! Our planet is saved!", 400),
 ];

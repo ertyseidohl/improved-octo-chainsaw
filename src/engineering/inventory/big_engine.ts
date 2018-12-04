@@ -23,7 +23,7 @@ export class BigEngine extends BaseComponent {
     }
 
     public getPlacementConstraint(): Constraints {
-        return Constraints.BACK;
+        return Constraints.DOUBLE_BACK;
     }
 
     public getStateConfig(): StateConfig {
@@ -38,13 +38,13 @@ export class BigEngine extends BaseComponent {
     }
 
     public getSpeed(): number {
-        return this.getPower() * 2;
+        return this.getPower() * 3;
     }
 
     public getDescription(): string[] {
         return [
             // tslint:disable-next-line
-            "This engine can burn kerosene, oil, antimatter, and three kinds of aliens for fuel. Requires 3 wires.",
+            "One hell of an engine. Requires 3 wires.",
         ];
     }
 

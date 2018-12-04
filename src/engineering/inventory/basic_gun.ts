@@ -46,7 +46,7 @@ export class BasicGun extends BaseComponent {
     }
 
     public getGuns(): number {
-        return Math.floor(this.getPower() / 2);
+        return this.getPower();
     }
 
     public getPotentialGuns(): number {

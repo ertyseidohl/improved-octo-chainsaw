@@ -1,6 +1,6 @@
 import { ShipUpdateMessage } from "../engineering/engineering";
 
-const PLAYER_SPEED: number = 100;
+const PLAYER_SPEED: number = 20;
 const PLAYER_SCALE: number = 2;
 
 const BULLET_SPEED: number = 700;
@@ -65,8 +65,8 @@ export default class Player extends Phaser.Sprite {
 
     public getUpdateMessage(updateMessage: ShipUpdateMessage): void {
         const { topSpeed, weight, guns } = updateMessage;
-        const force = 2 * (6 + topSpeed) - weight / 2;
-        this.speedForce = PLAYER_SPEED + Math.max(0, 20 * force);
+        const force = (7 * (topSpeed)) * (100 / weight + 1);
+        this.speedForce = PLAYER_SPEED + Math.max(0, force);
         this.gunCount = updateMessage.guns;
     }
 

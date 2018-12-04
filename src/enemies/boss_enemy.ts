@@ -3,7 +3,7 @@ import { Powerup } from "../player/powerup";
 import BaseEnemy from "./base_enemy";
 
 export default class BossEnemy extends BaseEnemy {
-    public maxHealth: number = 30;
+    public maxHealth: number = 50;
 
     protected speedMin: number = 100;
     protected speedMax: number = 300;

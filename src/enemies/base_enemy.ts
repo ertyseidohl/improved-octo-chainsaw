@@ -17,7 +17,7 @@ export default abstract class BaseEnemy extends Phaser.Sprite {
     protected shootTimeMin: number = 4000;
     protected shootTimeMax: number = 6000;
     protected bulletSpeed: number = 500;
-    protected healthMax: number = 3;
+    protected healthMax: number = 6;
 
     protected speedMin: number = 200;
     protected speedMax: number = 400;

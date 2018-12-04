@@ -157,7 +157,6 @@ export abstract class BaseComponent extends Phaser.Sprite {
         if (this.getPowerType() === PowerType.None) {
             return;
         } else if (this.getPowerType() === PowerType.Source) {
-            console.error("overwrite your disconnect all in yor source component");
             return;
         }
 
