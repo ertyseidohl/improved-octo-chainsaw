@@ -24,12 +24,12 @@ function textLevel(text: string, duration: number): Level {
 }
 
 export const LEVELS: Level[] = [
-    textLevel("The Mining Guild has invaded our system! [enter to progress]", 400),
-    textLevel("They stole our [pri]mary [n]etwork [c]ontrol [e]lements, our only defence!", 400),
+    textLevel("The Mining Guild has invaded our system! [enter to progress]", 1200),
+    textLevel("They stole our [pri]mary [n]etwork [c]ontrol [e]lements, our only defence!", 1200),
     {
         init: (gameState: Gameplay) => {
             gameState.displayText(
-                "You two, with your scrappy ship, are our last hope to recover these [prince]s.", 400);
+                "You two, with your scrappy ship, are our last hope to recover these [prince]s.", 1200);
             gameState.generateBaseStation();
         },
         update: (gameState: Gameplay) => { /* empty */ },
@@ -61,7 +61,7 @@ export const LEVELS: Level[] = [
     {
         init: (gameState: Gameplay) => {
             // tslint:disable-next-line
-            gameState.displayText("There was something inside! Helm, use the arrow keys to pick it up. wire up some engines to go faster.", 400);
+            gameState.displayText("There was something inside! Helm, use the arrow keys to pick it up. wire up some engines to go faster.", 1200);
         },
         update: (gameState: Gameplay) => { /* empty */ },
         isOver: (gameState: Gameplay) => {
@@ -72,7 +72,7 @@ export const LEVELS: Level[] = [
     {
         init: (gameState: Gameplay) => {
             // tslint:disable-next-line
-            gameState.displayText("Hook it up! It looks like it needs 4 wires to run. pick up an energy cell to disconnect all of its wires", 400);
+            gameState.displayText("Hook it up! It looks like it needs 4 wires to run. pick up an energy cell to disconnect all of its wires", 1200);
         },
         update: (gameState: Gameplay) => { /* empty */ },
         isOver: (gameState: Gameplay) => {
@@ -80,7 +80,7 @@ export const LEVELS: Level[] = [
         },
         cleanup: (gameState: Gameplay) => { /* empty */ },
     },
-    textLevel("Great! Now go retrieve those [prince]s and save our planet!", 400),
+    textLevel("Great! Now go retrieve those [prince]s and save our planet!", 1200),
     // LEVEL ONE
     {
         init: (gameState: Gameplay) => {
@@ -118,7 +118,7 @@ export const LEVELS: Level[] = [
     },
     {
         init: (gameState: Gameplay) => {
-            gameState.displayText("Grab that [prince] - make sure you have space for it!", 400);
+            gameState.displayText("Grab that [prince] - make sure you have space for it!", 1200);
         },
         update: (gameState: Gameplay) => { /* empty */ },
         isOver: (gameState: Gameplay) => {
@@ -126,7 +126,7 @@ export const LEVELS: Level[] = [
         },
         cleanup: (gameState: Gameplay) => { /* empty */ },
     },
-    textLevel("Now, get back to base so that we can start to repair our defences!", 400),
+    textLevel("Now, get back to base so that we can start to repair our defences!", 1200),
     {
         init: (gameState: Gameplay) => {
             gameState.stopAllMusic();
@@ -141,7 +141,7 @@ export const LEVELS: Level[] = [
             // todo
         },
     },
-    textLevel("Great work! Now go get the other four [prince]s", 400),
+    textLevel("Great work! Now go get the other four [prince]s", 1200),
     // LEVEL TWO
     {
         init: (gameState: Gameplay) => {
@@ -189,7 +189,7 @@ export const LEVELS: Level[] = [
             gameState.stopAllMusic();
             gameState.playSafeMusic();
             gameState.displayText(
-                "Another [prince] safe and sound - three to go!", 400);
+                "Another [prince] safe and sound - three to go!", 1200);
             gameState.generateBaseStation();
         },
         update: (gameState: Gameplay) => { /* empty */ },
@@ -249,7 +249,7 @@ export const LEVELS: Level[] = [
             gameState.stopAllMusic();
             gameState.playSafeMusic();
             gameState.displayText(
-                "Thanks! just two more princes!", 400);
+                "Thanks! just two more princes!", 1200);
             gameState.generateBaseStation();
         },
         update: (gameState: Gameplay) => { /* empty */ },
@@ -315,7 +315,7 @@ export const LEVELS: Level[] = [
             gameState.stopAllMusic();
             gameState.playSafeMusic();
             gameState.displayText(
-                "Thanks! only one more prince to go!", 400);
+                "Thanks! only one more prince to go!", 1200);
             gameState.generateBaseStation();
         },
         update: (gameState: Gameplay) => { /* empty */ },
@@ -395,5 +395,5 @@ export const LEVELS: Level[] = [
         },
         cleanup: (gameState: Gameplay) => { /* empty */ },
     },
-    textLevel("You did it! Our planet is saved!", 400),
+    textLevel("You did it! Our planet is saved!", 1200),
 ];

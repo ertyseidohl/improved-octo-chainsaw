@@ -302,6 +302,7 @@ export default class Engineering {
                 c.destroy();
             }
         });
+        document.location.hash = this.points.toString();
         this.pointsText.setText(`Points: ${this.points}`);
     }
 

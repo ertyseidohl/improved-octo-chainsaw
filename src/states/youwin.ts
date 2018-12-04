@@ -10,7 +10,7 @@ export default class YouWin extends Phaser.State {
         this.game.add.text(
             this.game.width / 2,
             this.game.height / 2 + 100,
-            "enter to restart",
+            `Points: ${document.location.hash} \n enter to restart`,
             {font: "20px pixelsix", fill: "#FFFFFF"},
         );
 

@@ -48,4 +48,6 @@ function startApp(): void {
     document.getElementById("loading").style.display = "none";
 }
 
+document.location.hash = "0";
+
 window.onload = startApp;

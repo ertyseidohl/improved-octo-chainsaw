@@ -1,6 +1,6 @@
 // DEPENDENCIES
 import { BaseComponent } from "../base_component";
-import { BaseDragHandler, GlobalDragState } from "./base";
+import { BaseDragHandler, GlobalDragState, HandlerMode } from "./base";
 
 import { InventorySystem } from "../system";
 
@@ -42,6 +42,10 @@ export class MoveDragHandler extends BaseDragHandler {
     // CREATORS
     constructor(private inventorySystem: InventorySystem) {
         super();
+    }
+
+    public getCurrentHandlerMode(): HandlerMode {
+        return HandlerMode.MOVE;
     }
 
     // PUBLIC METHODS
