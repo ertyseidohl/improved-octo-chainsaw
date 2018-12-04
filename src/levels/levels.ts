@@ -60,7 +60,8 @@ export const LEVELS: Level[] = [
     },
     {
         init: (gameState: Gameplay) => {
-            gameState.displayText("There was something inside! Helm, use the arrow keys to pick it up, quick!", 400);
+            // tslint:disable-next-line
+            gameState.displayText("There was something inside! Helm, use the arrow keys to pick it up. wire up some engines to go faster.", 400);
         },
         update: (gameState: Gameplay) => { /* empty */ },
         isOver: (gameState: Gameplay) => {
@@ -70,7 +71,8 @@ export const LEVELS: Level[] = [
     },
     {
         init: (gameState: Gameplay) => {
-            gameState.displayText("Looks useful! Engineering, use wire mode and connect it up!", 400);
+            // tslint:disable-next-line
+            gameState.displayText("Hook it up! It looks like it needs 4 wires to run. pick up an energy cell to disconnect all of its wires", 400);
         },
         update: (gameState: Gameplay) => { /* empty */ },
         isOver: (gameState: Gameplay) => {
@@ -96,7 +98,6 @@ export const LEVELS: Level[] = [
             // todo
         },
     },
-    // BOSS ONE
     {
         init: (gameState: Gameplay) => {
             gameState.stopAllMusic();
@@ -130,15 +131,16 @@ export const LEVELS: Level[] = [
         init: (gameState: Gameplay) => {
             gameState.stopAllMusic();
             gameState.playSafeMusic();
-            gameState.displayText(
-                "Great work! Now go get the other 8 [prince]s", 400);
             gameState.generateBaseStation();
         },
         update: (gameState: Gameplay) => { /* empty */ },
         isOver: (gameState: Gameplay) => {
             return gameState.baseStationDone();
         },
-        cleanup: (gameState: Gameplay) => { /* empty */ },
+        cleanup: (gameState: Gameplay) => {
+            gameState.displayText(
+                "Great work! Now go get the other four [prince]s", 400);
+        },
     },
     // LEVEL TWO
     {
@@ -161,7 +163,6 @@ export const LEVELS: Level[] = [
             // todo
         },
     },
-    // BOSS TWO
     {
         init: (gameState: Gameplay) => {
             gameState.stopAllMusic();
@@ -185,7 +186,7 @@ export const LEVELS: Level[] = [
             gameState.stopAllMusic();
             gameState.playSafeMusic();
             gameState.displayText(
-                "Another [prince] safe and sound - seven to go!", 400);
+                "Another [prince] safe and sound - three to go!", 400);
             gameState.generateBaseStation();
         },
         update: (gameState: Gameplay) => { /* empty */ },
@@ -216,13 +217,13 @@ export const LEVELS: Level[] = [
             // todo
         },
     },
-    // BOSS TWO
     {
         init: (gameState: Gameplay) => {
             gameState.stopAllMusic();
             gameState.playBossMusic();
             gameState.setUpcomingWaves([
                 new Wave(0, WAVE_TYPE.BOSS),
+                new Wave(0, WAVE_TYPE.BOMB),
             ]);
         },
         update: () => {
@@ -240,7 +241,7 @@ export const LEVELS: Level[] = [
             gameState.stopAllMusic();
             gameState.playSafeMusic();
             gameState.displayText(
-                "Thanks! Six more [prince]s left!", 400);
+                "Thanks! just one more prince!", 400);
             gameState.generateBaseStation();
         },
         update: (gameState: Gameplay) => { /* empty */ },
@@ -249,4 +250,123 @@ export const LEVELS: Level[] = [
         },
         cleanup: (gameState: Gameplay) => { /* empty */ },
     },
+    // LEVEL FOUR
+    {
+        init: (gameState: Gameplay) => {
+            gameState.stopAllMusic();
+            gameState.playFightMusic();
+            gameState.setUpcomingWaves([
+                new Wave(0, WAVE_TYPE.SWOOP_LEFT),
+                new Wave(0, WAVE_TYPE.SWOOP_RIGHT),
+                new Wave(120, WAVE_TYPE.BIGV),
+                new Wave(60, WAVE_TYPE.BIGV),
+            ]);
+        },
+        update: () => {
+            // todo
+        },
+        isOver: (gameState: Gameplay) => {
+            return gameState.allWavesDead();
+        },
+        cleanup: () => {
+            // todo
+        },
+    },
+    {
+        init: (gameState: Gameplay) => {
+            gameState.stopAllMusic();
+            gameState.playBossMusic();
+            gameState.setUpcomingWaves([
+                new Wave(0, WAVE_TYPE.BOSS),
+                new Wave(0, WAVE_TYPE.BOMB),
+                new Wave(0, WAVE_TYPE.BOMB),
+            ]);
+        },
+        update: () => {
+            // todo
+        },
+        isOver: (gameState: Gameplay) => {
+            return gameState.allWavesDead();
+        },
+        cleanup: () => {
+            // todo
+        },
+    },
+    {
+        init: (gameState: Gameplay) => {
+            gameState.stopAllMusic();
+            gameState.playSafeMusic();
+            gameState.displayText(
+                "Thanks! only one more prince to go!", 400);
+            gameState.generateBaseStation();
+        },
+        update: (gameState: Gameplay) => { /* empty */ },
+        isOver: (gameState: Gameplay) => {
+            return gameState.baseStationDone();
+        },
+        cleanup: (gameState: Gameplay) => { /* empty */ },
+    },
+
+    // LEVEL FIVE
+    {
+        init: (gameState: Gameplay) => {
+            gameState.stopAllMusic();
+            gameState.playFightMusic();
+            gameState.setUpcomingWaves([
+                new Wave(0, WAVE_TYPE.SWOOP_LEFT),
+                new Wave(0, WAVE_TYPE.SWOOP_RIGHT),
+                new Wave(120, WAVE_TYPE.ROW_LEFT),
+                new Wave(0, WAVE_TYPE.ROW_RIGHT),
+                new Wave(120, WAVE_TYPE.ROW_STRAIGHT),
+                new Wave(60, WAVE_TYPE.ROW_STRAIGHT),
+                new Wave(60, WAVE_TYPE.ROW_STRAIGHT),
+            ]);
+        },
+        update: () => {
+            // todo
+        },
+        isOver: (gameState: Gameplay) => {
+            return gameState.allWavesDead();
+        },
+        cleanup: () => {
+            // todo
+        },
+    },
+    {
+        init: (gameState: Gameplay) => {
+            gameState.stopAllMusic();
+            gameState.playBossMusic();
+            gameState.setUpcomingWaves([
+                new Wave(0, WAVE_TYPE.BIGV),
+                new Wave(30, WAVE_TYPE.BOSS),
+                new Wave(30, WAVE_TYPE.BIGV),
+                new Wave(30, WAVE_TYPE.BOMB),
+            ]);
+        },
+        update: () => {
+            // todo
+        },
+        isOver: (gameState: Gameplay) => {
+            return gameState.allWavesDead();
+        },
+        cleanup: () => {
+            // todo
+        },
+    },
+    {
+        init: (gameState: Gameplay) => {
+            gameState.stopAllMusic();
+            gameState.playSafeMusic();
+            gameState.displayText(
+                "You did it! Our planet is saved!", 400);
+            gameState.generateBaseStation();
+        },
+        update: (gameState: Gameplay) => { /* empty */ },
+        isOver: (gameState: Gameplay) => {
+            return gameState.baseStationDone();
+        },
+        cleanup: (gameState: Gameplay) => { /* empty */ },
+    },
+
+
 ];

@@ -17,6 +17,8 @@ export enum WAVE_TYPE {
 
 export enum COMPONENT_TYPES {
     BASIC_GUN,
+    ENERGY_CELL,
+    ENERGY_CELL_HD,
     ENGINE,
     PRINCE,
     SPACE_JUNK,

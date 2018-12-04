@@ -1,5 +1,5 @@
 import { ComponentState, StateConfig } from "./component_state";
-import { Constraints, InventorySystem } from "./system";
+import { Constraints, InventorySystem, INCINERATOR_BOUNDS } from "./system";
 
 import { PowerSubSystem } from "../systems/power_subsystem";
 import { ConnectedWire } from "../wiring/wire";
@@ -62,6 +62,10 @@ export abstract class BaseComponent extends Phaser.Sprite {
 
     public abstract getDescription(): string[];
     public abstract getStateConfig(): StateConfig;
+
+    public isIncineratable(): boolean {
+        return true;
+    }
 
     public lockDrag(): void {
         this.input.disableDrag();
@@ -153,7 +157,13 @@ export abstract class BaseComponent extends Phaser.Sprite {
         }
     }
 
-    private onDragStop(): void {
+    private onDragStop(game: any, pointer: Phaser.Pointer): void {
+        console.log(pointer.x, pointer.y);
+        if (INCINERATOR_BOUNDS.contains(pointer.x, pointer.y) && this.isIncineratable()) {
+            this.game.sound.play("burn");
+            this.destroy();
+            return;
+        }
         this.inventorySystem.dragHandler.dragStop(this);
     }
 

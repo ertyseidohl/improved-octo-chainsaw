@@ -19,6 +19,8 @@ import {
     ShieldPowerup,
     SpaceDiamondPowerup,
     SpaceJunkPowerup,
+    EnergyCellPowerup,
+    EnergyCellHDPowerup,
 } from "../player/powerup";
 
 import Wave from "../levels/wave";
@@ -142,6 +144,8 @@ export default class Gameplay extends Phaser.State {
         this.game.load.image("gun_1_powerup", "../assets/gun_1_powerup.png");
         this.game.load.image("engine_1_powerup", "../assets/engine_1_powerup.png");
         this.game.load.image("shield_powerup", "../assets/shield_powerup.png");
+        this.game.load.image("energy_cell_powerup", "../assets/energy_cell_powerup.png");
+        this.game.load.image("energy_cell_hd_powerup", "../assets/energy_cell_hd_powerup.png");
         this.game.load.image("space_junk", "../assets/space_junk.png");
         this.game.load.image("space_diamond", "../assets/space_diamond.png");
 
@@ -341,6 +345,15 @@ export default class Gameplay extends Phaser.State {
         this.gameMessageCenterTime--;
 
         this.levelManager.update();
+
+        // check of bullets have gone out of bounds to engineering
+        for (const bullet of this.bulletsGroup.children) {
+            if (bullet instanceof Phaser.Sprite) {
+                if (!this.shmupBounds.contains(bullet.x, bullet.y)) {
+                    bullet.kill();
+                }
+            }
+        }
     }
 
     public displayText(text: string, time: number) {
@@ -629,6 +642,10 @@ export default class Gameplay extends Phaser.State {
                 break;
             case WAVE_TYPE.ROW_STRAIGHT:
                 for (let i: number = 0; i < WAVE_ROWS_ENEMY_COUNT_MAX; i++) {
+                    if (i === 2) {
+                        // leave a hole
+                        continue;
+                    }
                     currentWave.addEnemy(
                         this.createEnemy(WAVE_TYPE.ROW_STRAIGHT, WAVE_ROW_XOFFSET + ENEMY_WIDTH * i, ENEMY_TYPES.BASIC),
                     );
@@ -663,6 +680,12 @@ export default class Gameplay extends Phaser.State {
             case COMPONENT_TYPES.SHIELD:
                 powerup = new ShieldPowerup(this.game, enemy.x, enemy.y);
                 break;
+            case COMPONENT_TYPES.ENERGY_CELL:
+                powerup = new EnergyCellPowerup(this.game, enemy.x, enemy.y);
+                break;
+            case COMPONENT_TYPES.ENERGY_CELL_HD:
+                powerup = new EnergyCellHDPowerup(this.game, enemy.x, enemy.y);
+                break;
             case COMPONENT_TYPES.PRINCE:
                 powerup = new PrincePowerup(this.game, enemy.x, enemy.y);
                 break;
@@ -675,7 +698,7 @@ export default class Gameplay extends Phaser.State {
         }
         if (!this.testPowerup) {
             this.testPowerup = powerup;
-            powerup.lifespan = Infinity;
+            powerup.setLifetime(Infinity);
         }
         this.groupPowerups.add(powerup);
         this.game.physics.p2.enable(powerup);

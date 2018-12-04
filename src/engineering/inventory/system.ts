@@ -30,6 +30,13 @@ abstract class Ship {
     public cargoHoldYStart: number;
 }
 
+export const INCINERATOR_BOUNDS: Phaser.Rectangle = new Phaser.Rectangle(
+    1024 - 128, // mAgIc nUmBeRs
+    128,
+    64,
+    64,
+);
+
 export class BasicShip extends Ship {
     constructor() {
         super();
