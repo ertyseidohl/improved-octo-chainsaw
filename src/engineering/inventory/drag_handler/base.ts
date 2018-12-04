@@ -14,6 +14,8 @@ export abstract class BaseDragHandler {
 
     public abstract dragUpdate(comp: BaseComponent): void;
 
+    public abstract getCurrentHandlerMode(): HandlerMode;
+
 }
 
 export class GlobalDragState {
