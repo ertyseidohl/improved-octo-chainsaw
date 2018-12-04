@@ -42,7 +42,7 @@ export class PowerSubSystem extends SubSystem {
         source.plugIn(plugIndex, wire);
         sink.plugIn(plugIndex, wire);
 
-        sink.updatePower(sink.getPower() + 1);
+        sink.updatePower(sink.getPotential() + 1);
     }
 
     public detach(source: BaseComponent, sink: BaseComponent, wire: ConnectedWire): void {
