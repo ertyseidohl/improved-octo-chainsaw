@@ -16,4 +16,12 @@ export class GunSubSystem {
         return guns;
     }
 
+    public getPotentialGuns(): number {
+        let guns = 0;
+        for (const component of this.inventorySystem.getAllComponents()) {
+            guns += component.getPotentialGuns();
+        }
+        return guns;
+    }
+
 }

@@ -106,6 +106,10 @@ export abstract class BaseComponent extends Phaser.Sprite {
         return this.componentState.getPower();
     }
 
+    public getPotential() {
+        return this.componentState.getPotential();
+    }
+
     public isOnline() {
         return this.componentState.isOnline();
     }
@@ -118,7 +122,15 @@ export abstract class BaseComponent extends Phaser.Sprite {
         return 0;
     }
 
+    public getPotentialSpeed(): number {
+        return 0;
+    }
+
     public getGuns(): number {
+        return 0;
+    }
+
+    public getPotentialGuns(): number {
         return 0;
     }
 

@@ -49,6 +49,10 @@ export class BasicGun extends BaseComponent {
         return Math.floor(this.getPower() / 2);
     }
 
+    public getPotentialGuns(): number {
+        return Math.floor(this.getPotential() / 2);
+    }
+
     public getPowerPads(index: number): Phaser.Point {
         return new Phaser.Point(
             this.x + this.powerPadsOffsets[index].x,

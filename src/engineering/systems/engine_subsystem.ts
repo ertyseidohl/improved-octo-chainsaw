@@ -16,4 +16,12 @@ export class EngineSubSystem {
         return speed;
     }
 
+    public getPotentialSpeed(): number {
+        let speed = 0;
+        for (const component of this.inventorySystem.getAllComponents()) {
+            speed += component.getPotentialSpeed();
+        }
+        return speed;
+    }
+
 }
