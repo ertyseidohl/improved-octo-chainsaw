@@ -1,8 +1,10 @@
 import { Game } from "phaser-ce";
-import { BaseComponent } from "./base_component";
-import { BaseDragHandler } from "./drag_handler/base";
+import { BaseComponent, PowerType } from "./base_component";
+import { BaseDragHandler, HandlerMode } from "./drag_handler/base";
 
+import Engineering from "../engineering";
 import { PowerSubSystem } from "../systems/power_subsystem";
+import { Engine } from "./engine";
 
 export const NUM_TILE_SPRITES = 9;
 
@@ -98,10 +100,11 @@ export class InventorySystem {
     private components: BaseComponent[];
 
     private displayText: Phaser.Text;
+    private engineeringRefDontUse: Engineering;
 
     constructor(game: Phaser.Game, x: number, y: number,
                 tileWidth: number, tileHeight: number,
-                ship: Ship, powerSystem: PowerSubSystem) {
+                ship: Ship, powerSystem: PowerSubSystem, engineeringRefDontUse: Engineering) {
 
         this.game = game;
         this.ship = ship;
@@ -147,7 +150,7 @@ export class InventorySystem {
         };
 
         this.powerSystem = powerSystem;
-
+        this.engineeringRefDontUse = engineeringRefDontUse;
     }
 
     public getAllComponents(): BaseComponent[] {
@@ -203,6 +206,19 @@ export class InventorySystem {
         }
 
         this.components.push(component);
+
+        switch (this.dragHandler.getCurrentHandlerMode()) {
+            case HandlerMode.CONNECT:
+                if (component.getPowerType() === PowerType.Source) {
+                    this.engineeringRefDontUse.addHandleToComponent(component);
+                }
+                component.lockDrag();
+                break;
+            case HandlerMode.MOVE:
+                component.unlockDrag();
+                break;
+        }
+
         return this.gridIndexToPixels(index.x, index.y);
     }
 

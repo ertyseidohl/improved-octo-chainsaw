@@ -39,8 +39,8 @@ class BorderBitmaps {
 
     private count = -1;
 
-    constructor(private bg:  Phaser.BitmapData,
-                private fg:  Phaser.BitmapData,
+    constructor(private bg: Phaser.BitmapData,
+                private fg: Phaser.BitmapData,
                 private bgs: Phaser.Sprite,
                 private fgs: Phaser.Sprite) {
     }
@@ -148,6 +148,7 @@ export default class Engineering {
             32, 32,
             new BasicShip(),
             this.powerSystem,
+            this,
         );
         this.system = new System(this.inventorySystem);
 
@@ -368,6 +369,14 @@ export default class Engineering {
         return this.addComponent(newComponent, null, true);
     }
 
+    // DO NOT CALL THIS FUNCTION, HACK HACK HACK HACK
+    public addHandleToComponent(c: BaseComponent): void {
+        if (c.getPowerType() === PowerType.Source && c.getNextPowerPadIndex() >= 0 && c.onShip) {
+            const pad = new StartPad(this.game, c, this.inventorySystem, this.powerSystem, this.wireGroup);
+            this.powerHandleGroup.add(pad);
+        }
+    }
+
     // PRIVATE METHODS
     private addComponent(
         newComponent: BaseComponent, gridPos?: Phaser.Point, destroyOnFail: boolean = false,
@@ -427,10 +436,7 @@ export default class Engineering {
 
                 for (const c of this.inventorySystem.getAllComponents()) {
                     c.lockDrag();
-                    if (c.getPowerType() === PowerType.Source && c.getNextPowerPadIndex() >= 0 && c.onShip) {
-                        const pad = new StartPad(this.game, c, this.inventorySystem, this.powerSystem, this.wireGroup);
-                        this.powerHandleGroup.add(pad);
-                    }
+                    this.addHandleToComponent(c);
                 }
 
                 this.wireGroup.visible = true;
