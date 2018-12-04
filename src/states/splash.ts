@@ -6,7 +6,7 @@ export default class Splash extends Phaser.State {
     private text: Phaser.Text;
 
     public preload(): void {
-        this.game.load.image("splash", "../assets/splash.png");
+        this.game.load.image("splash", "./assets/splash.png");
     }
 
     // METHODS

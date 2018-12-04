@@ -82,21 +82,21 @@ const HUD_TEXT_STYLE: Phaser.PhaserTextStyle = {
 export default class Engineering {
 
     public static preload(game: Phaser.Game): void {
-        game.load.spritesheet("engine_1", "../assets/engine_1.png", 32, 64, 5);
-        game.load.spritesheet("big_engine", "../assets/big_engine.png", 64, 64, 3);
+        game.load.spritesheet("engine_1", "./assets/engine_1.png", 32, 64, 5);
+        game.load.spritesheet("big_engine", "./assets/big_engine.png", 64, 64, 3);
 
-        game.load.spritesheet("gun_1", "../assets/gun_1.png", 32, 32 * 3, 5);
-        game.load.spritesheet("gun_small", "../assets/gun_small.png", 32, 32 * 2, 5);
-        game.load.spritesheet("energy_cell", "../assets/energy_cell.png", 32, 32, 5);
-        game.load.spritesheet("shield_generator", "../assets/shield_generator.png", 64, 32, 5);
+        game.load.spritesheet("gun_1", "./assets/gun_1.png", 32, 32 * 3, 5);
+        game.load.spritesheet("gun_small", "./assets/gun_small.png", 32, 32 * 2, 5);
+        game.load.spritesheet("energy_cell", "./assets/energy_cell.png", 32, 32, 5);
+        game.load.spritesheet("shield_generator", "./assets/shield_generator.png", 64, 32, 5);
 
-        game.load.image("incinerator", "../assets/incinerator.png");
+        game.load.image("incinerator", "./assets/incinerator.png");
 
         for (let i: number = 1; i <= NUM_TILE_SPRITES; i++) {
-            game.load.image(`floor_tile_${i}`, `../assets/floor_tile_${i}.png`);
+            game.load.image(`floor_tile_${i}`, `./assets/floor_tile_${i}.png`);
         }
 
-        game.load.spritesheet("wire", "../assets/wire.png", 4, 4, 2);
+        game.load.spritesheet("wire", "./assets/wire.png", 4, 4, 2);
     }
 
     public bounds: Phaser.Rectangle;

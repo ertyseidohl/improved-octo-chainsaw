@@ -10,17 +10,17 @@ export default class Startup extends Phaser.State {
         this.loadingCount = 0;
 
         // sound
-        this.game.load.audio("blaster", "../assets/Laser_Shoot10.wav");
-        this.game.load.audio("hit", "../assets/Explosion12.wav");
-        this.game.load.audio("explosion", "../assets/Explosion30.wav");
-        this.game.load.audio("hurt", "../assets/Hit_Hurt14.wav");
-        this.game.load.audio("dead", "../assets/Explosion45.wav");
-        this.game.load.audio("powerup", "../assets/Powerup.wav");
-        this.game.load.audio("burn", "../assets/Explosion5.wav");
+        this.game.load.audio("blaster", "./assets/Laser_Shoot10.wav");
+        this.game.load.audio("hit", "./assets/Explosion12.wav");
+        this.game.load.audio("explosion", "./assets/Explosion30.wav");
+        this.game.load.audio("hurt", "./assets/Hit_Hurt14.wav");
+        this.game.load.audio("dead", "./assets/Explosion45.wav");
+        this.game.load.audio("powerup", "./assets/Powerup.wav");
+        this.game.load.audio("burn", "./assets/Explosion5.wav");
 
-        this.game.load.audio("visager_final", "../assets/visager_final.mp3");
-        this.game.load.audio("visager_game", "../assets/visager_game.mp3");
-        this.game.load.audio("visager_boss", "../assets/visager_boss.mp3");
+        this.game.load.audio("visager_final", "./assets/visager_final.mp3");
+        this.game.load.audio("visager_game", "./assets/visager_game.mp3");
+        this.game.load.audio("visager_boss", "./assets/visager_boss.mp3");
     }
 
     public create(): void {

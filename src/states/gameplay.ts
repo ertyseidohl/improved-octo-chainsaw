@@ -111,46 +111,46 @@ export default class Gameplay extends Phaser.State {
     private enter: Phaser.Key;
 
     public preload(): void {
-        this.game.load.image("player", "../assets/ship.png");
-        this.game.load.image("border", "../assets/border.png");
-        this.game.load.image("bullet", "../assets/laser.png");
-        this.game.load.image("enemyBullet", "../assets/enemy-bullet.png");
-        this.game.load.image("powerup", "../assets/powerup.png");
-        this.game.load.image("health", "../assets/powerup.png");
-        this.game.load.image("engine", "../assets/powerup.png");
-        this.game.load.image("weight", "../assets/powerup.png");
+        this.game.load.image("player", "./assets/ship.png");
+        this.game.load.image("border", "./assets/border.png");
+        this.game.load.image("bullet", "./assets/laser.png");
+        this.game.load.image("enemyBullet", "./assets/enemy-bullet.png");
+        this.game.load.image("powerup", "./assets/powerup.png");
+        this.game.load.image("health", "./assets/powerup.png");
+        this.game.load.image("engine", "./assets/powerup.png");
+        this.game.load.image("weight", "./assets/powerup.png");
 
-        this.game.load.image("base_station", "../assets/base_station.png");
+        this.game.load.image("base_station", "./assets/base_station.png");
 
-        this.game.load.spritesheet("drag_wire", "../assets/drag_wire.png", 32, 256, 2);
+        this.game.load.spritesheet("drag_wire", "./assets/drag_wire.png", 32, 256, 2);
 
-        this.game.load.image("enemy", "../assets/enemy_1.png");
-        this.game.load.spritesheet("boss_enemy", "../assets/boss_enemy.png", 128, 128, 3);
-        this.game.load.spritesheet("dummy_drone", "../assets/dummy_drone.png", 64, 64, 3);
-        this.game.load.spritesheet("bomb_enemy", "../assets/enemy_2.png", 64, 64, 1);
+        this.game.load.image("enemy", "./assets/enemy_1.png");
+        this.game.load.spritesheet("boss_enemy", "./assets/boss_enemy.png", 128, 128, 3);
+        this.game.load.spritesheet("dummy_drone", "./assets/dummy_drone.png", 64, 64, 3);
+        this.game.load.spritesheet("bomb_enemy", "./assets/enemy_2.png", 64, 64, 1);
 
-        this.game.load.spritesheet("prince", "../assets/prince.png", 128, 128, 4);
-        this.game.load.spritesheet("explosion", "../assets/explosion.png", 64, 64, 6);
-        this.game.load.spritesheet("explosion_small", "../assets/explosion_small.png", 32, 32, 4);
-        this.game.load.spritesheet("missile_launcher", "../assets/missile_launcher.png", 64, 64, 8);
-        this.game.load.spritesheet("energy_cell_hd", "../assets/energy_cell_2.png", 32, 32, 5);
-        this.game.load.image("background", "../assets/background.png");
-        this.game.load.image("stars_1", "../assets/stars_1.png");
-        this.game.load.image("stars_2", "../assets/stars_2.png");
-        this.game.load.image("stars_3", "../assets/stars_3.png");
+        this.game.load.spritesheet("prince", "./assets/prince.png", 128, 128, 4);
+        this.game.load.spritesheet("explosion", "./assets/explosion.png", 64, 64, 6);
+        this.game.load.spritesheet("explosion_small", "./assets/explosion_small.png", 32, 32, 4);
+        this.game.load.spritesheet("missile_launcher", "./assets/missile_launcher.png", 64, 64, 8);
+        this.game.load.spritesheet("energy_cell_hd", "./assets/energy_cell_2.png", 32, 32, 5);
+        this.game.load.image("background", "./assets/background.png");
+        this.game.load.image("stars_1", "./assets/stars_1.png");
+        this.game.load.image("stars_2", "./assets/stars_2.png");
+        this.game.load.image("stars_3", "./assets/stars_3.png");
 
-        this.game.load.spritesheet("button_z", "../assets/button_z.png", 32, 32, 2);
-        this.game.load.spritesheet("button_x", "../assets/button_x.png", 32, 32, 2);
-        this.game.load.spritesheet("button_c", "../assets/button_c.png", 32, 32, 2);
+        this.game.load.spritesheet("button_z", "./assets/button_z.png", 32, 32, 2);
+        this.game.load.spritesheet("button_x", "./assets/button_x.png", 32, 32, 2);
+        this.game.load.spritesheet("button_c", "./assets/button_c.png", 32, 32, 2);
 
-        this.game.load.image("gun_1_powerup", "../assets/gun_1_powerup.png");
-        this.game.load.image("engine_1_powerup", "../assets/engine_1_powerup.png");
-        this.game.load.image("shield_powerup", "../assets/shield_powerup.png");
-        this.game.load.image("big_engine_powerup", "../assets/big_engine_powerup.png");
-        this.game.load.image("energy_cell_powerup", "../assets/energy_cell_powerup.png");
-        this.game.load.image("energy_cell_hd_powerup", "../assets/energy_cell_hd_powerup.png");
-        this.game.load.image("space_junk", "../assets/space_junk.png");
-        this.game.load.image("space_diamond", "../assets/space_diamond.png");
+        this.game.load.image("gun_1_powerup", "./assets/gun_1_powerup.png");
+        this.game.load.image("engine_1_powerup", "./assets/engine_1_powerup.png");
+        this.game.load.image("shield_powerup", "./assets/shield_powerup.png");
+        this.game.load.image("big_engine_powerup", "./assets/big_engine_powerup.png");
+        this.game.load.image("energy_cell_powerup", "./assets/energy_cell_powerup.png");
+        this.game.load.image("energy_cell_hd_powerup", "./assets/energy_cell_hd_powerup.png");
+        this.game.load.image("space_junk", "./assets/space_junk.png");
+        this.game.load.image("space_diamond", "./assets/space_diamond.png");
 
         Engineering.preload(this.game);
     }
