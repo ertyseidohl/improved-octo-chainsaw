@@ -249,7 +249,7 @@ export const LEVELS: Level[] = [
             gameState.stopAllMusic();
             gameState.playSafeMusic();
             gameState.displayText(
-                "Thanks! just one more prince!", 400);
+                "Thanks! just two more princes!", 400);
             gameState.generateBaseStation();
         },
         update: (gameState: Gameplay) => { /* empty */ },
