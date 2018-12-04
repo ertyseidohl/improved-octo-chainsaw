@@ -291,11 +291,13 @@ export default class Engineering {
             if (c instanceof Prince) {
                 this.points += 100;
                 this.componentGroup.remove(c);
+                this.inventorySystem.release(c);
                 c.destroy();
             }
             if (c instanceof SpaceDiamond) {
                 this.points += 20;
                 this.componentGroup.remove(c);
+                this.inventorySystem.release(c);
                 c.destroy();
             }
         });
