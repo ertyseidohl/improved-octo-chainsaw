@@ -10,12 +10,19 @@ class NoopHandler extends BaseDragHandler {
 
     // PUBLIC METHODS
     public dragStart(comp: BaseComponent): void {
+        // NOOP;
     }
 
     public dragStop(comp: BaseComponent): void {
+        // NOOP;
     }
 
     public dragUpdate(comp: BaseComponent): void {
+        // NOOP;
+    }
+
+    public getCurrentHandlerMode(): HandlerMode  {
+        return HandlerMode.NONE;
     }
 }
 
@@ -59,6 +66,10 @@ export class MultiDragHandler extends BaseDragHandler {
         if (!this.globalDragState.currentlyActive) {
             this.handler = handler;
         }
+    }
+
+    public getCurrentHandlerMode(): HandlerMode {
+        return this.currentHandlerMode;
     }
 
     // PUBLIC PROPERTIES
