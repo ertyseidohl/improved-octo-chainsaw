@@ -1,11 +1,23 @@
 // DEPENDENCIES
 import { BaseComponent } from "../base_component";
 import { BaseDragHandler, GlobalDragState, HandlerMode } from "./base";
-import { ConnectDragHandler } from "./connect";
 import { MoveDragHandler } from "./move";
 
 import { PowerSubSystem } from "../../systems/power_subsystem";
 import { InventorySystem } from "../system";
+
+class NoopHandler extends BaseDragHandler {
+
+    // PUBLIC METHODS
+    public dragStart(comp: BaseComponent): void {
+    }
+
+    public dragStop(comp: BaseComponent): void {
+    }
+
+    public dragUpdate(comp: BaseComponent): void {
+    }
+}
 
 export class MultiDragHandler extends BaseDragHandler {
 
@@ -27,11 +39,7 @@ export class MultiDragHandler extends BaseDragHandler {
         this.globalDragState = new GlobalDragState();
 
         this.handlers[HandlerMode.MOVE] = new MoveDragHandler(inventorySystem);
-        this.handlers[HandlerMode.CONNECT] = new ConnectDragHandler(
-            game,
-            inventorySystem,
-            powerSystem,
-        );
+        this.handlers[HandlerMode.CONNECT] = new NoopHandler();
     }
 
     // PUBLIC METHODS
