@@ -1,6 +1,9 @@
 import { ComponentState, StateConfig } from "./component_state";
 import { Constraints, INCINERATOR_BOUNDS, InventorySystem } from "./system";
 
+import { PowerSubSystem } from "../systems/power_subsystem";
+import { ConnectedWire } from "../wiring/wire";
+
 export enum PowerType {
     None,
     Source,
@@ -103,6 +106,10 @@ export abstract class BaseComponent extends Phaser.Sprite {
         return this.componentState.getPower();
     }
 
+    public getPotential() {
+        return this.componentState.getPotential();
+    }
+
     public isOnline() {
         return this.componentState.isOnline();
     }
@@ -115,7 +122,15 @@ export abstract class BaseComponent extends Phaser.Sprite {
         return 0;
     }
 
+    public getPotentialSpeed(): number {
+        return 0;
+    }
+
     public getGuns(): number {
+        return 0;
+    }
+
+    public getPotentialGuns(): number {
         return 0;
     }
 
@@ -134,12 +149,24 @@ export abstract class BaseComponent extends Phaser.Sprite {
         return null;
     }
 
-    public plugIn(index: any): void {
+    public disconnectAll(powerSystem: PowerSubSystem): void {
+        // noop
+    }
+
+    public plugOut(index: number) {
+        // noop
+    }
+
+    public plugIn(index: number, wire: ConnectedWire): void {
         // noop
     }
 
     private onDragStart(game: any, pointer: Phaser.Pointer): void {
         this.inventorySystem.dragHandler.dragStart(this);
+
+        if (this.getPowerType() === PowerType.Source) {
+            this.disconnectAll(this.inventorySystem.powerSystem);
+        }
     }
 
     private onDragStop(game: any, pointer: Phaser.Pointer): void {

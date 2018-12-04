@@ -26,11 +26,15 @@ export class System {
         const topSpeed = this.engineSubSystem.getSpeed();
         const guns = this.gunsSubSystem.getGuns();
         const shielding = this.shieldSubSystem.getShielding();
+        const potentialSpeed = this.engineSubSystem.getPotentialSpeed();
+        const potentialGuns = this.gunsSubSystem.getPotentialGuns();
         return {
             guns,
             topSpeed,
             weight,
             shielding,
+            potentialSpeed,
+            potentialGuns,
         };
     }
 

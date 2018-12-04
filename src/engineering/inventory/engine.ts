@@ -41,6 +41,10 @@ export class Engine extends BaseComponent {
         return this.getPower();
     }
 
+    public getPotentialSpeed(): number {
+        return this.getStateConfig().powerConsumer.powerLoad;
+    }
+
     public getDescription(): string[] {
         return [
             // tslint:disable-next-line

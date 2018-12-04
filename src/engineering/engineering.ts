@@ -30,6 +30,29 @@ export interface ShipUpdateMessage {
     guns: number;
     weight: number;
     shielding: number;
+
+    potentialSpeed: number;
+    potentialGuns: number;
+}
+
+class BorderBitmaps {
+
+    private count = -1;
+
+    constructor(private bg:  Phaser.BitmapData,
+                private fg:  Phaser.BitmapData,
+                private bgs: Phaser.Sprite,
+                private fgs: Phaser.Sprite) {
+    }
+
+    set width(count: number) {
+        if (count !== this.count) {
+            this.count = count;
+            const width = 16 + 5 * (count - 1);
+            this.bgs.resizeFrame(null, 2 + width, this.bg.height)
+            this.fgs.resizeFrame(null, width, this.fg.height)
+        }
+    }
 }
 
 // HUD
@@ -101,6 +124,10 @@ export default class Engineering {
     private engineIcons: Phaser.Sprite[];
     private weightIcons: Phaser.Sprite[];
 
+    private healthBorder: BorderBitmaps;
+    private engineBorder: BorderBitmaps;
+    private weightBorder: BorderBitmaps;
+
     private testComponent: BaseComponent;
 
     private cargoHoldText: Phaser.Text;
@@ -114,19 +141,19 @@ export default class Engineering {
 
         this.points = 0;
 
+        this.powerSystem = new PowerSubSystem();
         this.inventorySystem = new InventorySystem(
             this.game,
             600, 100,
             32, 32,
             new BasicShip(),
+            this.powerSystem,
         );
+        this.system = new System(this.inventorySystem);
 
         this.mouseInBounds = false;
 
         this.playerHealth = MAX_HEALTH;
-
-        this.powerSystem = new PowerSubSystem();
-        this.system = new System(this.inventorySystem);
 
         this.componentGroup = this.game.add.group();
         this.powerHandleGroup = this.game.add.group();
@@ -160,7 +187,7 @@ export default class Engineering {
             "Health: ",
             HUD_TEXT_STYLE,
         );
-
+        this.healthBorder = this.makeBorder(MAX_HEALTH, HEALTH_DISPLAY_X, HEALTH_DISPLAY_Y);
         for (let i = 0; i < MAX_HEALTH; i++) {
             this.healthIcons[i] = this.game.add.sprite(
                 this.game.width / 2 + (5 * i) + HEALTH_DISPLAY_X,
@@ -176,6 +203,7 @@ export default class Engineering {
             HUD_TEXT_STYLE,
         );
 
+        this.engineBorder = this.makeBorder(MAX_ENGINE, ENGINE_DISPLAY_X, ENGINE_DISPLAY_Y);
         for (let i = 0; i < MAX_ENGINE; i++) {
             this.engineIcons[i] = this.game.add.sprite(
                 this.game.width / 2 + (5 * i) + ENGINE_DISPLAY_X,
@@ -191,7 +219,8 @@ export default class Engineering {
             HUD_TEXT_STYLE,
         );
 
-        for (let i = 0; i < MAX_ENGINE; i++) {
+        this.weightBorder = this.makeBorder(MAX_WEIGHT, WEIGHT_DISPLAY_X, WEIGHT_DISPLAY_Y);
+        for (let i = 0; i < MAX_WEIGHT; i++) {
             this.weightIcons[i] = this.game.add.sprite(
                 this.game.width / 2 + (5 * i) + WEIGHT_DISPLAY_X,
                 WEIGHT_DISPLAY_Y,
@@ -237,10 +266,12 @@ export default class Engineering {
         for (let i: number = 0; i < MAX_ENGINE; i++)  {
             this.engineIcons[i].visible = i < updateMessage.topSpeed;
         }
+        this.engineBorder.width = Math.min(MAX_ENGINE,
+                                           updateMessage.potentialSpeed);
         for (let i = 0; i < MAX_HEALTH; i++) {
             this.healthIcons[i].visible = i < this.playerHealth;
         }
-        for (let i = 0; i < MAX_ENGINE; i++) {
+        for (let i = 0; i < MAX_WEIGHT; i++) {
             this.weightIcons[i].visible = i < updateMessage.weight;
         }
 
@@ -323,12 +354,6 @@ export default class Engineering {
             case COMPONENT_TYPES.SHIELD:
                 newComponent = new ShieldGenerator(this.game, this.inventorySystem);
                 break;
-            case COMPONENT_TYPES.ENERGY_CELL:
-                newComponent = new EnergyCell(this.game, this.inventorySystem);
-                break;
-            case COMPONENT_TYPES.ENERGY_CELL_HD:
-                newComponent = new EnergyCellHD(this.game, this.inventorySystem);
-                break;
             default:
                 throw new Error(`unknown component type for createComponentByname: ${componentType}`);
         }
@@ -397,7 +422,7 @@ export default class Engineering {
 
                 for (const c of this.inventorySystem.getAllComponents()) {
                     c.lockDrag();
-                    if (c.getPowerType() === PowerType.Source && c.getNextPowerPadIndex() >= 0) {
+                    if (c.getPowerType() === PowerType.Source && c.getNextPowerPadIndex() >= 0 && c.onShip) {
                         const pad = new StartPad(this.game, c, this.inventorySystem, this.powerSystem, this.wireGroup);
                         this.powerHandleGroup.add(pad);
                     }
@@ -419,6 +444,20 @@ export default class Engineering {
 
                 break;
         }
+    }
+
+    private makeBorder(count: number, x: number, y: number): BorderBitmaps {
+        const width = 16 + 5 * (count - 1);
+        const height = 16;
+        const bg = this.game.add.bitmapData(2 + width, 2 + height);
+        bg.fill(96, 96, 96);
+        const bgs = this.game.add.sprite(this.game.width / 2 + x - 1,
+                                         y - 1,
+                                         bg);
+        const fg = this.game.add.bitmapData(width, height);
+        const fgs = this.game.add.sprite(this.game.width / 2 + x, y, fg);
+        fg.fill(0, 0, 0);
+        return new BorderBitmaps(bg, fg, bgs, fgs);
     }
 
 }

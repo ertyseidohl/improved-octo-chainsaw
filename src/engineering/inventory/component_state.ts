@@ -64,4 +64,8 @@ export class ComponentState {
         }
         return 0;
     }
+
+    public getPotential(): number {
+        return this.power;
+    }
 }

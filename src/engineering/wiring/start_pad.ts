@@ -33,6 +33,13 @@ export class StartPad extends Phaser.Sprite {
         this.resetPosition();
     }
 
+    public destroy(): void {
+        if (this.wire) {
+            this.wire.destroy();
+        }
+        super.destroy();
+    }
+
     private onDragStart(game: any, pointer: Phaser.Pointer): void {
         this.wire = new DraggingWire(this.game, this.sourceComponent, this);
     }
@@ -58,19 +65,12 @@ export class StartPad extends Phaser.Sprite {
             const wire = new ConnectedWire(this.game, this.sourceComponent,
                                             srcIndex,  sinkComponent, sinkIndex, this.wire.color);
             this.wireGroup.add(wire);
-            this.powerSystem.attach(this.sourceComponent, sinkComponent, srcIndex);
+            this.powerSystem.attach(this.sourceComponent, sinkComponent, srcIndex, wire);
         }
         this.wire.destroy();
         this.wire = null;
 
         this.resetPosition();
-    }
-
-    private destroy(): void {
-        if (this.wire) {
-            this.wire.destroy();
-        }
-        super.destroy();
     }
 
     private onDragUpdate(): void {

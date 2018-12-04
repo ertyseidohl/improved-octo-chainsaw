@@ -159,6 +159,14 @@ export class ConnectedWire extends Wire {
         const pad = this.terminal.getPowerPads(this.terminalPadIndex);
         return pad;
     }
+
+    public getTerminalComponent(): BaseComponent {
+        return this.terminal;
+    }
+
+    public getOriginPadIndex(): number {
+        return this.originPadIndex;
+    }
 }
 
 export class DraggingWire extends Wire {

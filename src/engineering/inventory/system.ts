@@ -2,6 +2,8 @@ import { Game } from "phaser-ce";
 import { BaseComponent } from "./base_component";
 import { BaseDragHandler } from "./drag_handler/base";
 
+import { PowerSubSystem } from "../systems/power_subsystem";
+
 export const NUM_TILE_SPRITES = 9;
 
 const DISPLAY_TEXT_BUFFER = 32;
@@ -74,6 +76,7 @@ class Index {
 export class InventorySystem {
 
     public dragHandler: BaseDragHandler;
+    public powerSystem: PowerSubSystem;
 
     private x: number;
     private y: number;
@@ -98,7 +101,7 @@ export class InventorySystem {
 
     constructor(game: Phaser.Game, x: number, y: number,
                 tileWidth: number, tileHeight: number,
-                ship: Ship) {
+                ship: Ship, powerSystem: PowerSubSystem) {
 
         this.game = game;
         this.ship = ship;
@@ -142,6 +145,8 @@ export class InventorySystem {
             [Constraints.DOUBLE_FRONT]: 2,
             [Constraints.DOUBLE_BACK]: 2,
         };
+
+        this.powerSystem = powerSystem;
 
     }
 
