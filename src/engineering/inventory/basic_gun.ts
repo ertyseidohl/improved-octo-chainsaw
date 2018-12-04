@@ -20,7 +20,7 @@ export class BasicGun extends BaseComponent {
         return {
             powerConsumer: {
                 powerLoad: 2,
-                minPowerDraw: 1.5,
+                minPowerDraw: 1,
             },
             powerSource: null,
             weight: 6,
@@ -41,12 +41,16 @@ export class BasicGun extends BaseComponent {
     public getDescription(): string[] {
         return [
             // tslint:disable-next-line
-            "The GK-305 model is the hottest on the market! No seriously, you'll need, like, three heatsinks. Max wires: 2",
+            "The GK-305 model is the hottest on the market! No seriously, you'll need, like, three heatsinks. Requires one wire, can take two.",
         ];
     }
 
     public getGuns(): number {
         return Math.floor(this.getPower() / 2);
+    }
+
+    public getPotentialGuns(): number {
+        return Math.floor(this.getPotential() / 2);
     }
 
     public getPowerPads(index: number): Phaser.Point {

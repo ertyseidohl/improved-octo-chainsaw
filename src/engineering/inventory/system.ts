@@ -6,7 +6,7 @@ import { PowerSubSystem } from "../systems/power_subsystem";
 
 export const NUM_TILE_SPRITES = 9;
 
-const DISPLAY_TEXT_BUFFER = 100;
+const DISPLAY_TEXT_BUFFER = 32;
 const DISPLAY_TEXT_STYLE: Phaser.PhaserTextStyle = {
     font: "pixelsix",
     fontSize: 24,

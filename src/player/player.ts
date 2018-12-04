@@ -1,6 +1,6 @@
 import { ShipUpdateMessage } from "../engineering/engineering";
 
-const PLAYER_SPEED: number = 50;
+const PLAYER_SPEED: number = 100;
 const PLAYER_SCALE: number = 2;
 
 const BULLET_SPEED: number = 700;

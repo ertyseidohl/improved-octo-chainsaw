@@ -44,10 +44,6 @@ export class ComponentState {
         return this.weight;
     }
 
-    public getPowerLoad(): number {
-        return this.powerConsumer.powerLoad;
-    }
-
     public updatePower(power: number): void {
         if (power > this.powerConsumer.powerLoad) {
             power = this.powerConsumer.powerLoad;
@@ -63,9 +59,13 @@ export class ComponentState {
     }
 
     public getPower(): number {
-        if (this.isAlive() && this.isOnline()) {
+        if (this.isAlive()) {
             return this.power;
         }
         return 0;
+    }
+
+    public getPotential(): number {
+        return this.power;
     }
 }

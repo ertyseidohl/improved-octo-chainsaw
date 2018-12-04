@@ -17,6 +17,7 @@ export enum WAVE_TYPE {
 
 export enum COMPONENT_TYPES {
     BASIC_GUN,
+    BIG_ENGINE,
     ENERGY_CELL,
     ENERGY_CELL_HD,
     ENGINE,
@@ -33,6 +34,6 @@ export enum ENEMY_TYPES {
     BOMB,
 }
 
-export const MAX_HEALTH: number = 4;
+export const MAX_HEALTH: number = 100; // TODO
 export const MAX_ENGINE: number = 10;
 export const MAX_WEIGHT: number = 10;

@@ -1,5 +1,6 @@
 import { BaseComponent, PowerType } from "./inventory/base_component";
 import { BasicGun } from "./inventory/basic_gun";
+import { BigEngine } from "./inventory/big_engine";
 import { EnergyCell } from "./inventory/energy_cell";
 import { EnergyCellHD } from "./inventory/energy_cell_hd";
 import { Engine } from "./inventory/engine";
@@ -15,7 +16,7 @@ import { SpaceJunk } from "./inventory/space_junk";
 
 import { HandlerMode } from "./inventory/drag_handler/base";
 import { MultiDragHandler } from "./inventory/drag_handler/multi";
-import { BasicShip, InventorySystem, NUM_TILE_SPRITES, INCINERATOR_BOUNDS} from "./inventory/system";
+import { BasicShip, INCINERATOR_BOUNDS, InventorySystem, NUM_TILE_SPRITES} from "./inventory/system";
 
 import { PowerSubSystem } from "./systems/power_subsystem";
 import { System } from "./systems/system";
@@ -23,14 +24,35 @@ import { System } from "./systems/system";
 import { COMPONENT_TYPES, MAX_ENGINE, MAX_HEALTH, MAX_WEIGHT } from "../constants";
 
 import { StartPad } from "./wiring/start_pad";
-import { ConnectedWire } from "./wiring/wire";
-import { Rectangle } from "phaser-ce";
 
 export interface ShipUpdateMessage {
     topSpeed: number;
     guns: number;
     weight: number;
     shielding: number;
+
+    potentialSpeed: number;
+    potentialGuns: number;
+}
+
+class BorderBitmaps {
+
+    private count = -1;
+
+    constructor(private bg:  Phaser.BitmapData,
+                private fg:  Phaser.BitmapData,
+                private bgs: Phaser.Sprite,
+                private fgs: Phaser.Sprite) {
+    }
+
+    set width(count: number) {
+        if (count !== this.count) {
+            this.count = count;
+            const width = 16 + 5 * (count - 1);
+            this.bgs.resizeFrame(null, 2 + width, this.bg.height)
+            this.fgs.resizeFrame(null, width, this.fg.height)
+        }
+    }
 }
 
 // HUD
@@ -61,11 +83,11 @@ export default class Engineering {
 
     public static preload(game: Phaser.Game): void {
         game.load.spritesheet("engine_1", "../assets/engine_1.png", 32, 64, 5);
+        game.load.spritesheet("big_engine", "../assets/big_engine.png", 64, 64, 3);
 
         game.load.spritesheet("gun_1", "../assets/gun_1.png", 32, 32 * 3, 5);
         game.load.spritesheet("gun_small", "../assets/gun_small.png", 32, 32 * 2, 5);
         game.load.spritesheet("energy_cell", "../assets/energy_cell.png", 32, 32, 5);
-        game.load.spritesheet("energy_cell_2", "../assets/energy_cell_2.png", 32, 32, 5);
         game.load.spritesheet("shield_generator", "../assets/shield_generator.png", 64, 32, 5);
 
         game.load.image("incinerator", "../assets/incinerator.png");
@@ -101,6 +123,10 @@ export default class Engineering {
     private healthIcons: Phaser.Sprite[];
     private engineIcons: Phaser.Sprite[];
     private weightIcons: Phaser.Sprite[];
+
+    private healthBorder: BorderBitmaps;
+    private engineBorder: BorderBitmaps;
+    private weightBorder: BorderBitmaps;
 
     private testComponent: BaseComponent;
 
@@ -161,7 +187,7 @@ export default class Engineering {
             "Health: ",
             HUD_TEXT_STYLE,
         );
-
+        this.healthBorder = this.makeBorder(MAX_HEALTH, HEALTH_DISPLAY_X, HEALTH_DISPLAY_Y);
         for (let i = 0; i < MAX_HEALTH; i++) {
             this.healthIcons[i] = this.game.add.sprite(
                 this.game.width / 2 + (5 * i) + HEALTH_DISPLAY_X,
@@ -177,6 +203,7 @@ export default class Engineering {
             HUD_TEXT_STYLE,
         );
 
+        this.engineBorder = this.makeBorder(MAX_ENGINE, ENGINE_DISPLAY_X, ENGINE_DISPLAY_Y);
         for (let i = 0; i < MAX_ENGINE; i++) {
             this.engineIcons[i] = this.game.add.sprite(
                 this.game.width / 2 + (5 * i) + ENGINE_DISPLAY_X,
@@ -192,7 +219,8 @@ export default class Engineering {
             HUD_TEXT_STYLE,
         );
 
-        for (let i = 0; i < MAX_ENGINE; i++) {
+        this.weightBorder = this.makeBorder(MAX_WEIGHT, WEIGHT_DISPLAY_X, WEIGHT_DISPLAY_Y);
+        for (let i = 0; i < MAX_WEIGHT; i++) {
             this.weightIcons[i] = this.game.add.sprite(
                 this.game.width / 2 + (5 * i) + WEIGHT_DISPLAY_X,
                 WEIGHT_DISPLAY_Y,
@@ -238,10 +266,12 @@ export default class Engineering {
         for (let i: number = 0; i < MAX_ENGINE; i++)  {
             this.engineIcons[i].visible = i < updateMessage.topSpeed;
         }
+        this.engineBorder.width = Math.min(MAX_ENGINE,
+                                           updateMessage.potentialSpeed);
         for (let i = 0; i < MAX_HEALTH; i++) {
             this.healthIcons[i].visible = i < this.playerHealth;
         }
-        for (let i = 0; i < MAX_ENGINE; i++) {
+        for (let i = 0; i < MAX_WEIGHT; i++) {
             this.weightIcons[i].visible = i < updateMessage.weight;
         }
 
@@ -261,11 +291,13 @@ export default class Engineering {
             if (c instanceof Prince) {
                 this.points += 100;
                 this.componentGroup.remove(c);
+                this.inventorySystem.release(c);
                 c.destroy();
             }
             if (c instanceof SpaceDiamond) {
                 this.points += 20;
                 this.componentGroup.remove(c);
+                this.inventorySystem.release(c);
                 c.destroy();
             }
         });
@@ -306,8 +338,17 @@ export default class Engineering {
             case COMPONENT_TYPES.BASIC_GUN:
                 newComponent = new BasicGun(this.game, this.inventorySystem);
                 break;
+            case COMPONENT_TYPES.BIG_ENGINE:
+                newComponent = new BigEngine(this.game, this.inventorySystem);
+                break;
             case COMPONENT_TYPES.ENGINE:
                 newComponent = new Engine(this.game, this.inventorySystem);
+                break;
+            case COMPONENT_TYPES.ENERGY_CELL:
+                newComponent = new EnergyCell(this.game, this.inventorySystem);
+                break;
+            case COMPONENT_TYPES.ENERGY_CELL_HD:
+                newComponent = new EnergyCellHD(this.game, this.inventorySystem);
                 break;
             case COMPONENT_TYPES.PRINCE:
                 newComponent = new Prince(this.game, this.inventorySystem);
@@ -320,12 +361,6 @@ export default class Engineering {
                 break;
             case COMPONENT_TYPES.SHIELD:
                 newComponent = new ShieldGenerator(this.game, this.inventorySystem);
-                break;
-            case COMPONENT_TYPES.ENERGY_CELL:
-                newComponent = new EnergyCell(this.game, this.inventorySystem);
-                break;
-            case COMPONENT_TYPES.ENERGY_CELL_HD:
-                newComponent = new EnergyCellHD(this.game, this.inventorySystem);
                 break;
             default:
                 throw new Error(`unknown component type for createComponentByname: ${componentType}`);
@@ -365,6 +400,9 @@ export default class Engineering {
     private createStartingComponents(): void {
         const firstGun = new BasicGun(this.game, this.inventorySystem);
         this.addComponent(firstGun, null, false, true);
+
+        const p = new Prince(this.game, this.inventorySystem);
+        this.addComponent(p, null, false, true);
 
         const secondGun = new BasicGun(this.game, this.inventorySystem);
         this.addComponent(secondGun, null, false, true);
@@ -414,6 +452,20 @@ export default class Engineering {
 
                 break;
         }
+    }
+
+    private makeBorder(count: number, x: number, y: number): BorderBitmaps {
+        const width = 16 + 5 * (count - 1);
+        const height = 16;
+        const bg = this.game.add.bitmapData(2 + width, 2 + height);
+        bg.fill(96, 96, 96);
+        const bgs = this.game.add.sprite(this.game.width / 2 + x - 1,
+                                         y - 1,
+                                         bg);
+        const fg = this.game.add.bitmapData(width, height);
+        const fgs = this.game.add.sprite(this.game.width / 2 + x, y, fg);
+        fg.fill(0, 0, 0);
+        return new BorderBitmaps(bg, fg, bgs, fgs);
     }
 
 }

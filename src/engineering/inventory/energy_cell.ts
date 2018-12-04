@@ -19,10 +19,10 @@ export class EnergyCell extends BaseComponent {
         sizex: number = 1,
         sizey: number = 1,
     ) {
-        super(game, inventorySystem, "energy_cell", sizex, sizey, position);
+        super(game, inventorySystem, key, sizex, sizey, position);
 
         this.animation = this.animations.add("zap", [1, 2, 3, 4]);
-        this.animation.play(20, true);
+        this.animation.play(5, true);
 
         this.powerPadsIndexes = this.generatePlugs();
     }
@@ -60,7 +60,7 @@ export class EnergyCell extends BaseComponent {
         this.powerPadsIndexes.set(index, wire);
     }
 
-    public plugOut(index) {
+    public plugOut(index: number) {
         this.powerPadsUsed -= 1;
         this.powerPadsIndexes.set(index, null);
     }

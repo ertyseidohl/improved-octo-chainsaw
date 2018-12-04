@@ -16,6 +16,7 @@ export default class BombEnemy extends BaseEnemy {
     public getPowerupToSpawn(): COMPONENT_TYPES | null {
         const options = [
             COMPONENT_TYPES.BASIC_GUN,
+            COMPONENT_TYPES.BIG_ENGINE,
             COMPONENT_TYPES.ENGINE,
             COMPONENT_TYPES.SHIELD,
             COMPONENT_TYPES.ENERGY_CELL,

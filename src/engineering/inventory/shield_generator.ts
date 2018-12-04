@@ -39,7 +39,7 @@ export class ShieldGenerator extends BaseComponent {
 
     public getDescription(): string[] {
         return [
-            "Shield your ship from enemies, friends, frenemies, and strangers! Requires 4 power to run",
+            "Regenerates your health, but it's heavy and a power hog: Requires 4 power to run",
         ];
     }
 
