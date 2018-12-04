@@ -63,7 +63,7 @@ export class ComponentState {
     }
 
     public getPower(): number {
-        if (this.isAlive() && this.isOnline) {
+        if (this.isAlive() && this.isOnline()) {
             return this.power;
         }
         return 0;
