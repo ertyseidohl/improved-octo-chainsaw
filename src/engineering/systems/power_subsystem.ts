@@ -58,7 +58,8 @@ export class PowerSubSystem extends SubSystem {
 
         sink.updatePower(sink.getPower() - 1);
 
-        source.plugOut(wire.getOriginPadIndex());
+        source.plugOut(wire.getOriginPadIndex(),  wire);
+        sink.plugOut(wire.getOriginPadIndex(), wire);
     }
 
     public updateAllComponents(): void {

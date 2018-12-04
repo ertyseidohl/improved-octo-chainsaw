@@ -47,7 +47,7 @@ export class StartPad extends Phaser.Sprite {
     private onDragStop(): void {
         const sinkComponent = this.inventorySystem.find(new Phaser.Point(this.x, this.y));
 
-        if (!sinkComponent || sinkComponent.getPowerType() === PowerType.Source) {
+        if (!sinkComponent || sinkComponent.getPowerType() === PowerType.Source || !sinkComponent.onShip) {
             this.resetPosition();
             return;
         }
