@@ -160,6 +160,10 @@ export class ConnectedWire extends Wire {
         return pad;
     }
 
+    public getOriginComponent(): BaseComponent {
+        return this.origin;
+    }
+
     public getTerminalComponent(): BaseComponent {
         return this.terminal;
     }

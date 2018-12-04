@@ -1,5 +1,5 @@
 import { ComponentState, StateConfig } from "./component_state";
-import { Constraints, InventorySystem, INCINERATOR_BOUNDS } from "./system";
+import { Constraints, INCINERATOR_BOUNDS, InventorySystem } from "./system";
 
 import { PowerSubSystem } from "../systems/power_subsystem";
 import { ConnectedWire } from "../wiring/wire";
@@ -31,6 +31,8 @@ export abstract class BaseComponent extends Phaser.Sprite {
     private oldX: number;
     private oldY: number;
 
+    private wires: ConnectedWire[];
+
     constructor(game: Phaser.Game, inventorySystem: InventorySystem,
                 key: string,
                 tileWidth: number, tileHeight: number,
@@ -56,6 +58,7 @@ export abstract class BaseComponent extends Phaser.Sprite {
         this.events.onInputOut.add(this.onInputOut, this);
 
         this.componentState = new ComponentState(this.getStateConfig());
+        this.wires = [];
 
         game.add.existing(this);
     }
@@ -138,15 +141,33 @@ export abstract class BaseComponent extends Phaser.Sprite {
     }
 
     public disconnectAll(powerSystem: PowerSubSystem): void {
-        // noop
+
+        if (this.getPowerType() === PowerType.None) {
+            return;
+        } else if (this.getPowerType() === PowerType.Source) {
+            console.error("overwrite your disconnect all in yor source component");
+            return;
+        }
+
+        while (this.wires.length) {
+            const wire = this.wires.pop();
+            powerSystem.detach(wire.getOriginComponent(), this, wire);
+            wire.destroy();
+        }
     }
 
-    public plugOut(index: number) {
-        // noop
+    public plugOut(index: number, wire: ConnectedWire) {
+        const i = this.wires.indexOf(wire);
+        this.wires.splice(i);
     }
 
     public plugIn(index: number, wire: ConnectedWire): void {
-        // noop
+        this.wires.push(wire);
+    }
+
+    public destroy() {
+        this.disconnectAll(this.inventorySystem.powerSystem);
+        super.destroy();
     }
 
     private onDragStart(game: any, pointer: Phaser.Pointer): void {
@@ -158,13 +179,17 @@ export abstract class BaseComponent extends Phaser.Sprite {
     }
 
     private onDragStop(game: any, pointer: Phaser.Pointer): void {
-        console.log(pointer.x, pointer.y);
         if (INCINERATOR_BOUNDS.contains(pointer.x, pointer.y) && this.isIncineratable()) {
             this.game.sound.play("burn");
             this.destroy();
             return;
         }
         this.inventorySystem.dragHandler.dragStop(this);
+
+        if (this.getPowerType() === PowerType.Sink && !this.onShip) {
+            this.disconnectAll(this.inventorySystem.powerSystem);
+        }
+
     }
 
     private onDragUpdate(): void {
