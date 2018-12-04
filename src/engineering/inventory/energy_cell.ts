@@ -2,16 +2,20 @@ import { BaseComponent } from "./base_component";
 import { StateConfig } from "./component_state";
 import { InventorySystem } from "./system";
 
+import { PowerSubSystem } from "../systems/power_subsystem";
+import { ConnectedWire } from "../wiring/wire";
+
 export class EnergyCell extends BaseComponent {
 
-    private powerPadsIndexes: Map<number, boolean>;
+    private powerPadsIndexes: Map<number, ConnectedWire>;
     private powerPadsUsed = 0;
+    private animation: Phaser.Animation;
 
     constructor(game: Phaser.Game, inventorySystem: InventorySystem, position?: Phaser.Point) {
         super(game, inventorySystem, "energy_cell", 1, 1, position);
 
-        const energyCellAnimation = this.animations.add("zap", [1, 2, 3, 4]);
-        energyCellAnimation.play(20, true);
+        this.animation = this.animations.add("zap", [1, 2, 3, 4]);
+        this.animation.play(20, true);
 
         this.powerPadsIndexes = this.generatePlugs();
     }
@@ -32,9 +36,25 @@ export class EnergyCell extends BaseComponent {
         ];
     }
 
-    public plugIn(index: number) {
+    public update(): void {
+        super.update();
+
+        if (this.onShip && !this.animation.isPlaying) {
+            this.animation.play(20, true);
+        } else if (!this.onShip) {
+            this.animation.stop();
+            this.frame = 0;
+        }
+    }
+
+    public plugIn(index: number, wire: ConnectedWire) {
         this.powerPadsUsed += 1;
-        this.powerPadsIndexes.set(index, true);
+        this.powerPadsIndexes.set(index, wire);
+    }
+
+    public plugOut(index) {
+        this.powerPadsUsed -= 1;
+        this.powerPadsIndexes.set(index, null);
     }
 
     public getNextPowerPadIndex(): number {
@@ -58,17 +78,29 @@ export class EnergyCell extends BaseComponent {
         );
     }
 
-    private generatePlugs(): Map<number, boolean> {
-        const plugs = new Map<number, boolean>();
+    public disconnectAll(powerSystem: PowerSubSystem): void {
+        for (let i = 0; i < this.powerPadsIndexes.size; i += 1) {
+            const wire = this.powerPadsIndexes.get(i);
+            if (!wire) {
+                continue;
+            }
+            const sink = wire.getTerminalComponent();
+            powerSystem.detach(this, sink, wire);
+            wire.destroy();
+        }
+    }
+
+    private generatePlugs(): Map<number, ConnectedWire> {
+        const plugs = new Map<number, ConnectedWire>();
         for (let i = 0; i < 4; i += 1) {
-            plugs.set(i, false);
+            plugs.set(i, null);
         }
         return plugs;
     }
 
-    private first(indexes: Map<number, boolean>): number {
+    private first(indexes: Map<number, ConnectedWire>): number {
         for (let i = 0; i < indexes.size; i += 1) {
-            if (indexes.get(i) === false) {
+            if (indexes.get(i) === null) {
                 return i;
             }
         }
