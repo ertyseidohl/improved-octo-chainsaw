@@ -26,7 +26,7 @@ export class ShieldGenerator extends BaseComponent {
         return {
             powerConsumer: {
                 powerLoad: 4,
-                minPowerDraw: 2,
+                minPowerDraw: 4,
             },
             powerSource: null,
             weight: 4,
@@ -39,7 +39,7 @@ export class ShieldGenerator extends BaseComponent {
 
     public getDescription(): string[] {
         return [
-            "Shield your ship from enemies, friends, frenemies, and strangers!",
+            "Shield your ship from enemies, friends, frenemies, and strangers! Requires 4 power to run",
         ];
     }
 

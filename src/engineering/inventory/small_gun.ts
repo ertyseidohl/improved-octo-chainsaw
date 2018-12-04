@@ -28,7 +28,7 @@ export class SmallGun extends BaseComponent {
 
     public getDescription(): string[] {
         return [
-            "This gun is actually just four smaller guns taped together.",
+            "This gun is actually just four smaller guns taped together. Max power: 1",
         ];
     }
 

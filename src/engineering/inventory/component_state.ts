@@ -33,7 +33,7 @@ export class ComponentState {
     }
 
     public isOnline(): boolean {
-        return this.power > this.powerConsumer.minPowerDraw;
+        return this.power >= this.powerConsumer.minPowerDraw;
     }
 
     public isAlive(): boolean {

@@ -40,7 +40,8 @@ export class BasicGun extends BaseComponent {
 
     public getDescription(): string[] {
         return [
-            "The GK-305 model is the hottest on the market! No seriously, you'll need, like, three heatsinks.",
+            // tslint:disable-next-line
+            "The GK-305 model is the hottest on the market! No seriously, you'll need, like, three heatsinks. Max wires: 2",
         ];
     }
 

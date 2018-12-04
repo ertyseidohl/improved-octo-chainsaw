@@ -19,6 +19,8 @@ import {
     ShieldPowerup,
     SpaceDiamondPowerup,
     SpaceJunkPowerup,
+    EnergyCellPowerup,
+    EnergyCellHDPowerup,
 } from "../player/powerup";
 
 import Wave from "../levels/wave";
@@ -672,6 +674,12 @@ export default class Gameplay extends Phaser.State {
             case COMPONENT_TYPES.SHIELD:
                 powerup = new ShieldPowerup(this.game, enemy.x, enemy.y);
                 break;
+            case COMPONENT_TYPES.ENERGY_CELL:
+                powerup = new EnergyCellPowerup(this.game, enemy.x, enemy.y);
+                break;
+            case COMPONENT_TYPES.ENERGY_CELL_HD:
+                powerup = new EnergyCellHDPowerup(this.game, enemy.x, enemy.y);
+                break;
             case COMPONENT_TYPES.PRINCE:
                 powerup = new PrincePowerup(this.game, enemy.x, enemy.y);
                 break;
@@ -684,7 +692,7 @@ export default class Gameplay extends Phaser.State {
         }
         if (!this.testPowerup) {
             this.testPowerup = powerup;
-            powerup.lifespan = Infinity;
+            powerup.setLifetime(Infinity);
         }
         this.groupPowerups.add(powerup);
         this.game.physics.p2.enable(powerup);

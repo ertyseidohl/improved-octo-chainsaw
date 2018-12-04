@@ -11,6 +11,8 @@ export default class BasicEnemy extends BaseEnemy {
             COMPONENT_TYPES.BASIC_GUN,
             COMPONENT_TYPES.ENGINE,
             COMPONENT_TYPES.SHIELD,
+            COMPONENT_TYPES.ENERGY_CELL,
+            COMPONENT_TYPES.ENERGY_CELL_HD,
         ];
 
         if (Math.random() < 0.95) {

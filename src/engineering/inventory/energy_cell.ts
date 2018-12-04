@@ -7,8 +7,15 @@ export class EnergyCell extends BaseComponent {
     private powerPadsIndexes: Map<number, boolean>;
     private powerPadsUsed = 0;
 
-    constructor(game: Phaser.Game, inventorySystem: InventorySystem, position?: Phaser.Point) {
-        super(game, inventorySystem, "energy_cell", 1, 1, position);
+    constructor(
+        game: Phaser.Game,
+        inventorySystem: InventorySystem,
+        position?: Phaser.Point,
+        key: string = "energy_cell",
+        sizex: number = 1,
+        sizey: number = 1,
+    ) {
+        super(game, inventorySystem, "energy_cell", sizex, sizey, position);
 
         const energyCellAnimation = this.animations.add("zap", [1, 2, 3, 4]);
         energyCellAnimation.play(20, true);
@@ -28,7 +35,8 @@ export class EnergyCell extends BaseComponent {
 
     public getDescription(): string[] {
         return [
-            "The ZZ-55000 is a real hair-raiser! Make sure to ground yourself before coming within 100 meters...",
+            // tslint:disable-next-line
+            "The ZZ-55000 is a real hair-raiser! Make sure to ground yourself before coming within 100 meters. Has 4 wires.",
         ];
     }
 

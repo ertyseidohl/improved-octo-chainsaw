@@ -17,6 +17,10 @@ export abstract class Powerup extends Phaser.Sprite {
         return this;
     }
 
+    public setLifetime(time: number) {
+        this.lifetime = time;
+    }
+
     public update() {
         this.lifetime --;
         if (this.lifetime <= 0) {
@@ -87,5 +91,25 @@ export class ShieldPowerup extends Powerup {
 
     public getComponentName(): COMPONENT_TYPES {
         return COMPONENT_TYPES.SHIELD;
+    }
+}
+
+export class EnergyCellPowerup extends Powerup {
+    constructor(game: Phaser.Game, x: number, y: number) {
+        super(game, x, y, "energy_cell_powerup");
+    }
+
+    public getComponentName(): COMPONENT_TYPES {
+        return COMPONENT_TYPES.ENERGY_CELL;
+    }
+}
+
+export class EnergyCellHDPowerup extends Powerup {
+    constructor(game: Phaser.Game, x: number, y: number) {
+        super(game, x, y, "energy_cell_hd_powerup");
+    }
+
+    public getComponentName(): COMPONENT_TYPES {
+        return COMPONENT_TYPES.ENERGY_CELL_HD;
     }
 }

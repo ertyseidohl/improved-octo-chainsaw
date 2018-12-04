@@ -60,7 +60,8 @@ export const LEVELS: Level[] = [
     },
     {
         init: (gameState: Gameplay) => {
-            gameState.displayText("There was something inside! Helm, use the arrow keys to pick it up, quick!", 400);
+            // tslint:disable-next-line
+            gameState.displayText("There was something inside! Helm, use the arrow keys to pick it up. wire up some engines to go faster.", 400);
         },
         update: (gameState: Gameplay) => { /* empty */ },
         isOver: (gameState: Gameplay) => {
@@ -78,6 +79,7 @@ export const LEVELS: Level[] = [
         },
         cleanup: (gameState: Gameplay) => { /* empty */ },
     },
+    textLevel("One more thing, engineering - you can pick up an energy cell to disconnect all of its wires.", 400),
     textLevel("Great! Now go retrieve those [prince]s and save our planet!", 400),
     // LEVEL ONE
     {
@@ -129,15 +131,16 @@ export const LEVELS: Level[] = [
         init: (gameState: Gameplay) => {
             gameState.stopAllMusic();
             gameState.playSafeMusic();
-            gameState.displayText(
-                "Great work! Now go get the other four [prince]s", 400);
             gameState.generateBaseStation();
         },
         update: (gameState: Gameplay) => { /* empty */ },
         isOver: (gameState: Gameplay) => {
             return gameState.baseStationDone();
         },
-        cleanup: (gameState: Gameplay) => { /* empty */ },
+        cleanup: (gameState: Gameplay) => {
+            gameState.displayText(
+                "Great work! Now go get the other four [prince]s", 400);
+        },
     },
     // LEVEL TWO
     {
