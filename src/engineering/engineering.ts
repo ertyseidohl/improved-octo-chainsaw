@@ -115,19 +115,19 @@ export default class Engineering {
 
         this.points = 0;
 
+        this.powerSystem = new PowerSubSystem();
         this.inventorySystem = new InventorySystem(
             this.game,
             600, 100,
             32, 32,
             new BasicShip(),
+            this.powerSystem,
         );
+        this.system = new System(this.inventorySystem);
 
         this.mouseInBounds = false;
 
         this.playerHealth = MAX_HEALTH;
-
-        this.powerSystem = new PowerSubSystem();
-        this.system = new System(this.inventorySystem);
 
         this.componentGroup = this.game.add.group();
         this.powerHandleGroup = this.game.add.group();
@@ -392,7 +392,7 @@ export default class Engineering {
 
                 for (const c of this.inventorySystem.getAllComponents()) {
                     c.lockDrag();
-                    if (c.getPowerType() === PowerType.Source && c.getNextPowerPadIndex() >= 0) {
+                    if (c.getPowerType() === PowerType.Source && c.getNextPowerPadIndex() >= 0 && c.onShip) {
                         const pad = new StartPad(this.game, c, this.inventorySystem, this.powerSystem, this.wireGroup);
                         this.powerHandleGroup.add(pad);
                     }

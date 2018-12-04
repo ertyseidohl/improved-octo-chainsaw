@@ -1,8 +1,10 @@
 import { BaseComponent } from "../inventory/base_component";
 
+import { ConnectedWire } from "../wiring/wire";
+
 abstract class SubSystem {
-    public abstract detach(source: BaseComponent, sink: BaseComponent): void;
-    public abstract attach(source: BaseComponent, sink: BaseComponent, plugIndex: number): void;
+    public abstract detach(source: BaseComponent, sink: BaseComponent, wire: ConnectedWire): void;
+    public abstract attach(source: BaseComponent, sink: BaseComponent, plugIndex: number, wire: ConnectedWire): void;
     public abstract updateAllComponents(): void;
 }
 
@@ -19,7 +21,7 @@ export class PowerSubSystem extends SubSystem {
         this.sinkCount = new Map<BaseComponent, number>();
     }
 
-    public attach(source: BaseComponent, sink: BaseComponent, plugIndex: number): void {
+    public attach(source: BaseComponent, sink: BaseComponent, plugIndex: number, wire: ConnectedWire): void {
         let sinkSet = this.sourceToSinkMap.get(source);
         if (!sinkSet) {
             sinkSet = new Set<BaseComponent>();
@@ -37,28 +39,26 @@ export class PowerSubSystem extends SubSystem {
         const count = this.sinkCount.get(sink) || 0;
         this.sinkCount.set(sink, count + 1);
 
-        source.plugIn(plugIndex);
-        sink.plugIn(plugIndex);
+        source.plugIn(plugIndex, wire);
+        sink.plugIn(plugIndex, wire);
 
         sink.updatePower(sink.getPower() + 1);
     }
 
-    public detach(source: BaseComponent, sink: BaseComponent, n?: number): void {
+    public detach(source: BaseComponent, sink: BaseComponent, wire: ConnectedWire): void {
 
-        n = n || 1;
-
-        const count = this.sinkCount.get(sink) - n;
+        const count = this.sinkCount.get(sink) - 1;
         this.sinkCount.set(sink, count);
 
-        if (n <= 0) {
-            const sinkSet = this.sourceToSinkMap.get(source);
-            sinkSet.delete(sink);
+        const sinkSet = this.sourceToSinkMap.get(source);
+        sinkSet.delete(sink);
 
-            const sourceSet = this.sinkToSourceMap.get(sink);
-            sourceSet.delete(source);
-        }
+        const sourceSet = this.sinkToSourceMap.get(sink);
+        sourceSet.delete(source);
 
-        sink.updatePower(sink.getPower() - n);
+        sink.updatePower(sink.getPower() - 1);
+
+        source.plugOut(wire.getOriginPadIndex());
     }
 
     public updateAllComponents(): void {
