@@ -45,6 +45,7 @@ function startApp(): void {
     };
 
     const app = new App(gameConfig);
+    document.getElementById("loading").style.display = "none";
 }
 
 window.onload = startApp;
