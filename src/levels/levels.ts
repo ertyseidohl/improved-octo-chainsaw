@@ -110,7 +110,7 @@ export const LEVELS: Level[] = [
             // todo
         },
         isOver: (gameState: Gameplay) => {
-            return gameState.allWavesDead();
+            return gameState.princeInInventory() && gameState.allWavesDead();
         },
         cleanup: () => {
             // todo
@@ -175,7 +175,7 @@ export const LEVELS: Level[] = [
             // todo
         },
         isOver: (gameState: Gameplay) => {
-            return gameState.allWavesDead();
+            return gameState.princeInInventory() && gameState.allWavesDead();
         },
         cleanup: () => {
             // todo
@@ -230,7 +230,7 @@ export const LEVELS: Level[] = [
             // todo
         },
         isOver: (gameState: Gameplay) => {
-            return gameState.allWavesDead();
+            return gameState.princeInInventory() && gameState.allWavesDead();
         },
         cleanup: () => {
             // todo
@@ -286,7 +286,7 @@ export const LEVELS: Level[] = [
             // todo
         },
         isOver: (gameState: Gameplay) => {
-            return gameState.allWavesDead();
+            return gameState.princeInInventory() && gameState.allWavesDead();
         },
         cleanup: () => {
             // todo
@@ -347,7 +347,7 @@ export const LEVELS: Level[] = [
             // todo
         },
         isOver: (gameState: Gameplay) => {
-            return gameState.allWavesDead();
+            return gameState.princeInInventory() && gameState.allWavesDead();
         },
         cleanup: () => {
             // todo

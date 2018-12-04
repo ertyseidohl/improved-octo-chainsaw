@@ -26,7 +26,7 @@ export class Prince extends BaseComponent {
                 power: 4,
             },
             powerConsumer: null,
-            weight: 1, // TODO
+            weight: 4,
         };
     }
 

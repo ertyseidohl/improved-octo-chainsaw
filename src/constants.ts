@@ -34,6 +34,6 @@ export enum ENEMY_TYPES {
     BOMB,
 }
 
-export const MAX_HEALTH: number = 100; // TODO
+export const MAX_HEALTH: number = 10; // TODO
 export const MAX_ENGINE: number = 10;
 export const MAX_WEIGHT: number = 10;

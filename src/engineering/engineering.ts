@@ -401,9 +401,6 @@ export default class Engineering {
         const firstGun = new BasicGun(this.game, this.inventorySystem);
         this.addComponent(firstGun, null, false, true);
 
-        const p = new Prince(this.game, this.inventorySystem);
-        this.addComponent(p, null, false, true);
-
         const secondGun = new BasicGun(this.game, this.inventorySystem);
         this.addComponent(secondGun, null, false, true);
 
