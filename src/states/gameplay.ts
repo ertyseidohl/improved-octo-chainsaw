@@ -144,6 +144,8 @@ export default class Gameplay extends Phaser.State {
         this.game.load.image("gun_1_powerup", "../assets/gun_1_powerup.png");
         this.game.load.image("engine_1_powerup", "../assets/engine_1_powerup.png");
         this.game.load.image("shield_powerup", "../assets/shield_powerup.png");
+        this.game.load.image("energy_cell_powerup", "../assets/energy_cell_powerup.png");
+        this.game.load.image("energy_cell_hd_powerup", "../assets/energy_cell_hd_powerup.png");
         this.game.load.image("space_junk", "../assets/space_junk.png");
         this.game.load.image("space_diamond", "../assets/space_diamond.png");
 
@@ -640,6 +642,10 @@ export default class Gameplay extends Phaser.State {
                 break;
             case WAVE_TYPE.ROW_STRAIGHT:
                 for (let i: number = 0; i < WAVE_ROWS_ENEMY_COUNT_MAX; i++) {
+                    if (i === 2) {
+                        // leave a hole
+                        continue;
+                    }
                     currentWave.addEnemy(
                         this.createEnemy(WAVE_TYPE.ROW_STRAIGHT, WAVE_ROW_XOFFSET + ENEMY_WIDTH * i, ENEMY_TYPES.BASIC),
                     );

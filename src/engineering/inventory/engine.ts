@@ -30,7 +30,7 @@ export class Engine extends BaseComponent {
         return {
             powerConsumer: {
                 powerLoad: 2,
-                minPowerDraw: 0,
+                minPowerDraw: 1,
             },
             powerSource: null,
             weight: 4,
@@ -43,7 +43,8 @@ export class Engine extends BaseComponent {
 
     public getDescription(): string[] {
         return [
-            "This engine can burn kerosene, oil, antimatter, and three kinds of aliens for fuel.",
+            //tslint:disable-next-line
+            "This engine can burn kerosene, oil, antimatter, and three kinds of aliens for fuel. Requires 1 wire, can take 2.",
         ];
     }
 

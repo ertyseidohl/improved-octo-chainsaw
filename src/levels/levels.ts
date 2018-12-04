@@ -71,7 +71,8 @@ export const LEVELS: Level[] = [
     },
     {
         init: (gameState: Gameplay) => {
-            gameState.displayText("Looks useful! Engineering, use wire mode and connect it up!", 400);
+            // tslint:disable-next-line
+            gameState.displayText("Hook it up! It looks like it needs 4 wires to run. pick up an energy cell to disconnect all of its wires", 400);
         },
         update: (gameState: Gameplay) => { /* empty */ },
         isOver: (gameState: Gameplay) => {
@@ -79,7 +80,6 @@ export const LEVELS: Level[] = [
         },
         cleanup: (gameState: Gameplay) => { /* empty */ },
     },
-    textLevel("One more thing, engineering - you can pick up an energy cell to disconnect all of its wires.", 400),
     textLevel("Great! Now go retrieve those [prince]s and save our planet!", 400),
     // LEVEL ONE
     {

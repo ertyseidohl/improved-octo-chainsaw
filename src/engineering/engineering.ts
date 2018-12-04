@@ -273,7 +273,7 @@ export default class Engineering {
     }
 
     public hasConnectedTestComponent(): boolean {
-        return this.testComponent.getPower() > 0;
+        return this.testComponent.getPower() === 4;
     }
 
     public princeInInventory(): boolean {
