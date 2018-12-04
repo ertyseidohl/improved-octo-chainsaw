@@ -55,12 +55,12 @@ export class EnergyCell extends BaseComponent {
         }
     }
 
-    public plugIn(index: number, wire: ConnectedWire) {
+    public plugIn(index: number, wire: ConnectedWire): void {
         this.powerPadsUsed += 1;
         this.powerPadsIndexes.set(index, wire);
     }
 
-    public plugOut(index: number) {
+    public plugOut(index: number, wire: ConnectedWire): void {
         this.powerPadsUsed -= 1;
         this.powerPadsIndexes.set(index, null);
     }

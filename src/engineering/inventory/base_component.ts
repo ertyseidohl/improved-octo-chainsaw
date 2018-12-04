@@ -170,7 +170,9 @@ export abstract class BaseComponent extends Phaser.Sprite {
 
     public plugOut(index: number, wire: ConnectedWire) {
         const i = this.wires.indexOf(wire);
-        this.wires.splice(i);
+        if (i > -1) {
+            this.wires.splice(i, 1);
+        }
     }
 
     public plugIn(index: number, wire: ConnectedWire): void {
